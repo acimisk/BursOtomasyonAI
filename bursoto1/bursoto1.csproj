@@ -150,6 +150,7 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
+    <None Include="App.config.example" />
     <None Include="bursOtoDeneme1DataSet.xsc">
       <DependentUpon>bursOtoDeneme1DataSet.xsd</DependentUpon>
     </None>
