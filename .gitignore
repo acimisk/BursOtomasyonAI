@@ -482,3 +482,9 @@ $RECYCLE.BIN/
 
 # Vim temporary swap files
 *.swp
+
+#App config
+bursoto1/App.config
+
+# Ama taslak dosyasını göndermesine izin ver
+!App.config.example
