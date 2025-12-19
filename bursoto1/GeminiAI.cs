@@ -13,7 +13,7 @@ namespace bursoto1
         private string apiKey = ConfigurationManager.AppSettings["GeminiApiKey"];
         // Kesin çalışan v1beta URL'si ve model adı
         private string apiUrl =>
-    $"https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent?key={apiKey}";
+    $"https://generativelanguage.googleapis.com/v1/models/gemini-2.5-pro:generateContent?key={apiKey}";
 
         public async Task<string> BursAnaliziYap(string ogrenciVerisi)
         {

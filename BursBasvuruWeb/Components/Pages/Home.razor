@@ -1,0 +1,140 @@
+﻿@page "/"
+@using Microsoft.AspNetCore.Components.Web
+@rendermode InteractiveServer
+@using System.Data.SqlClient
+@using System.IO
+@inject NavigationManager Nav
+
+<PageTitle>Burs Başvuru Sistemi</PageTitle>
+
+<div class="container mt-5">
+    <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+            <h3 class="mb-0">Öğrenci Burs Başvuru Formu</h3>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label>Ad</label>
+                    <input type="text" @bind="ad" class="form-control" />
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label>Soyad</label>
+                    <input type="text" @bind="soyad" class="form-control" />
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <label>Bölüm</label>
+                    <input type="text" @bind="bolum" class="form-control" placeholder="Örn: Bilgisayar Müh." />
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label>Sınıf</label>
+                    <select @bind="sinif" class="form-control">
+                        <option value="">Seçiniz...</option>
+                        <option value="Hazırlık">Hazırlık</option>
+                        <option value="1. Sınıf">1. Sınıf</option>
+                        <option value="2. Sınıf">2. Sınıf</option>
+                        <option value="3. Sınıf">3. Sınıf</option>
+                        <option value="4. Sınıf">4. Sınıf</option>
+                    </select>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label>AGNO (0-4)</label>
+                    <input type="number" step="0.01" @bind="agno" class="form-control" />
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <label>Kardeş Sayısı</label>
+                    <input type="number" @bind="kardesSayisi" class="form-control" />
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label>Hane Geliri</label>
+                    <input type="number" @bind="gelir" class="form-control" />
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label>Telefon</label>
+                    <input type="text" @bind="telefon" class="form-control" placeholder="0555..." />
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label>Profil Fotoğrafı</label>
+                <InputFile OnChange="FotoSec" class="form-control" />
+                @if (!string.IsNullOrEmpty(fotoBase64))
+                {
+                    <img src="@fotoBase64" style="width:100px; margin-top:10px; border-radius:5px;" />
+                }
+            </div>
+
+            <div class="mb-3">
+                <label>Neden Burs Almalısın? (AI Analiz Notu)</label>
+                <textarea @bind="aciklama" class="form-control" rows="4"></textarea>
+            </div>
+
+            <button class="btn btn-success w-100" @onclick="Kaydet">Başvuruyu Gönder</button>
+
+            @if (!string.IsNullOrEmpty(mesaj))
+            {
+                <div class="alert alert-info mt-3">@mesaj</div>
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    private string ad, soyad, sinif, bolum, telefon, aciklama, mesaj, fotoBase64;
+    private double agno;
+    private decimal gelir;
+    private int kardesSayisi;
+
+    async Task FotoSec(InputFileChangeEventArgs e)
+    {
+        var format = "image/png";
+        var resizedImage = await e.File.RequestImageFileAsync(format, 300, 300);
+        var buffer = new byte[resizedImage.Size];
+        await resizedImage.OpenReadStream().ReadAsync(buffer);
+        fotoBase64 = $"data:{format};base64,{Convert.ToBase64String(buffer)}";
+    }
+
+    private void Kaydet()
+    {
+        if (agno < 0 || agno > 4) { mesaj = "Hata: AGNO 0-4 arası olmalı!"; return; }
+
+        try
+        {
+            string connString = @"Data Source=(localdb)\MSSQLLocalDB; initial catalog=bursOtoDeneme1; Integrated Security=TRUE";
+            using (SqlConnection conn = new SqlConnection(connString))
+            {
+                conn.Open();
+                string query = @"INSERT INTO Ogrenciler
+                                (AD, SOYAD, [KARDEŞ SAYISI], [TOPLAM HANE GELİRİ], SINIF, BÖLÜMÜ, AGNO, TELEFON, FOTO, AINotu)
+                                VALUES (@p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8, @p9, @p10)";
+
+                using (SqlCommand cmd = new SqlCommand(query, conn))
+                {
+                    cmd.Parameters.AddWithValue("@p1", ad ?? "");
+                    cmd.Parameters.AddWithValue("@p2", soyad ?? "");
+                    cmd.Parameters.AddWithValue("@p3", kardesSayisi);
+                    cmd.Parameters.AddWithValue("@p4", gelir);
+                    cmd.Parameters.AddWithValue("@p5", sinif ?? "");
+                    cmd.Parameters.AddWithValue("@p6", bolum ?? "");
+                    cmd.Parameters.AddWithValue("@p7", agno);
+                    cmd.Parameters.AddWithValue("@p8", telefon ?? "");
+                    cmd.Parameters.AddWithValue("@p9", fotoBase64 ?? ""); // Fotoğraf Base64 olarak gidiyor
+                    cmd.Parameters.AddWithValue("@p10", aciklama ?? "");
+
+                    cmd.ExecuteNonQuery();
+                    mesaj = "Başvurunuz başarıyla kaydedildi kanka!";
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            mesaj = "Hata: " + ex.Message;
+        }
+    }
+}

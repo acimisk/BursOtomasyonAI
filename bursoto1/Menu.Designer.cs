@@ -38,6 +38,7 @@
             this.btnAnasayfa = new DevExpress.XtraBars.BarButtonItem();
             this.btnAra = new DevExpress.XtraBars.BarButtonItem();
             this.btnBursTurleri = new DevExpress.XtraBars.BarButtonItem();
+            this.btnTopluAnaliz = new DevExpress.XtraBars.BarButtonItem();
             this.ribbonPage1 = new DevExpress.XtraBars.Ribbon.RibbonPage();
             this.ribbonPageGroup1 = new DevExpress.XtraBars.Ribbon.RibbonPageGroup();
             this.repositoryItemTextEdit1 = new DevExpress.XtraEditors.Repository.RepositoryItemTextEdit();
@@ -50,12 +51,14 @@
             // ribbonStatusBar
             // 
             this.ribbonStatusBar.Location = new System.Drawing.Point(0, 669);
+            this.ribbonStatusBar.Margin = new System.Windows.Forms.Padding(4);
             this.ribbonStatusBar.Name = "ribbonStatusBar";
             this.ribbonStatusBar.Ribbon = this.ribbon;
             this.ribbonStatusBar.Size = new System.Drawing.Size(1201, 30);
             // 
             // ribbon
             // 
+            this.ribbon.EmptyAreaImageOptions.ImagePadding = new System.Windows.Forms.Padding(37);
             this.ribbon.ExpandCollapseItem.Id = 0;
             this.ribbon.Items.AddRange(new DevExpress.XtraBars.BarItem[] {
             this.ribbon.ExpandCollapseItem,
@@ -64,16 +67,20 @@
             this.btnSil,
             this.btnAnasayfa,
             this.btnAra,
-            this.btnBursTurleri});
+            this.btnBursTurleri,
+            this.btnTopluAnaliz});
             this.ribbon.Location = new System.Drawing.Point(0, 0);
-            this.ribbon.MaxItemId = 10;
+            this.ribbon.Margin = new System.Windows.Forms.Padding(4);
+            this.ribbon.MaxItemId = 11;
             this.ribbon.Name = "ribbon";
+            this.ribbon.OptionsMenuMinWidth = 412;
             this.ribbon.Pages.AddRange(new DevExpress.XtraBars.Ribbon.RibbonPage[] {
             this.ribbonPage1});
             this.ribbon.RepositoryItems.AddRange(new DevExpress.XtraEditors.Repository.RepositoryItem[] {
             this.repositoryItemTextEdit1});
             this.ribbon.Size = new System.Drawing.Size(1201, 193);
             this.ribbon.StatusBar = this.ribbonStatusBar;
+            this.ribbon.Click += new System.EventHandler(this.ribbon_Click);
             // 
             // btnOgrenciler
             // 
@@ -128,6 +135,15 @@
             this.btnBursTurleri.Name = "btnBursTurleri";
             this.btnBursTurleri.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnBursTurleri_ItemClick);
             // 
+            // btnTopluAnaliz
+            // 
+            this.btnTopluAnaliz.Caption = "Toplu AI Analizi";
+            this.btnTopluAnaliz.Id = 10;
+            this.btnTopluAnaliz.ImageOptions.Image = ((System.Drawing.Image)(resources.GetObject("btnTopluAnaliz.ImageOptions.Image")));
+            this.btnTopluAnaliz.ImageOptions.LargeImage = ((System.Drawing.Image)(resources.GetObject("btnTopluAnaliz.ImageOptions.LargeImage")));
+            this.btnTopluAnaliz.Name = "btnTopluAnaliz";
+            this.btnTopluAnaliz.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnTopluAnaliz_ItemClick);
+            // 
             // ribbonPage1
             // 
             this.ribbonPage1.Groups.AddRange(new DevExpress.XtraBars.Ribbon.RibbonPageGroup[] {
@@ -143,6 +159,7 @@
             this.ribbonPageGroup1.ItemLinks.Add(this.btnSil);
             this.ribbonPageGroup1.ItemLinks.Add(this.btnAra);
             this.ribbonPageGroup1.ItemLinks.Add(this.btnBursTurleri);
+            this.ribbonPageGroup1.ItemLinks.Add(this.btnTopluAnaliz);
             this.ribbonPageGroup1.Name = "ribbonPageGroup1";
             // 
             // repositoryItemTextEdit1
@@ -191,5 +208,6 @@
         private DevExpress.XtraEditors.Repository.RepositoryItemTextEdit repositoryItemTextEdit1;
         private DevExpress.XtraBars.BarButtonItem btnAra;
         private DevExpress.XtraBars.BarButtonItem btnBursTurleri;
+        private DevExpress.XtraBars.BarButtonItem btnTopluAnaliz;
     }
 }

@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Data;
 using System.Data.SqlClient;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -82,22 +83,65 @@ namespace bursoto1
         {
 
         }
+        public Image Base64ToImage(string base64String)
+        {
+            if (string.IsNullOrEmpty(base64String)) return null;
 
+            try
+            {
+                // Eğer başında "data:image..." kısmı varsa temizle, yoksa olduğu gibi al
+                string temizBase64 = base64String.Contains(",") ? base64String.Split(',')[1] : base64String;
+
+                byte[] imageBytes = Convert.FromBase64String(temizBase64);
+                using (MemoryStream ms = new MemoryStream(imageBytes))
+                {
+                    // MemoryStream'den Image oluştururken kopya oluşturmak WinForms'ta daha sağlıklıdır
+                    return Image.FromStream(ms);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Resim dönüştürme hatası: " + ex.Message);
+                return null;
+            }
+        }
         private void OgrenciProfili_Load(object sender, EventArgs e)
         {
             txtOgrAd.Text = ad;
             txtOgrSoyad.Text = soyad;
             txtHaneGeliri.Text = haneGeliri;
             txtAgno.Text = agno;
-            txtBolum.Text=bolum;
+            txtBolum.Text = bolum;
             txtOgrKardesSayisi.Text = kardesSayisi;
-            txtSinif.Text=sinif;
-            txtTelNo.Text=telNo;
-            // Sekmenin üzerinde "Ali Yılmaz - Profil" yazar. Çok elit durur.
+            txtSinif.Text = sinif;
+            txtTelNo.Text = telNo;
             this.Text = ad + " " + soyad + " - Profil";
+
             if (!string.IsNullOrEmpty(fotoYolu))
             {
-                pictureEdit1.Image = Image.FromFile(fotoYolu);
+                try
+                {
+                    if (fotoYolu.StartsWith("data:") || fotoYolu.Length > 260) // Base64 tespiti
+                    {
+                        Image resim = Base64ToImage(fotoYolu);
+                        if (resim != null)
+                        {
+                            pictureEdit1.EditValue = resim; // Image yerine EditValue dene
+                        }
+                    }
+                    else if (File.Exists(fotoYolu)) // Normal dosya yoluysa
+                    {
+                        pictureEdit1.Image = Image.FromFile(fotoYolu);
+                    }
+
+                    // Resmin kutuya tam sığması için (Boyutu ne olursa olsun)
+                    pictureEdit1.Properties.SizeMode = DevExpress.XtraEditors.Controls.PictureSizeMode.Squeeze;
+                }
+                catch (Exception ex)
+                {
+                    // Hata varsa bile program çökmesin diye boş bırakıyoruz
+                    Console.WriteLine("Resim yükleme hatası: " + ex.Message);
+                }
             }
         }
 

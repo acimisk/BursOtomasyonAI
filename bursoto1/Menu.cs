@@ -45,36 +45,49 @@ namespace bursoto1
             {
                 try
                 {
-                    baglanti.Open();
+                    if (baglanti.State == ConnectionState.Closed) baglanti.Open();
 
                     string sorgu = "INSERT INTO Ogrenciler (AD, SOYAD, [KARDEŞ SAYISI], [TOPLAM HANE GELİRİ], BÖLÜMÜ, SINIF, AGNO, FOTO, TELEFON) " +
                                    "VALUES (@p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8, @p9)";
 
-                    SqlCommand komut = new SqlCommand(sorgu, baglanti);
+                    using (SqlCommand komut = new SqlCommand(sorgu, baglanti))
+                    {
+                        // Parametreleri eklerken boş kalma ihtimaline karşı kontroller ekliyoruz
+                        komut.Parameters.AddWithValue("@p1", fr1.txtOgrAd.Text ?? "");
+                        komut.Parameters.AddWithValue("@p2", fr1.txtOgrSoyad.Text ?? "");
 
-                    // 2. HATALARIN ÇÖZÜMÜ: Başına "fr1." ekliyoruz çünkü bu kutular fr1'in içinde!
-                    komut.Parameters.AddWithValue("@p1", fr1.txtOgrAd.Text);
-                    komut.Parameters.AddWithValue("@p2", fr1.txtOgrSoyad.Text);
-                    komut.Parameters.AddWithValue("@p3", int.Parse(fr1.txtOgrKardesSayisi.Text));
-                    komut.Parameters.AddWithValue("@p4", decimal.Parse(fr1.txtHaneGeliri.Text));
-                    komut.Parameters.AddWithValue("@p5", fr1.txtBolum.Text);
-                    komut.Parameters.AddWithValue("@p6", fr1.txtSinif.Text);
-                    komut.Parameters.AddWithValue("@p7", decimal.Parse(fr1.txtAgno.Text));
-                    komut.Parameters.AddWithValue("@p8", fr1.dosyaYolu); // FrmOgrenciler'deki değişken
-                    komut.Parameters.AddWithValue("@p9", fr1.txtTelNo.Text);
+                        // Sayısal değerlerde boş kutu hatasını engellemek için 0 atıyoruz
+                        int kardes = 0; int.TryParse(fr1.txtOgrKardesSayisi.Text, out kardes);
+                        komut.Parameters.AddWithValue("@p3", kardes);
 
-                    komut.ExecuteNonQuery();
+                        decimal haneGeliri = 0; decimal.TryParse(fr1.txtHaneGeliri.Text, out haneGeliri);
+                        komut.Parameters.AddWithValue("@p4", haneGeliri);
+
+                        komut.Parameters.AddWithValue("@p5", fr1.txtBolum.Text ?? "");
+                        komut.Parameters.AddWithValue("@p6", fr1.txtSinif.Text ?? "");
+
+                        decimal agno = 0; decimal.TryParse(fr1.txtAgno.Text, out agno);
+                        komut.Parameters.AddWithValue("@p7", agno);
+
+                        // --- KRİTİK NOKTA ---
+                        // Burada sakın File.ReadAllBytes falan kullanma. 
+                        // Web'den gelen o uzun string'i direkt gönderiyoruz.
+                        komut.Parameters.AddWithValue("@p8", (object)fr1.dosyaYolu ?? DBNull.Value);
+
+                        komut.Parameters.AddWithValue("@p9", fr1.txtTelNo.Text ?? "");
+
+                        komut.ExecuteNonQuery();
+                    }
+
                     baglanti.Close();
 
                     XtraMessageBox.Show("Öğrenci başarıyla kaydedildi.", "Bilgi", MessageBoxButtons.OK, MessageBoxIcon.Information);
-
-                    // 3. Grid'i anında güncellemek için (FrmOgrenciler'deki Listele public olmalı)
                     fr1.Listele();
                 }
                 catch (Exception ex)
                 {
-                    XtraMessageBox.Show("Hata oluştu kanka: " + ex.Message, "Hata", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     if (baglanti.State == ConnectionState.Open) baglanti.Close();
+                    XtraMessageBox.Show("Hata oluştu kanka: " + ex.Message, "Hata", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
             else
@@ -132,7 +145,7 @@ namespace bursoto1
                     }
                     catch (Exception ex)
                     {
-                        if (conn.State == ConnectionState.Open) conn.Open();
+                        if (conn.State == ConnectionState.Open) conn.Close();
                         MessageBox.Show("Hata oluştu: " + ex.Message);
                     }
                 }
@@ -184,6 +197,44 @@ namespace bursoto1
             {
                 frBurs.Activate();
             }
+        }
+
+        private async void btnTopluAnaliz_ItemClick(object sender, ItemClickEventArgs e)
+        {
+            // 1. Önce Öğrenciler sayfası açık mı kontrol et
+            if (fr1 == null || fr1.IsDisposed)
+            {
+                XtraMessageBox.Show("Toplu analiz yapabilmek için önce 'Öğrenciler' sayfasını açmalısın kanka!", "Uyarı", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            // 2. Kullanıcıdan son bir onay al (API kotasını harcayabilir sonuçta)
+            DialogResult onay = XtraMessageBox.Show("Puanı olmayan tüm öğrenciler analiz edilecek. Devam edilsin mi?", "Toplu Analiz Onayı", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+
+            if (onay == DialogResult.Yes)
+            {
+                // Butonu geçici olarak kapatalım ki iki kere basılmasın kanka
+                btnTopluAnaliz.Enabled = false;
+
+                try
+                {
+                    // FrmOgrenciler formuna yazdığımız o canavar metodu çağırıyoruz
+                    await fr1.TopluAnalizYap();
+                }
+                catch (Exception ex)
+                {
+                    XtraMessageBox.Show("Hata oluştu: " + ex.Message);
+                }
+                finally
+                {
+                    btnTopluAnaliz.Enabled = true;
+                }
+            }
+        }
+
+        private void ribbon_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }
