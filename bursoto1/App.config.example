@@ -3,7 +3,7 @@
     <configSections>
     </configSections>
 	<appSettings>
-		<add key="GeminiApiKey" value="AIzaSyCkxoZgl3PxZXe4_3CdbrvP2prH26F7b5w" />
+		<add key="GeminiApiKey" value="BURAYA_KEY_GELECEK" />
 	</appSettings>
     <connectionStrings>
         <add name="bursoto1.Properties.Settings.bursOtoDeneme1ConnectionString"

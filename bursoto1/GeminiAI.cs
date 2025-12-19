@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using System;
+using System.Configuration;
 using System.Net.Http;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -9,9 +10,10 @@ namespace bursoto1
 {
     public class GeminiAI
     {
-        private const string apiKey = "AIzaSyDd1sR3PpPRYpmmKBtMr6IBKV4Grzk3rZs";
+        private string apiKey = ConfigurationManager.AppSettings["GeminiApiKey"];
         // Kesin çalışan v1beta URL'si ve model adı
-        private const string apiUrl = "https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent?key=" + apiKey;
+        private string apiUrl =>
+    $"https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent?key={apiKey}";
 
         public async Task<string> BursAnaliziYap(string ogrenciVerisi)
         {
