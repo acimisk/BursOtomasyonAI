@@ -1,4 +1,5 @@
 ﻿using DevExpress.XtraBars;
+using DevExpress.XtraCharts.Native;
 using DevExpress.XtraEditors;
 using System;
 using System.Collections.Generic;
@@ -105,10 +106,41 @@ namespace bursoto1
                 Application.ExitThread(); // Uygulamayı tertemiz kapat
             }
         }
-
-        private void barButtonItem1_ItemClick(object sender, ItemClickEventArgs e)
+        // Eğer ismini 'baglanti' yaptıysan koddaki 'conn' yazılarını 'baglanti' olarak değiştir.
+        SqlConnection conn = new SqlConnection(@"Data Source=(localdb)\MSSQLLocalDB; initial catalog=bursOtoDeneme1; Integrated Security=TRUE");
+        private void btnSil_ItemClick(object sender, ItemClickEventArgs e)
         {
+            // 1. GridView'dan seçili olan satırın ID'sini alıyoruz
+            var secilenID = fr1.gridView1.GetFocusedRowCellValue("ID");
 
+            if (secilenID != null)
+            {
+                DialogResult onay = MessageBox.Show("Bu öğrenci kaydını silmek istediğinize emin misiniz?", "Kayıt Silme", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+
+                if (onay == DialogResult.Yes)
+                {
+                    try
+                    {
+                        if (conn.State == ConnectionState.Closed) conn.Open();
+                        SqlCommand cmd = new SqlCommand("DELETE FROM Ogrenciler WHERE ID=@p1", conn);
+                        cmd.Parameters.AddWithValue("@p1", secilenID);
+                        cmd.ExecuteNonQuery();
+                        conn.Close();
+
+                        MessageBox.Show("Öğrenci başarıyla silindi.", "Bilgi", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        fr1.Listele(); // Listeyi yenile ki silinen veri gitsin
+                    }
+                    catch (Exception ex)
+                    {
+                        if (conn.State == ConnectionState.Open) conn.Open();
+                        MessageBox.Show("Hata oluştu: " + ex.Message);
+                    }
+                }
+            }
+            else
+            {
+                MessageBox.Show("Lütfen silmek istediğiniz öğrenciyi seçin!", "Uyarı", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
         }
         Anasayfa frAna;
         private void btnAnasayfa_ItemClick(object sender, ItemClickEventArgs e)
