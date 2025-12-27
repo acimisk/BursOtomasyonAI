@@ -29,76 +29,109 @@
         private void InitializeComponent()
         {
             this.groupControl1 = new DevExpress.XtraEditors.GroupControl();
-            this.txtAraAd = new DevExpress.XtraEditors.TextEdit();
-            this.txtAraSoyad = new DevExpress.XtraEditors.TextEdit();
+            this.txtSınıf = new DevExpress.XtraEditors.TextEdit();
+            this.txtTelNo = new DevExpress.XtraEditors.TextEdit();
+            this.btnSorgula = new DevExpress.XtraEditors.SimpleButton();
             this.txtAraBolum = new DevExpress.XtraEditors.TextEdit();
+            this.txtAraSoyad = new DevExpress.XtraEditors.TextEdit();
+            this.txtAraAd = new DevExpress.XtraEditors.TextEdit();
             this.gridAraSonuc = new DevExpress.XtraGrid.GridControl();
             this.gridView1 = new DevExpress.XtraGrid.Views.Grid.GridView();
-            this.btnSorgula = new DevExpress.XtraEditors.SimpleButton();
-            this.labelOgrAd = new DevExpress.XtraEditors.LabelControl();
-            this.labelControl1 = new DevExpress.XtraEditors.LabelControl();
-            this.labelControl2 = new DevExpress.XtraEditors.LabelControl();
-            this.labelControl3 = new DevExpress.XtraEditors.LabelControl();
-            this.labelControl4 = new DevExpress.XtraEditors.LabelControl();
-            this.txtTelNo = new DevExpress.XtraEditors.TextEdit();
-            this.txtSınıf = new DevExpress.XtraEditors.TextEdit();
+            this.layoutControl1 = new DevExpress.XtraLayout.LayoutControl();
+            this.Root = new DevExpress.XtraLayout.LayoutControlGroup();
+            this.layoutControlItem1 = new DevExpress.XtraLayout.LayoutControlItem();
+            this.layoutControlItem2 = new DevExpress.XtraLayout.LayoutControlItem();
+            this.layoutControlItem3 = new DevExpress.XtraLayout.LayoutControlItem();
+            this.layoutControlItem7 = new DevExpress.XtraLayout.LayoutControlItem();
+            this.layoutControlItem10 = new DevExpress.XtraLayout.LayoutControlItem();
+            this.layoutControlItem11 = new DevExpress.XtraLayout.LayoutControlItem();
             ((System.ComponentModel.ISupportInitialize)(this.groupControl1)).BeginInit();
             this.groupControl1.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.txtAraAd.Properties)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.txtAraSoyad.Properties)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.txtSınıf.Properties)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.txtTelNo.Properties)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.txtAraBolum.Properties)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.txtAraSoyad.Properties)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.txtAraAd.Properties)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridAraSonuc)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridView1)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.txtTelNo.Properties)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.txtSınıf.Properties)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.layoutControl1)).BeginInit();
+            this.layoutControl1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.Root)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.layoutControlItem1)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.layoutControlItem2)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.layoutControlItem3)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.layoutControlItem7)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.layoutControlItem10)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.layoutControlItem11)).BeginInit();
             this.SuspendLayout();
             // 
             // groupControl1
             // 
-            this.groupControl1.Controls.Add(this.txtSınıf);
-            this.groupControl1.Controls.Add(this.txtTelNo);
-            this.groupControl1.Controls.Add(this.labelControl4);
-            this.groupControl1.Controls.Add(this.labelControl3);
-            this.groupControl1.Controls.Add(this.btnSorgula);
-            this.groupControl1.Controls.Add(this.labelControl2);
-            this.groupControl1.Controls.Add(this.labelControl1);
-            this.groupControl1.Controls.Add(this.labelOgrAd);
-            this.groupControl1.Controls.Add(this.txtAraBolum);
-            this.groupControl1.Controls.Add(this.txtAraSoyad);
-            this.groupControl1.Controls.Add(this.txtAraAd);
-            this.groupControl1.Location = new System.Drawing.Point(3, 0);
+            this.groupControl1.Controls.Add(this.gridAraSonuc);
+            this.groupControl1.Controls.Add(this.layoutControl1);
+            this.groupControl1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.groupControl1.Location = new System.Drawing.Point(0, 0);
             this.groupControl1.Name = "groupControl1";
-            this.groupControl1.Size = new System.Drawing.Size(298, 401);
+            this.groupControl1.Size = new System.Drawing.Size(1173, 388);
             this.groupControl1.TabIndex = 0;
             this.groupControl1.Text = "Öğrenci Arama";
             // 
-            // txtAraAd
+            // txtSınıf
             // 
-            this.txtAraAd.Location = new System.Drawing.Point(111, 123);
-            this.txtAraAd.Name = "txtAraAd";
-            this.txtAraAd.Size = new System.Drawing.Size(125, 22);
-            this.txtAraAd.TabIndex = 0;
+            this.txtSınıf.Location = new System.Drawing.Point(14, 262);
+            this.txtSınıf.Name = "txtSınıf";
+            this.txtSınıf.Size = new System.Drawing.Size(232, 22);
+            this.txtSınıf.StyleController = this.layoutControl1;
+            this.txtSınıf.TabIndex = 9;
             // 
-            // txtAraSoyad
+            // txtTelNo
             // 
-            this.txtAraSoyad.Location = new System.Drawing.Point(111, 151);
-            this.txtAraSoyad.Name = "txtAraSoyad";
-            this.txtAraSoyad.Size = new System.Drawing.Size(125, 22);
-            this.txtAraSoyad.TabIndex = 1;
+            this.txtTelNo.Location = new System.Drawing.Point(14, 205);
+            this.txtTelNo.Name = "txtTelNo";
+            this.txtTelNo.Size = new System.Drawing.Size(232, 22);
+            this.txtTelNo.StyleController = this.layoutControl1;
+            this.txtTelNo.TabIndex = 8;
+            // 
+            // btnSorgula
+            // 
+            this.btnSorgula.Location = new System.Drawing.Point(14, 288);
+            this.btnSorgula.Name = "btnSorgula";
+            this.btnSorgula.Size = new System.Drawing.Size(232, 27);
+            this.btnSorgula.StyleController = this.layoutControl1;
+            this.btnSorgula.TabIndex = 2;
+            this.btnSorgula.Text = "Sorgula";
+            this.btnSorgula.Click += new System.EventHandler(this.btnSorgula_Click);
             // 
             // txtAraBolum
             // 
-            this.txtAraBolum.Location = new System.Drawing.Point(111, 179);
+            this.txtAraBolum.Location = new System.Drawing.Point(14, 34);
             this.txtAraBolum.Name = "txtAraBolum";
-            this.txtAraBolum.Size = new System.Drawing.Size(125, 22);
+            this.txtAraBolum.Size = new System.Drawing.Size(232, 22);
+            this.txtAraBolum.StyleController = this.layoutControl1;
             this.txtAraBolum.TabIndex = 2;
+            // 
+            // txtAraSoyad
+            // 
+            this.txtAraSoyad.Location = new System.Drawing.Point(14, 148);
+            this.txtAraSoyad.Name = "txtAraSoyad";
+            this.txtAraSoyad.Size = new System.Drawing.Size(232, 22);
+            this.txtAraSoyad.StyleController = this.layoutControl1;
+            this.txtAraSoyad.TabIndex = 1;
+            // 
+            // txtAraAd
+            // 
+            this.txtAraAd.Location = new System.Drawing.Point(14, 91);
+            this.txtAraAd.Name = "txtAraAd";
+            this.txtAraAd.Size = new System.Drawing.Size(232, 22);
+            this.txtAraAd.StyleController = this.layoutControl1;
+            this.txtAraAd.TabIndex = 0;
             // 
             // gridAraSonuc
             // 
-            this.gridAraSonuc.Location = new System.Drawing.Point(307, 0);
+            this.gridAraSonuc.Location = new System.Drawing.Point(268, 28);
             this.gridAraSonuc.MainView = this.gridView1;
             this.gridAraSonuc.Name = "gridAraSonuc";
-            this.gridAraSonuc.Size = new System.Drawing.Size(792, 401);
+            this.gridAraSonuc.Size = new System.Drawing.Size(892, 315);
             this.gridAraSonuc.TabIndex = 1;
             this.gridAraSonuc.ViewCollection.AddRange(new DevExpress.XtraGrid.Views.Base.BaseView[] {
             this.gridView1});
@@ -109,100 +142,124 @@
             this.gridView1.Name = "gridView1";
             this.gridView1.OptionsView.ShowGroupPanel = false;
             // 
-            // btnSorgula
+            // layoutControl1
             // 
-            this.btnSorgula.Location = new System.Drawing.Point(111, 295);
-            this.btnSorgula.Name = "btnSorgula";
-            this.btnSorgula.Size = new System.Drawing.Size(94, 34);
-            this.btnSorgula.TabIndex = 2;
-            this.btnSorgula.Text = "Sorgula";
-            this.btnSorgula.Click += new System.EventHandler(this.btnSorgula_Click);
+            this.layoutControl1.Controls.Add(this.txtSınıf);
+            this.layoutControl1.Controls.Add(this.txtTelNo);
+            this.layoutControl1.Controls.Add(this.txtAraBolum);
+            this.layoutControl1.Controls.Add(this.btnSorgula);
+            this.layoutControl1.Controls.Add(this.txtAraAd);
+            this.layoutControl1.Controls.Add(this.txtAraSoyad);
+            this.layoutControl1.Dock = System.Windows.Forms.DockStyle.Left;
+            this.layoutControl1.Font = new System.Drawing.Font("Tahoma", 7.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
+            this.layoutControl1.Location = new System.Drawing.Point(2, 28);
+            this.layoutControl1.Name = "layoutControl1";
+            this.layoutControl1.Root = this.Root;
+            this.layoutControl1.Size = new System.Drawing.Size(260, 358);
+            this.layoutControl1.TabIndex = 10;
+            this.layoutControl1.Text = "layoutControl1";
             // 
-            // labelOgrAd
+            // Root
             // 
-            this.labelOgrAd.Appearance.Font = new System.Drawing.Font("Segoe UI", 10.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
-            this.labelOgrAd.Appearance.Options.UseFont = true;
-            this.labelOgrAd.Location = new System.Drawing.Point(77, 121);
-            this.labelOgrAd.Name = "labelOgrAd";
-            this.labelOgrAd.Size = new System.Drawing.Size(23, 23);
-            this.labelOgrAd.TabIndex = 3;
-            this.labelOgrAd.Text = "Ad";
+            this.Root.EnableIndentsWithoutBorders = DevExpress.Utils.DefaultBoolean.True;
+            this.Root.GroupBordersVisible = false;
+            this.Root.Items.AddRange(new DevExpress.XtraLayout.BaseLayoutItem[] {
+            this.layoutControlItem1,
+            this.layoutControlItem2,
+            this.layoutControlItem3,
+            this.layoutControlItem10,
+            this.layoutControlItem11,
+            this.layoutControlItem7});
+            this.Root.Name = "Root";
+            this.Root.Size = new System.Drawing.Size(260, 358);
+            this.Root.TextVisible = false;
             // 
-            // labelControl1
+            // layoutControlItem1
             // 
-            this.labelControl1.Appearance.Font = new System.Drawing.Font("Segoe UI", 10.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
-            this.labelControl1.Appearance.Options.UseFont = true;
-            this.labelControl1.Location = new System.Drawing.Point(48, 178);
-            this.labelControl1.Name = "labelControl1";
-            this.labelControl1.Size = new System.Drawing.Size(52, 23);
-            this.labelControl1.TabIndex = 4;
-            this.labelControl1.Text = "Bölüm";
+            this.layoutControlItem1.Control = this.txtAraBolum;
+            this.layoutControlItem1.Location = new System.Drawing.Point(0, 0);
+            this.layoutControlItem1.Name = "layoutControlItem1";
+            this.layoutControlItem1.Size = new System.Drawing.Size(236, 46);
+            this.layoutControlItem1.Text = "Bölüm";
+            this.layoutControlItem1.TextLocation = DevExpress.Utils.Locations.Top;
+            this.layoutControlItem1.TextSize = new System.Drawing.Size(43, 16);
             // 
-            // labelControl2
+            // layoutControlItem2
             // 
-            this.labelControl2.Appearance.Font = new System.Drawing.Font("Segoe UI", 10.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
-            this.labelControl2.Appearance.Options.UseFont = true;
-            this.labelControl2.Location = new System.Drawing.Point(51, 150);
-            this.labelControl2.Name = "labelControl2";
-            this.labelControl2.Size = new System.Drawing.Size(49, 23);
-            this.labelControl2.TabIndex = 5;
-            this.labelControl2.Text = "Soyad";
+            this.layoutControlItem2.Control = this.txtAraAd;
+            this.layoutControlItem2.Location = new System.Drawing.Point(0, 46);
+            this.layoutControlItem2.Name = "layoutControlItem2";
+            this.layoutControlItem2.Size = new System.Drawing.Size(236, 57);
+            this.layoutControlItem2.Text = "Ad";
+            this.layoutControlItem2.TextLocation = DevExpress.Utils.Locations.Top;
+            this.layoutControlItem2.TextSize = new System.Drawing.Size(43, 16);
             // 
-            // labelControl3
+            // layoutControlItem3
             // 
-            this.labelControl3.Appearance.Font = new System.Drawing.Font("Segoe UI", 10.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
-            this.labelControl3.Appearance.Options.UseFont = true;
-            this.labelControl3.Location = new System.Drawing.Point(12, 207);
-            this.labelControl3.Name = "labelControl3";
-            this.labelControl3.Size = new System.Drawing.Size(88, 23);
-            this.labelControl3.TabIndex = 6;
-            this.labelControl3.Text = "Telefon No";
+            this.layoutControlItem3.Control = this.txtAraSoyad;
+            this.layoutControlItem3.Location = new System.Drawing.Point(0, 103);
+            this.layoutControlItem3.Name = "layoutControlItem3";
+            this.layoutControlItem3.Size = new System.Drawing.Size(236, 57);
+            this.layoutControlItem3.Text = "Soyad";
+            this.layoutControlItem3.TextLocation = DevExpress.Utils.Locations.Top;
+            this.layoutControlItem3.TextSize = new System.Drawing.Size(43, 16);
             // 
-            // labelControl4
+            // layoutControlItem7
             // 
-            this.labelControl4.Appearance.Font = new System.Drawing.Font("Segoe UI", 10.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
-            this.labelControl4.Appearance.Options.UseFont = true;
-            this.labelControl4.Location = new System.Drawing.Point(63, 236);
-            this.labelControl4.Name = "labelControl4";
-            this.labelControl4.Size = new System.Drawing.Size(37, 23);
-            this.labelControl4.TabIndex = 7;
-            this.labelControl4.Text = "Sınıf";
+            this.layoutControlItem7.Control = this.btnSorgula;
+            this.layoutControlItem7.Location = new System.Drawing.Point(0, 274);
+            this.layoutControlItem7.Name = "layoutControlItem7";
+            this.layoutControlItem7.Size = new System.Drawing.Size(236, 60);
+            this.layoutControlItem7.TextVisible = false;
             // 
-            // txtTelNo
+            // layoutControlItem10
             // 
-            this.txtTelNo.Location = new System.Drawing.Point(111, 207);
-            this.txtTelNo.Name = "txtTelNo";
-            this.txtTelNo.Size = new System.Drawing.Size(125, 22);
-            this.txtTelNo.TabIndex = 8;
+            this.layoutControlItem10.Control = this.txtTelNo;
+            this.layoutControlItem10.Location = new System.Drawing.Point(0, 160);
+            this.layoutControlItem10.Name = "layoutControlItem10";
+            this.layoutControlItem10.Size = new System.Drawing.Size(236, 57);
+            this.layoutControlItem10.Text = "Telefon";
+            this.layoutControlItem10.TextLocation = DevExpress.Utils.Locations.Top;
+            this.layoutControlItem10.TextSize = new System.Drawing.Size(43, 16);
             // 
-            // txtSınıf
+            // layoutControlItem11
             // 
-            this.txtSınıf.Location = new System.Drawing.Point(111, 238);
-            this.txtSınıf.Name = "txtSınıf";
-            this.txtSınıf.Size = new System.Drawing.Size(125, 22);
-            this.txtSınıf.TabIndex = 9;
+            this.layoutControlItem11.Control = this.txtSınıf;
+            this.layoutControlItem11.Location = new System.Drawing.Point(0, 217);
+            this.layoutControlItem11.Name = "layoutControlItem11";
+            this.layoutControlItem11.Size = new System.Drawing.Size(236, 57);
+            this.layoutControlItem11.Text = "Sınıf";
+            this.layoutControlItem11.TextLocation = DevExpress.Utils.Locations.Top;
+            this.layoutControlItem11.TextSize = new System.Drawing.Size(43, 16);
             // 
             // Ara
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.SeaShell;
-            this.ClientSize = new System.Drawing.Size(1111, 413);
-            this.Controls.Add(this.gridAraSonuc);
+            this.ClientSize = new System.Drawing.Size(1173, 388);
             this.Controls.Add(this.groupControl1);
             this.Name = "Ara";
             this.Text = "Ara";
             this.Load += new System.EventHandler(this.Ara_Load);
             ((System.ComponentModel.ISupportInitialize)(this.groupControl1)).EndInit();
             this.groupControl1.ResumeLayout(false);
-            this.groupControl1.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.txtAraAd.Properties)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.txtAraSoyad.Properties)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.txtSınıf.Properties)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.txtTelNo.Properties)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.txtAraBolum.Properties)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.txtAraSoyad.Properties)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.txtAraAd.Properties)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridAraSonuc)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridView1)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.txtTelNo.Properties)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.txtSınıf.Properties)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.layoutControl1)).EndInit();
+            this.layoutControl1.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.Root)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.layoutControlItem1)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.layoutControlItem2)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.layoutControlItem3)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.layoutControlItem7)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.layoutControlItem10)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.layoutControlItem11)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -216,12 +273,15 @@
         private DevExpress.XtraGrid.GridControl gridAraSonuc;
         private DevExpress.XtraGrid.Views.Grid.GridView gridView1;
         private DevExpress.XtraEditors.SimpleButton btnSorgula;
-        private DevExpress.XtraEditors.LabelControl labelControl2;
-        private DevExpress.XtraEditors.LabelControl labelControl1;
-        private DevExpress.XtraEditors.LabelControl labelOgrAd;
         private DevExpress.XtraEditors.TextEdit txtSınıf;
         private DevExpress.XtraEditors.TextEdit txtTelNo;
-        private DevExpress.XtraEditors.LabelControl labelControl4;
-        private DevExpress.XtraEditors.LabelControl labelControl3;
+        private DevExpress.XtraLayout.LayoutControl layoutControl1;
+        private DevExpress.XtraLayout.LayoutControlGroup Root;
+        private DevExpress.XtraLayout.LayoutControlItem layoutControlItem1;
+        private DevExpress.XtraLayout.LayoutControlItem layoutControlItem2;
+        private DevExpress.XtraLayout.LayoutControlItem layoutControlItem3;
+        private DevExpress.XtraLayout.LayoutControlItem layoutControlItem10;
+        private DevExpress.XtraLayout.LayoutControlItem layoutControlItem11;
+        private DevExpress.XtraLayout.LayoutControlItem layoutControlItem7;
     }
 }

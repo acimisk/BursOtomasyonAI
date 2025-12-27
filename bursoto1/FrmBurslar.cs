@@ -29,39 +29,6 @@ namespace bursoto1
             Listele();
         }
 
-        private void btnKaydet_Click(object sender, EventArgs e)
-        {
-            if (string.IsNullOrEmpty(txtBursAd.Text) || string.IsNullOrEmpty(txtMiktar.Text))
-            {
-                XtraMessageBox.Show("Lütfen burs adını ve miktarını giriniz!", "Eksik Bilgi", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
-
-            try
-            {
-                SqlConnection conn = bgl.baglanti();
-                // SQL Sütun isimlerinin [BursAdı] falan doğru olduğundan emin ol kanka
-                string sorgu = "INSERT INTO Burslar (BursAdı, Miktar, Kontenjan, Aciklama) VALUES (@p1, @p2, @p3, @p4)";
-
-                using (SqlCommand cmd = new SqlCommand(sorgu, conn))
-                {
-                    cmd.Parameters.AddWithValue("@p1", txtBursAd.Text);
-                    cmd.Parameters.AddWithValue("@p2", decimal.Parse(txtMiktar.Text.Replace(".", ",")));
-                    cmd.Parameters.AddWithValue("@p3", int.Parse(txtKontenjan.Text));
-                    cmd.Parameters.AddWithValue("@p4", txtAciklama.Text ?? "");
-                    cmd.ExecuteNonQuery();
-                }
-                conn.Close();
-
-                XtraMessageBox.Show("Burs başarıyla kaydedildi.", "Bilgi", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                FormuTemizle();
-                Listele();
-            }
-            catch (Exception ex)
-            {
-                XtraMessageBox.Show("Kaydetme hatası: " + ex.Message);
-            }
-        }
 
         // KANKA BU ÇOK ÖNEMLİ: Grid'de bir satıra tıklayınca bilgiler kutulara dolsun
         private void gridView1_FocusedRowChanged(object sender, DevExpress.XtraGrid.Views.Base.FocusedRowChangedEventArgs e)
@@ -108,6 +75,40 @@ namespace bursoto1
             txtMiktar.Text = "";
             txtKontenjan.Text = "";
             txtAciklama.Text = "";
+        }
+
+        private void btnBursTanimla_Click(object sender, EventArgs e)
+        {
+            if (string.IsNullOrEmpty(txtBursAd.Text) || string.IsNullOrEmpty(txtMiktar.Text))
+            {
+                XtraMessageBox.Show("Lütfen burs adını ve miktarını giriniz!", "Eksik Bilgi", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            try
+            {
+                SqlConnection conn = bgl.baglanti();
+                // SQL Sütun isimlerinin [BursAdı] falan doğru olduğundan emin ol kanka
+                string sorgu = "INSERT INTO Burslar (BursAdı, Miktar, Kontenjan, Aciklama) VALUES (@p1, @p2, @p3, @p4)";
+
+                using (SqlCommand cmd = new SqlCommand(sorgu, conn))
+                {
+                    cmd.Parameters.AddWithValue("@p1", txtBursAd.Text);
+                    cmd.Parameters.AddWithValue("@p2", decimal.Parse(txtMiktar.Text.Replace(".", ",")));
+                    cmd.Parameters.AddWithValue("@p3", int.Parse(txtKontenjan.Text));
+                    cmd.Parameters.AddWithValue("@p4", txtAciklama.Text ?? "");
+                    cmd.ExecuteNonQuery();
+                }
+                conn.Close();
+
+                XtraMessageBox.Show("Burs başarıyla kaydedildi.", "Bilgi", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                FormuTemizle();
+                Listele();
+            }
+            catch (Exception ex)
+            {
+                XtraMessageBox.Show("Kaydetme hatası: " + ex.Message);
+            }
         }
     }
 }

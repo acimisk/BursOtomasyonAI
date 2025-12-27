@@ -56,6 +56,24 @@ namespace bursoto1
                 tileItemBasari.Elements[0].Text = (kralOgrenci != null) ? kralOgrenci.ToString() : "-";
                 tileItemBasari.AppearanceItem.Normal.BackColor = Color.FromArgb(142, 68, 173);
 
+                // En yüksek AGNO'yu çekelim
+                SqlCommand cmdAgno = new SqlCommand("SELECT MAX(AGNO) FROM Ogrenciler", bgl.baglanti());
+                object maxAgnoObj = cmdAgno.ExecuteScalar();
+
+                if (maxAgnoObj != DBNull.Value && maxAgnoObj != null)
+                {
+                    decimal maxAgno = Convert.ToDecimal(maxAgnoObj);
+
+                    // Eğer ortalama 3.80 üzerindeyse kutu altın rengi (Gold) olsun
+                    if (maxAgno >= 3.80m)
+                    {
+                        tileItemBasari.AppearanceItem.Normal.BackColor = Color.Gold;
+                        tileItemBasari.AppearanceItem.Normal.ForeColor = Color.Black; // Yazı siyah olsun ki okunsun
+                        tileItemBasari.Elements[0].Text = "★ " + tileItemBasari.Elements[0].Text + " (Üstün Başarı)";
+                    }
+                }
+
+
                 // İşlem bitince kapatıyoruz
                 aktifBaglanti.Close();
             }

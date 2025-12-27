@@ -63,7 +63,7 @@
             // pictureEdit1
             // 
             this.pictureEdit1.Location = new System.Drawing.Point(15, 69);
-            this.pictureEdit1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.pictureEdit1.Margin = new System.Windows.Forms.Padding(4);
             this.pictureEdit1.Name = "pictureEdit1";
             this.pictureEdit1.Properties.ShowCameraMenuItem = DevExpress.XtraEditors.Controls.CameraMenuItemVisibility.Auto;
             this.pictureEdit1.Properties.SizeMode = DevExpress.XtraEditors.Controls.PictureSizeMode.Stretch;
@@ -75,7 +75,7 @@
             this.labelOgrAd.Appearance.Font = new System.Drawing.Font("Segoe UI", 10.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
             this.labelOgrAd.Appearance.Options.UseFont = true;
             this.labelOgrAd.Location = new System.Drawing.Point(386, 69);
-            this.labelOgrAd.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.labelOgrAd.Margin = new System.Windows.Forms.Padding(4);
             this.labelOgrAd.Name = "labelOgrAd";
             this.labelOgrAd.Size = new System.Drawing.Size(23, 23);
             this.labelOgrAd.TabIndex = 1;
@@ -86,7 +86,7 @@
             this.labelOgrSoyad.Appearance.Font = new System.Drawing.Font("Segoe UI", 10.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
             this.labelOgrSoyad.Appearance.Options.UseFont = true;
             this.labelOgrSoyad.Location = new System.Drawing.Point(709, 75);
-            this.labelOgrSoyad.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.labelOgrSoyad.Margin = new System.Windows.Forms.Padding(4);
             this.labelOgrSoyad.Name = "labelOgrSoyad";
             this.labelOgrSoyad.Size = new System.Drawing.Size(49, 23);
             this.labelOgrSoyad.TabIndex = 2;
@@ -95,7 +95,7 @@
             // txtHaneGeliri
             // 
             this.txtHaneGeliri.Location = new System.Drawing.Point(438, 122);
-            this.txtHaneGeliri.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.txtHaneGeliri.Margin = new System.Windows.Forms.Padding(4);
             this.txtHaneGeliri.Name = "txtHaneGeliri";
             this.txtHaneGeliri.Properties.ReadOnly = true;
             this.txtHaneGeliri.Size = new System.Drawing.Size(156, 22);
@@ -106,7 +106,7 @@
             this.labelHaneGeliri.Appearance.Font = new System.Drawing.Font("Segoe UI", 10.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
             this.labelHaneGeliri.Appearance.Options.UseFont = true;
             this.labelHaneGeliri.Location = new System.Drawing.Point(304, 125);
-            this.labelHaneGeliri.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.labelHaneGeliri.Margin = new System.Windows.Forms.Padding(4);
             this.labelHaneGeliri.Name = "labelHaneGeliri";
             this.labelHaneGeliri.Size = new System.Drawing.Size(89, 23);
             this.labelHaneGeliri.TabIndex = 6;
@@ -116,7 +116,7 @@
             // txtAgno
             // 
             this.txtAgno.Location = new System.Drawing.Point(1060, 128);
-            this.txtAgno.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.txtAgno.Margin = new System.Windows.Forms.Padding(4);
             this.txtAgno.Name = "txtAgno";
             this.txtAgno.Properties.ReadOnly = true;
             this.txtAgno.Size = new System.Drawing.Size(156, 22);
@@ -127,7 +127,7 @@
             this.labelAgno.Appearance.Font = new System.Drawing.Font("Segoe UI", 10.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
             this.labelAgno.Appearance.Options.UseFont = true;
             this.labelAgno.Location = new System.Drawing.Point(974, 124);
-            this.labelAgno.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.labelAgno.Margin = new System.Windows.Forms.Padding(4);
             this.labelAgno.Name = "labelAgno";
             this.labelAgno.Size = new System.Drawing.Size(55, 23);
             this.labelAgno.TabIndex = 51;
@@ -136,7 +136,7 @@
             // txtTelNo
             // 
             this.txtTelNo.Location = new System.Drawing.Point(438, 186);
-            this.txtTelNo.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.txtTelNo.Margin = new System.Windows.Forms.Padding(4);
             this.txtTelNo.Name = "txtTelNo";
             this.txtTelNo.Properties.ReadOnly = true;
             this.txtTelNo.Size = new System.Drawing.Size(156, 22);
@@ -147,7 +147,7 @@
             this.labelNumara.Appearance.Font = new System.Drawing.Font("Segoe UI", 10.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
             this.labelNumara.Appearance.Options.UseFont = true;
             this.labelNumara.Location = new System.Drawing.Point(299, 181);
-            this.labelNumara.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.labelNumara.Margin = new System.Windows.Forms.Padding(4);
             this.labelNumara.Name = "labelNumara";
             this.labelNumara.Size = new System.Drawing.Size(93, 23);
             this.labelNumara.TabIndex = 49;
@@ -156,7 +156,7 @@
             // txtBolum
             // 
             this.txtBolum.Location = new System.Drawing.Point(1060, 78);
-            this.txtBolum.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.txtBolum.Margin = new System.Windows.Forms.Padding(4);
             this.txtBolum.Name = "txtBolum";
             this.txtBolum.Properties.ReadOnly = true;
             this.txtBolum.Size = new System.Drawing.Size(156, 22);
@@ -167,7 +167,7 @@
             this.labelBolum.Appearance.Font = new System.Drawing.Font("Segoe UI", 10.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
             this.labelBolum.Appearance.Options.UseFont = true;
             this.labelBolum.Location = new System.Drawing.Point(971, 74);
-            this.labelBolum.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.labelBolum.Margin = new System.Windows.Forms.Padding(4);
             this.labelBolum.Name = "labelBolum";
             this.labelBolum.Size = new System.Drawing.Size(57, 23);
             this.labelBolum.TabIndex = 47;
@@ -178,7 +178,7 @@
             this.labelSinif.Appearance.Font = new System.Drawing.Font("Segoe UI", 10.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
             this.labelSinif.Appearance.Options.UseFont = true;
             this.labelSinif.Location = new System.Drawing.Point(985, 170);
-            this.labelSinif.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.labelSinif.Margin = new System.Windows.Forms.Padding(4);
             this.labelSinif.Name = "labelSinif";
             this.labelSinif.Size = new System.Drawing.Size(37, 23);
             this.labelSinif.TabIndex = 46;
@@ -190,7 +190,7 @@
             this.labelKardes.Appearance.Font = new System.Drawing.Font("Segoe UI", 10.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
             this.labelKardes.Appearance.Options.UseFont = true;
             this.labelKardes.Location = new System.Drawing.Point(634, 125);
-            this.labelKardes.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.labelKardes.Margin = new System.Windows.Forms.Padding(4);
             this.labelKardes.Name = "labelKardes";
             this.labelKardes.Size = new System.Drawing.Size(109, 23);
             this.labelKardes.TabIndex = 44;
@@ -199,7 +199,7 @@
             // txtOgrSoyad
             // 
             this.txtOgrSoyad.Location = new System.Drawing.Point(788, 75);
-            this.txtOgrSoyad.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.txtOgrSoyad.Margin = new System.Windows.Forms.Padding(4);
             this.txtOgrSoyad.Name = "txtOgrSoyad";
             this.txtOgrSoyad.Properties.ReadOnly = true;
             this.txtOgrSoyad.Size = new System.Drawing.Size(156, 22);
@@ -208,7 +208,7 @@
             // txtOgrAd
             // 
             this.txtOgrAd.Location = new System.Drawing.Point(438, 71);
-            this.txtOgrAd.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.txtOgrAd.Margin = new System.Windows.Forms.Padding(4);
             this.txtOgrAd.Name = "txtOgrAd";
             this.txtOgrAd.Properties.ReadOnly = true;
             this.txtOgrAd.Size = new System.Drawing.Size(156, 22);
@@ -217,7 +217,7 @@
             // txtOgrKardesSayisi
             // 
             this.txtOgrKardesSayisi.Location = new System.Drawing.Point(788, 126);
-            this.txtOgrKardesSayisi.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.txtOgrKardesSayisi.Margin = new System.Windows.Forms.Padding(4);
             this.txtOgrKardesSayisi.Name = "txtOgrKardesSayisi";
             this.txtOgrKardesSayisi.Properties.Buttons.AddRange(new DevExpress.XtraEditors.Controls.EditorButton[] {
             new DevExpress.XtraEditors.Controls.EditorButton(DevExpress.XtraEditors.Controls.ButtonPredefines.Combo)});
@@ -234,7 +234,7 @@
             // txtSinif
             // 
             this.txtSinif.Location = new System.Drawing.Point(1060, 175);
-            this.txtSinif.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.txtSinif.Margin = new System.Windows.Forms.Padding(4);
             this.txtSinif.Name = "txtSinif";
             this.txtSinif.Properties.Buttons.AddRange(new DevExpress.XtraEditors.Controls.EditorButton[] {
             new DevExpress.XtraEditors.Controls.EditorButton(DevExpress.XtraEditors.Controls.ButtonPredefines.Combo)});
@@ -261,7 +261,7 @@
             // btnAIAnaliz
             // 
             this.btnAIAnaliz.Location = new System.Drawing.Point(335, 290);
-            this.btnAIAnaliz.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.btnAIAnaliz.Margin = new System.Windows.Forms.Padding(4);
             this.btnAIAnaliz.Name = "btnAIAnaliz";
             this.btnAIAnaliz.Size = new System.Drawing.Size(118, 36);
             this.btnAIAnaliz.TabIndex = 54;
@@ -272,7 +272,7 @@
             // 
             this.txtAISkor.EditValue = "";
             this.txtAISkor.Location = new System.Drawing.Point(335, 243);
-            this.txtAISkor.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.txtAISkor.Margin = new System.Windows.Forms.Padding(4);
             this.txtAISkor.Name = "txtAISkor";
             this.txtAISkor.Size = new System.Drawing.Size(125, 22);
             this.txtAISkor.TabIndex = 55;
@@ -281,7 +281,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(995, 389);
+            this.ClientSize = new System.Drawing.Size(1287, 487);
             this.Controls.Add(this.txtAISkor);
             this.Controls.Add(this.btnAIAnaliz);
             this.Controls.Add(this.rtbAnalizSonuc);
