@@ -21,7 +21,7 @@ namespace bursoto1
             DevExpress.UserSkins.BonusSkins.Register();
             DevExpress.LookAndFeel.UserLookAndFeel.Default.SetSkinStyle("Office 2019 Colorful"); // Veya "The Bezier"
 
-            Application.Run(new Menu());
+            Application.Run(new Login());
         }
     }
 }

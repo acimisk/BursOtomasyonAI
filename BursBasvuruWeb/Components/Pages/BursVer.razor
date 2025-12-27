@@ -1,0 +1,81 @@
+﻿@page "/burs-ver"
+@using System.Data.SqlClient
+@inject NavigationManager NavManager
+
+<PageTitle>Burs Ver - Eğitim Gönüllüsü Ol</PageTitle>
+
+<div class="container mt-5">
+    <div class="card shadow-lg border-0">
+        <div class="card-header bg-primary text-white text-center">
+            <h3>Eğitim Gönüllüsü Başvuru Formu</h3>
+        </div>
+        <div class="card-body p-4">
+            <p class="text-muted">Öğrencilerimize destek olmak için lütfen aşağıdaki formu doldurun. Sizinle iletişime geçeceğiz.</p>
+
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label">Ad Soyad</label>
+                    <input type="text" @bind="adSoyad" class="form-control" placeholder="Adınız Soyadınız">
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Kurum / Şirket Adı (Opsiyonel)</label>
+                    <input type="text" @bind="kurumAdi" class="form-control" placeholder="Varsa kurumunuz">
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">E-Posta</label>
+                    <input type="email" @bind="eposta" class="form-control" placeholder="ornek@mail.com">
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Bağışlamak İstediğiniz Toplam Tutar (₺)</label>
+                    <input type="number" @bind="miktar" class="form-control">
+                </div>
+                <div class="col-12 mt-4">
+                    <button class="btn btn-success btn-lg w-100" @onclick="BursuKaydet">Başvuruyu Tamamla</button>
+                </div>
+            </div>
+
+            @if (!string.IsNullOrEmpty(mesaj))
+            {
+                <div class="alert alert-info mt-3">@mesaj</div>
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    private string adSoyad;
+    private string kurumAdi;
+    private string eposta;
+    private decimal miktar;
+    private string mesaj;
+
+    // Kanka buradaki Connection String masaüstündekiyle aynı olmalı!
+    string connectionString = @"Data Source=(localdb)\MSSQLLocalDB; initial catalog=bursOtoDeneme1; Integrated Security=TRUE";
+
+    private void BursuKaydet()
+    {
+        try
+        {
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            {
+                conn.Open();
+                string query = "INSERT INTO BursVerenler (AdSoyad, KurumAdı, BagisMiktari, Eposta, Durum) VALUES (@p1, @p2, @p3, @p4, 'Beklemede')";
+                using (SqlCommand cmd = new SqlCommand(query, conn))
+                {
+                    cmd.Parameters.AddWithValue("@p1", adSoyad);
+                    cmd.Parameters.AddWithValue("@p2", kurumAdi ?? "");
+                    cmd.Parameters.AddWithValue("@p3", miktar);
+                    cmd.Parameters.AddWithValue("@p4", eposta);
+                    cmd.ExecuteNonQuery();
+                }
+            }
+            mesaj = "Başvurunuz alındı kanka! Eğitim gönüllüsü olduğunuz için teşekkürler.";
+            // Formu temizle
+            adSoyad = eposta = kurumAdi = ""; miktar = 0;
+        }
+        catch (Exception ex)
+        {
+            mesaj = "Hata oluştu: " + ex.Message;
+        }
+    }
+}
