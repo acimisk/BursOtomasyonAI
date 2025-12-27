@@ -62,7 +62,7 @@
             // 
             // txtBursAd
             // 
-            this.txtBursAd.Location = new System.Drawing.Point(14, 34);
+            this.txtBursAd.Location = new System.Drawing.Point(14, 41);
             this.txtBursAd.Name = "txtBursAd";
             this.txtBursAd.Size = new System.Drawing.Size(369, 22);
             this.txtBursAd.StyleController = this.layoutControl1;
@@ -101,7 +101,7 @@
             0,
             0,
             0});
-            this.txtMiktar.Location = new System.Drawing.Point(14, 128);
+            this.txtMiktar.Location = new System.Drawing.Point(14, 149);
             this.txtMiktar.Name = "txtMiktar";
             this.txtMiktar.Properties.Buttons.AddRange(new DevExpress.XtraEditors.Controls.EditorButton[] {
             new DevExpress.XtraEditors.Controls.EditorButton(DevExpress.XtraEditors.Controls.ButtonPredefines.Combo)});
@@ -116,7 +116,7 @@
             0,
             0,
             0});
-            this.txtKontenjan.Location = new System.Drawing.Point(14, 80);
+            this.txtKontenjan.Location = new System.Drawing.Point(14, 94);
             this.txtKontenjan.Name = "txtKontenjan";
             this.txtKontenjan.Properties.Buttons.AddRange(new DevExpress.XtraEditors.Controls.EditorButton[] {
             new DevExpress.XtraEditors.Controls.EditorButton(DevExpress.XtraEditors.Controls.ButtonPredefines.Combo)});
@@ -126,9 +126,9 @@
             // 
             // txtAciklama
             // 
-            this.txtAciklama.Location = new System.Drawing.Point(14, 176);
+            this.txtAciklama.Location = new System.Drawing.Point(14, 204);
             this.txtAciklama.Name = "txtAciklama";
-            this.txtAciklama.Size = new System.Drawing.Size(379, 126);
+            this.txtAciklama.Size = new System.Drawing.Size(379, 98);
             this.txtAciklama.StyleController = this.layoutControl1;
             this.txtAciklama.TabIndex = 8;
             // 
@@ -164,13 +164,15 @@
             // 
             // layoutControlItem1
             // 
+            this.layoutControlItem1.AppearanceItemCaption.Font = new System.Drawing.Font("Segoe UI Semibold", 10.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
+            this.layoutControlItem1.AppearanceItemCaption.Options.UseFont = true;
             this.layoutControlItem1.Control = this.txtKontenjan;
-            this.layoutControlItem1.Location = new System.Drawing.Point(0, 46);
+            this.layoutControlItem1.Location = new System.Drawing.Point(0, 53);
             this.layoutControlItem1.Name = "layoutControlItem1";
-            this.layoutControlItem1.Size = new System.Drawing.Size(383, 48);
+            this.layoutControlItem1.Size = new System.Drawing.Size(383, 55);
             this.layoutControlItem1.Text = "Kontenjan";
             this.layoutControlItem1.TextLocation = DevExpress.Utils.Locations.Top;
-            this.layoutControlItem1.TextSize = new System.Drawing.Size(67, 16);
+            this.layoutControlItem1.TextSize = new System.Drawing.Size(92, 23);
             // 
             // emptySpaceItem1
             // 
@@ -180,13 +182,15 @@
             // 
             // layoutControlItem2
             // 
+            this.layoutControlItem2.AppearanceItemCaption.Font = new System.Drawing.Font("Segoe UI Semibold", 10.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
+            this.layoutControlItem2.AppearanceItemCaption.Options.UseFont = true;
             this.layoutControlItem2.Control = this.txtBursAd;
             this.layoutControlItem2.Location = new System.Drawing.Point(0, 0);
             this.layoutControlItem2.Name = "layoutControlItem2";
-            this.layoutControlItem2.Size = new System.Drawing.Size(373, 46);
+            this.layoutControlItem2.Size = new System.Drawing.Size(373, 53);
             this.layoutControlItem2.Text = "Burs Adı";
             this.layoutControlItem2.TextLocation = DevExpress.Utils.Locations.Top;
-            this.layoutControlItem2.TextSize = new System.Drawing.Size(67, 16);
+            this.layoutControlItem2.TextSize = new System.Drawing.Size(92, 23);
             // 
             // layoutControlItem3
             // 
@@ -198,23 +202,27 @@
             // 
             // layoutControlItem4
             // 
+            this.layoutControlItem4.AppearanceItemCaption.Font = new System.Drawing.Font("Segoe UI Semibold", 10.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
+            this.layoutControlItem4.AppearanceItemCaption.Options.UseFont = true;
             this.layoutControlItem4.Control = this.txtMiktar;
-            this.layoutControlItem4.Location = new System.Drawing.Point(0, 94);
+            this.layoutControlItem4.Location = new System.Drawing.Point(0, 108);
             this.layoutControlItem4.Name = "layoutControlItem4";
-            this.layoutControlItem4.Size = new System.Drawing.Size(383, 48);
+            this.layoutControlItem4.Size = new System.Drawing.Size(383, 55);
             this.layoutControlItem4.Text = "Burs Miktarı";
             this.layoutControlItem4.TextLocation = DevExpress.Utils.Locations.Top;
-            this.layoutControlItem4.TextSize = new System.Drawing.Size(67, 16);
+            this.layoutControlItem4.TextSize = new System.Drawing.Size(92, 23);
             // 
             // layoutControlItem5
             // 
+            this.layoutControlItem5.AppearanceItemCaption.Font = new System.Drawing.Font("Segoe UI Semibold", 10.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
+            this.layoutControlItem5.AppearanceItemCaption.Options.UseFont = true;
             this.layoutControlItem5.Control = this.txtAciklama;
-            this.layoutControlItem5.Location = new System.Drawing.Point(0, 142);
+            this.layoutControlItem5.Location = new System.Drawing.Point(0, 163);
             this.layoutControlItem5.Name = "layoutControlItem5";
-            this.layoutControlItem5.Size = new System.Drawing.Size(383, 150);
+            this.layoutControlItem5.Size = new System.Drawing.Size(383, 129);
             this.layoutControlItem5.Text = "Açıklama";
             this.layoutControlItem5.TextLocation = DevExpress.Utils.Locations.Top;
-            this.layoutControlItem5.TextSize = new System.Drawing.Size(67, 16);
+            this.layoutControlItem5.TextSize = new System.Drawing.Size(92, 23);
             // 
             // FrmBurslar
             // 

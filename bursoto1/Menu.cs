@@ -23,7 +23,16 @@ namespace bursoto1
             // 1. İSTEK: TAM EKRAN YERİNE PENCERELİ VE ORTADA AÇILSIN
             this.WindowState = FormWindowState.Normal;
             this.StartPosition = FormStartPosition.CenterScreen;
-            this.Size = new Size(1366, 768); // İdeal dashboard boyutu
+            // 1. Ekranın tam ekran açılmasını KESİNLİKLE engelliyoruz
+            this.WindowState = FormWindowState.Normal;
+
+            // 2. Formun Windows başladığında nerede duracağını belirliyoruz (Tam Ortada)
+            this.StartPosition = FormStartPosition.CenterScreen;
+
+            // 3. Formun açılış boyutunu elle (Manuel) giriyoruz
+            // Buradaki rakamları ekranına göre değiştirebilirsin (Örn: 1200x800)
+            this.Size = new Size(1200, 650);
+
             this.FormBorderStyle = FormBorderStyle.Sizable; // Kenarlardan büyütüp küçültebilirsin
         }
         FrmOgrenciler fr1;
