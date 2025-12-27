@@ -29,18 +29,18 @@
         private void InitializeComponent()
         {
             this.txtBursAd = new DevExpress.XtraEditors.TextEdit();
-            this.txtMiktar = new DevExpress.XtraEditors.TextEdit();
-            this.txtKontenjan = new DevExpress.XtraEditors.TextEdit();
-            this.txtAciklama = new DevExpress.XtraEditors.TextEdit();
             this.btnBursTanimla = new DevExpress.XtraEditors.SimpleButton();
             this.gridControl1 = new DevExpress.XtraGrid.GridControl();
             this.gridView1 = new DevExpress.XtraGrid.Views.Grid.GridView();
+            this.txtMiktar = new DevExpress.XtraEditors.SpinEdit();
+            this.txtKontenjan = new DevExpress.XtraEditors.SpinEdit();
+            this.txtAciklama = new DevExpress.XtraEditors.MemoEdit();
             ((System.ComponentModel.ISupportInitialize)(this.txtBursAd.Properties)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.gridControl1)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.gridView1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.txtMiktar.Properties)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.txtKontenjan.Properties)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.txtAciklama.Properties)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.gridControl1)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.gridView1)).BeginInit();
             this.SuspendLayout();
             // 
             // txtBursAd
@@ -50,30 +50,9 @@
             this.txtBursAd.Size = new System.Drawing.Size(125, 22);
             this.txtBursAd.TabIndex = 0;
             // 
-            // txtMiktar
-            // 
-            this.txtMiktar.Location = new System.Drawing.Point(111, 127);
-            this.txtMiktar.Name = "txtMiktar";
-            this.txtMiktar.Size = new System.Drawing.Size(125, 22);
-            this.txtMiktar.TabIndex = 1;
-            // 
-            // txtKontenjan
-            // 
-            this.txtKontenjan.Location = new System.Drawing.Point(111, 170);
-            this.txtKontenjan.Name = "txtKontenjan";
-            this.txtKontenjan.Size = new System.Drawing.Size(125, 22);
-            this.txtKontenjan.TabIndex = 2;
-            // 
-            // txtAciklama
-            // 
-            this.txtAciklama.Location = new System.Drawing.Point(111, 216);
-            this.txtAciklama.Name = "txtAciklama";
-            this.txtAciklama.Size = new System.Drawing.Size(125, 22);
-            this.txtAciklama.TabIndex = 3;
-            // 
             // btnBursTanimla
             // 
-            this.btnBursTanimla.Location = new System.Drawing.Point(124, 264);
+            this.btnBursTanimla.Location = new System.Drawing.Point(250, 357);
             this.btnBursTanimla.Name = "btnBursTanimla";
             this.btnBursTanimla.Size = new System.Drawing.Size(94, 29);
             this.btnBursTanimla.TabIndex = 4;
@@ -94,26 +73,61 @@
             this.gridView1.GridControl = this.gridControl1;
             this.gridView1.Name = "gridView1";
             // 
+            // txtMiktar
+            // 
+            this.txtMiktar.EditValue = new decimal(new int[] {
+            0,
+            0,
+            0,
+            0});
+            this.txtMiktar.Location = new System.Drawing.Point(111, 121);
+            this.txtMiktar.Name = "txtMiktar";
+            this.txtMiktar.Properties.Buttons.AddRange(new DevExpress.XtraEditors.Controls.EditorButton[] {
+            new DevExpress.XtraEditors.Controls.EditorButton(DevExpress.XtraEditors.Controls.ButtonPredefines.Combo)});
+            this.txtMiktar.Size = new System.Drawing.Size(125, 24);
+            this.txtMiktar.TabIndex = 6;
+            // 
+            // txtKontenjan
+            // 
+            this.txtKontenjan.EditValue = new decimal(new int[] {
+            0,
+            0,
+            0,
+            0});
+            this.txtKontenjan.Location = new System.Drawing.Point(111, 170);
+            this.txtKontenjan.Name = "txtKontenjan";
+            this.txtKontenjan.Properties.Buttons.AddRange(new DevExpress.XtraEditors.Controls.EditorButton[] {
+            new DevExpress.XtraEditors.Controls.EditorButton(DevExpress.XtraEditors.Controls.ButtonPredefines.Combo)});
+            this.txtKontenjan.Size = new System.Drawing.Size(125, 24);
+            this.txtKontenjan.TabIndex = 7;
+            // 
+            // txtAciklama
+            // 
+            this.txtAciklama.Location = new System.Drawing.Point(111, 225);
+            this.txtAciklama.Name = "txtAciklama";
+            this.txtAciklama.Size = new System.Drawing.Size(100, 96);
+            this.txtAciklama.TabIndex = 8;
+            // 
             // FrmBurslar
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
-            this.Controls.Add(this.gridControl1);
-            this.Controls.Add(this.btnBursTanimla);
             this.Controls.Add(this.txtAciklama);
             this.Controls.Add(this.txtKontenjan);
             this.Controls.Add(this.txtMiktar);
+            this.Controls.Add(this.gridControl1);
+            this.Controls.Add(this.btnBursTanimla);
             this.Controls.Add(this.txtBursAd);
             this.Name = "FrmBurslar";
             this.Text = "FrmBurslar";
             this.Load += new System.EventHandler(this.FrmBurslar_Load);
             ((System.ComponentModel.ISupportInitialize)(this.txtBursAd.Properties)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.gridControl1)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.gridView1)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.txtMiktar.Properties)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.txtKontenjan.Properties)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.txtAciklama.Properties)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.gridControl1)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.gridView1)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -121,11 +135,11 @@
         #endregion
 
         private DevExpress.XtraEditors.TextEdit txtBursAd;
-        private DevExpress.XtraEditors.TextEdit txtMiktar;
-        private DevExpress.XtraEditors.TextEdit txtKontenjan;
-        private DevExpress.XtraEditors.TextEdit txtAciklama;
         private DevExpress.XtraEditors.SimpleButton btnBursTanimla;
         private DevExpress.XtraGrid.GridControl gridControl1;
         private DevExpress.XtraGrid.Views.Grid.GridView gridView1;
+        private DevExpress.XtraEditors.SpinEdit txtMiktar;
+        private DevExpress.XtraEditors.SpinEdit txtKontenjan;
+        private DevExpress.XtraEditors.MemoEdit txtAciklama;
     }
 }

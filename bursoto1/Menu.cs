@@ -19,6 +19,12 @@ namespace bursoto1
         public Menu()
         {
             InitializeComponent();
+
+            // 1. İSTEK: TAM EKRAN YERİNE PENCERELİ VE ORTADA AÇILSIN
+            this.WindowState = FormWindowState.Normal;
+            this.StartPosition = FormStartPosition.CenterScreen;
+            this.Size = new Size(1366, 768); // İdeal dashboard boyutu
+            this.FormBorderStyle = FormBorderStyle.Sizable; // Kenarlardan büyütüp küçültebilirsin
         }
         FrmOgrenciler fr1;
         private void btnOgrenciler_ItemClick(object sender, ItemClickEventArgs e)

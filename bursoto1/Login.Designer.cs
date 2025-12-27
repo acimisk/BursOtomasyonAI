@@ -52,6 +52,7 @@ namespace bursoto1
             this.txtKullaniciAdi.Name = "txtKullaniciAdi";
             this.txtKullaniciAdi.Size = new System.Drawing.Size(125, 22);
             this.txtKullaniciAdi.TabIndex = 0;
+            this.txtKullaniciAdi.EditValueChanged += new System.EventHandler(this.txtKullaniciAdi_EditValueChanged);
             // 
             // txtSifre
             // 
@@ -61,6 +62,7 @@ namespace bursoto1
             this.txtSifre.Properties.UseSystemPasswordChar = true;
             this.txtSifre.Size = new System.Drawing.Size(125, 22);
             this.txtSifre.TabIndex = 1;
+            this.txtSifre.EditValueChanged += new System.EventHandler(this.txtSifre_EditValueChanged);
             // 
             // labelKullaniciAdi
             // 
@@ -71,6 +73,7 @@ namespace bursoto1
             this.labelKullaniciAdi.Size = new System.Drawing.Size(126, 24);
             this.labelKullaniciAdi.TabIndex = 2;
             this.labelKullaniciAdi.Text = "Kullanıcı Adı";
+            this.labelKullaniciAdi.Click += new System.EventHandler(this.labelKullaniciAdi_Click);
             // 
             // labelSifre
             // 
@@ -81,6 +84,7 @@ namespace bursoto1
             this.labelSifre.Size = new System.Drawing.Size(48, 24);
             this.labelSifre.TabIndex = 3;
             this.labelSifre.Text = "Şifre";
+            this.labelSifre.Click += new System.EventHandler(this.labelSifre_Click);
             // 
             // btnGiris
             // 
@@ -126,7 +130,7 @@ namespace bursoto1
             this.btnCikis.PaintStyle = DevExpress.XtraEditors.Controls.PaintStyles.Light;
             this.btnCikis.Size = new System.Drawing.Size(55, 50);
             this.btnCikis.TabIndex = 0;
-            this.btnCikis.Click += new System.EventHandler(this.btnCikis_Click_1);
+            this.btnCikis.Click += new System.EventHandler(this.btnCikis_Click);
             // 
             // Login
             // 
@@ -152,7 +156,6 @@ namespace bursoto1
             this.Name = "Login";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Login Page";
-            this.Load += new System.EventHandler(this.Login_Load);
             ((System.ComponentModel.ISupportInitialize)(this.txtKullaniciAdi.Properties)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.txtSifre.Properties)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.svgKey)).EndInit();

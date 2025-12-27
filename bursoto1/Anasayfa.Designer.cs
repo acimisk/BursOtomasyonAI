@@ -28,55 +28,112 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.lblToplamBurs = new DevExpress.XtraEditors.LabelControl();
-            this.lblEnBasarili = new DevExpress.XtraEditors.LabelControl();
-            this.lblToplamOgrenci = new DevExpress.XtraEditors.LabelControl();
+            DevExpress.XtraEditors.TileItemElement tileItemElement1 = new DevExpress.XtraEditors.TileItemElement();
+            DevExpress.XtraEditors.TileItemElement tileItemElement2 = new DevExpress.XtraEditors.TileItemElement();
+            DevExpress.XtraEditors.TileItemElement tileItemElement3 = new DevExpress.XtraEditors.TileItemElement();
+            this.tileControl1 = new DevExpress.XtraEditors.TileControl();
+            this.tileGroup2 = new DevExpress.XtraEditors.TileGroup();
+            this.tileItemOgrenci = new DevExpress.XtraEditors.TileItem();
+            this.tileItemBurs = new DevExpress.XtraEditors.TileItem();
+            this.tileItemBasari = new DevExpress.XtraEditors.TileItem();
+            this.tileGroup1 = new DevExpress.XtraEditors.TileGroup();
+            this.tileGroup3 = new DevExpress.XtraEditors.TileGroup();
+            this.tileGroup4 = new DevExpress.XtraEditors.TileGroup();
+            this.tileGroup5 = new DevExpress.XtraEditors.TileGroup();
+            this.chartControl1 = new DevExpress.XtraCharts.ChartControl();
+            ((System.ComponentModel.ISupportInitialize)(this.chartControl1)).BeginInit();
             this.SuspendLayout();
             // 
-            // lblToplamBurs
+            // tileControl1
             // 
-            this.lblToplamBurs.Location = new System.Drawing.Point(140, 103);
-            this.lblToplamBurs.Name = "lblToplamBurs";
-            this.lblToplamBurs.Size = new System.Drawing.Size(100, 16);
-            this.lblToplamBurs.TabIndex = 0;
-            this.lblToplamBurs.Text = "lblToplamOgrenci";
+            this.tileControl1.Groups.Add(this.tileGroup2);
+            this.tileControl1.Location = new System.Drawing.Point(633, 27);
+            this.tileControl1.MaxId = 3;
+            this.tileControl1.Name = "tileControl1";
+            this.tileControl1.Size = new System.Drawing.Size(396, 507);
+            this.tileControl1.TabIndex = 3;
+            this.tileControl1.Text = "tileControl1";
             // 
-            // lblEnBasarili
+            // tileGroup2
             // 
-            this.lblEnBasarili.Location = new System.Drawing.Point(140, 151);
-            this.lblEnBasarili.Name = "lblEnBasarili";
-            this.lblEnBasarili.Size = new System.Drawing.Size(100, 16);
-            this.lblEnBasarili.TabIndex = 1;
-            this.lblEnBasarili.Text = "lblToplamOgrenci";
+            this.tileGroup2.Items.Add(this.tileItemOgrenci);
+            this.tileGroup2.Items.Add(this.tileItemBurs);
+            this.tileGroup2.Items.Add(this.tileItemBasari);
+            this.tileGroup2.Name = "tileGroup2";
             // 
-            // lblToplamOgrenci
+            // tileItemOgrenci
             // 
-            this.lblToplamOgrenci.Location = new System.Drawing.Point(140, 203);
-            this.lblToplamOgrenci.Name = "lblToplamOgrenci";
-            this.lblToplamOgrenci.Size = new System.Drawing.Size(100, 16);
-            this.lblToplamOgrenci.TabIndex = 2;
-            this.lblToplamOgrenci.Text = "lblToplamOgrenci";
+            tileItemElement1.Text = "tileItemogrenci";
+            this.tileItemOgrenci.Elements.Add(tileItemElement1);
+            this.tileItemOgrenci.Id = 0;
+            this.tileItemOgrenci.ItemSize = DevExpress.XtraEditors.TileItemSize.Medium;
+            this.tileItemOgrenci.Name = "tileItemOgrenci";
+            // 
+            // tileItemBurs
+            // 
+            tileItemElement2.Text = "tileItemBurs";
+            this.tileItemBurs.Elements.Add(tileItemElement2);
+            this.tileItemBurs.Id = 1;
+            this.tileItemBurs.ItemSize = DevExpress.XtraEditors.TileItemSize.Medium;
+            this.tileItemBurs.Name = "tileItemBurs";
+            // 
+            // tileItemBasari
+            // 
+            tileItemElement3.Text = "tileItem1";
+            this.tileItemBasari.Elements.Add(tileItemElement3);
+            this.tileItemBasari.Id = 2;
+            this.tileItemBasari.ItemSize = DevExpress.XtraEditors.TileItemSize.Medium;
+            this.tileItemBasari.Name = "tileItemBasari";
+            // 
+            // tileGroup1
+            // 
+            this.tileGroup1.Name = "tileGroup1";
+            // 
+            // tileGroup3
+            // 
+            this.tileGroup3.Name = "tileGroup3";
+            // 
+            // tileGroup4
+            // 
+            this.tileGroup4.Name = "tileGroup4";
+            // 
+            // tileGroup5
+            // 
+            this.tileGroup5.Name = "tileGroup5";
+            // 
+            // chartControl1
+            // 
+            this.chartControl1.Location = new System.Drawing.Point(27, 27);
+            this.chartControl1.Name = "chartControl1";
+            this.chartControl1.SeriesSerializable = new DevExpress.XtraCharts.Series[0];
+            this.chartControl1.Size = new System.Drawing.Size(592, 507);
+            this.chartControl1.TabIndex = 4;
             // 
             // Anasayfa
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(800, 450);
-            this.Controls.Add(this.lblToplamOgrenci);
-            this.Controls.Add(this.lblEnBasarili);
-            this.Controls.Add(this.lblToplamBurs);
+            this.ClientSize = new System.Drawing.Size(1041, 546);
+            this.Controls.Add(this.chartControl1);
+            this.Controls.Add(this.tileControl1);
             this.Name = "Anasayfa";
             this.Text = "Anasayfa";
             this.Load += new System.EventHandler(this.Anasayfa_Load);
+            ((System.ComponentModel.ISupportInitialize)(this.chartControl1)).EndInit();
             this.ResumeLayout(false);
-            this.PerformLayout();
 
         }
 
         #endregion
-
-        private DevExpress.XtraEditors.LabelControl lblToplamBurs;
-        private DevExpress.XtraEditors.LabelControl lblEnBasarili;
-        private DevExpress.XtraEditors.LabelControl lblToplamOgrenci;
+        private DevExpress.XtraEditors.TileControl tileControl1;
+        private DevExpress.XtraEditors.TileGroup tileGroup2;
+        private DevExpress.XtraEditors.TileItem tileItemOgrenci;
+        private DevExpress.XtraEditors.TileItem tileItemBurs;
+        private DevExpress.XtraEditors.TileGroup tileGroup1;
+        private DevExpress.XtraEditors.TileGroup tileGroup3;
+        private DevExpress.XtraEditors.TileGroup tileGroup4;
+        private DevExpress.XtraEditors.TileGroup tileGroup5;
+        private DevExpress.XtraEditors.TileItem tileItemBasari;
+        private DevExpress.XtraCharts.ChartControl chartControl1;
     }
 }

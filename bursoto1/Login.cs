@@ -7,26 +7,62 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using System.Data.Sql;
-using System.Data.SqlClient;
+using System.Data.SqlClient; // Sql kütüphanesi yeterli
+using DevExpress.XtraEditors; // XtraMessageBox kullanabilmek için
 
 namespace bursoto1
 {
     public partial class Login : Form
     {
-        public SqlConnection conn = new SqlConnection("Data Source=(localdb)\\MSSQLLocalDB; initial catalog=bursOtoDeneme1; Integrated Security=TRUE");
-
-
+        // Kanka bağlantı sınıfımızı çağırdık
+        public SqlBaglanti bgl = new SqlBaglanti();
 
         public Login()
         {
             InitializeComponent();
         }
 
-        private void Login_Load(object sender, EventArgs e)
+        private void btnCikis_Click(object sender, EventArgs e)
         {
-
+            Application.Exit();
         }
+
+        private void btnGiris_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                // 1. ADIM: Bağlantıyı alıp komutu hazırlıyoruz
+                // bgl.baglanti() zaten açık bağlantı döndürüyor
+                SqlConnection conn = bgl.baglanti();
+                SqlCommand cmd = new SqlCommand("SELECT * FROM login WHERE K_adi=@p1 AND Sifre=@p2", conn);
+                cmd.Parameters.AddWithValue("@p1", txtKullaniciAdi.Text);
+                cmd.Parameters.AddWithValue("@p2", txtSifre.Text);
+
+                SqlDataReader dr = cmd.ExecuteReader();
+
+                // 2. ADIM: Eğer kullanıcı varsa
+                if (dr.Read())
+                {
+                    // Giriş başarılıysa Ana Menü formunu açıyoruz
+                    Menu anaMenu = new Menu();
+                    anaMenu.Show();
+                    this.Hide(); // Login formunu gizle
+                }
+                else
+                {
+                    XtraMessageBox.Show("Kullanıcı adı veya şifre hatalı kanka!", "Hata", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+
+                // 3. ADIM: Kaynakları temizleyelim (Memory leak olmasın)
+                dr.Close();
+                conn.Close();
+            }
+            catch (Exception ex)
+            {
+                XtraMessageBox.Show("Bağlantı hatası kanka: " + ex.Message);
+            }
+        }
+
         private void svgPerson_Click(object sender, EventArgs e)
         {
 
@@ -37,54 +73,24 @@ namespace bursoto1
 
         }
 
-        private void btnCikis_Click(object sender, EventArgs e)
+        private void labelKullaniciAdi_Click(object sender, EventArgs e)
         {
 
         }
 
-        private void btnGiris_Click(object sender, EventArgs e)
-{
-    // 1. ÖNLEM: Bağlantı zaten açık mı diye kontrol et, kapalıysa aç.
-    if (conn.State == ConnectionState.Closed)
-    {
-        conn.Open();
-    }
-
-    string k_adi = txtKullaniciAdi.Text;
-    string sifre = txtSifre.Text;
-    bool kayitli_Mi = false;
-
-    SqlCommand cmd = new SqlCommand("Select * from login", conn);
-    SqlDataReader dr = cmd.ExecuteReader();
-
-    while (dr.Read()) 
-    {
-        if (k_adi == dr["K_adi"].ToString() && sifre == dr["Sifre"].ToString())
+        private void txtKullaniciAdi_EditValueChanged(object sender, EventArgs e)
         {
-            kayitli_Mi = true;
-            break;
+
         }
-    }
-    
-    // DataReader ile işimiz bitti, onu da kapatalım (önemli!)
-    dr.Close();
 
-            if (kayitli_Mi == true) {
-                Menu menu = new Menu();
-                MessageBox.Show("Giriş Başarılı");
-                menu.Show();
-                this.Hide();
-            } 
-            else
-                MessageBox.Show("Kullanıcı adı veya şifre hatalı!");
-
-    // 2. ÖNLEM: İşlem bitti, bağlantıyı kapat.
-    conn.Close(); 
-}
-
-        private void btnCikis_Click_1(object sender, EventArgs e)
+        private void txtSifre_EditValueChanged(object sender, EventArgs e)
         {
-            Application.Exit();
+
+        }
+
+        private void labelSifre_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }

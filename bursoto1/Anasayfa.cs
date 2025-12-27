@@ -1,53 +1,103 @@
-﻿using System;
+﻿using DevExpress.XtraEditors;
+using DevExpress.XtraCharts;
+using System;
 using System.Data;
 using System.Data.SqlClient;
+using System.Drawing;
 using System.Windows.Forms;
 
 namespace bursoto1
 {
     public partial class Anasayfa : Form
     {
+        // Kanka sınıfı çağırdık
+        SqlBaglanti bgl = new SqlBaglanti();
+
         public Anasayfa()
         {
             InitializeComponent();
         }
 
-        // Veritabanı bağlantısı (Senin bağlantı cümlen)
-        SqlConnection conn = new SqlConnection(@"Data Source=(localdb)\MSSQLLocalDB; initial catalog=bursOtoDeneme1; Integrated Security=TRUE");
+        private void Anasayfa_Load(object sender, EventArgs e)
+        {
+            DashboardVerileriniGetir();
+            BolumGrafiginiCiz();
+        }
 
-        void IstatistikleriGetir()
+        void DashboardVerileriniGetir()
         {
             try
             {
-                if (conn.State == ConnectionState.Closed) conn.Open();
+                // DÜZELTME: bgl.baglanti() metodunu çağırıyoruz
+                SqlConnection aktifBaglanti = bgl.baglanti();
 
-                // 1. Toplam Öğrenci Sayısı
-                SqlCommand komut1 = new SqlCommand("SELECT COUNT(*) FROM Ogrenciler", conn);
-                lblToplamOgrenci.Text = komut1.ExecuteScalar().ToString() + " Kayıtlı Öğrenci";
+                // 1. Tile: Toplam Öğrenci
+                SqlCommand cmd1 = new SqlCommand("SELECT COUNT(*) FROM Ogrenciler", aktifBaglanti);
+                string ogrSayisi = cmd1.ExecuteScalar().ToString();
 
-                // 2. Toplam Burs Yükü (Hane gelirleri üzerinden bir hesaplama örneği)
-                SqlCommand komut2 = new SqlCommand("SELECT SUM([TOPLAM HANE GELİRİ]) FROM Ogrenciler", conn);
-                var sonucBurs = komut2.ExecuteScalar();
-                lblToplamBurs.Text = (sonucBurs != DBNull.Value) ? string.Format("{0:C2}", sonucBurs) : "0,00 TL";
+                tileItemOgrenci.Text = "Toplam Öğrenci";
+                tileItemOgrenci.Elements[0].Text = ogrSayisi;
+                tileItemOgrenci.AppearanceItem.Normal.BackColor = Color.FromArgb(41, 128, 185);
 
-                // 3. AGNO'su en yüksek olan öğrenciyi getir
-                SqlCommand komut3 = new SqlCommand("SELECT TOP 1 (AD + ' ' + SOYAD) FROM Ogrenciler ORDER BY AGNO DESC", conn);
-                var sonucBasari = komut3.ExecuteScalar();
-                lblEnBasarili.Text = (sonucBasari != null) ? sonucBasari.ToString() : "Veri Yok";
+                // 2. Tile: Toplam Burs Yükü
+                SqlCommand cmd2 = new SqlCommand("SELECT SUM([TOPLAM HANE GELİRİ]) FROM Ogrenciler", aktifBaglanti);
+                object sonucBurs = cmd2.ExecuteScalar();
+                string bursMiktari = (sonucBurs != DBNull.Value) ? string.Format("{0:C0}", sonucBurs) : "0 ₺";
 
-                conn.Close();
+                tileItemBurs.Text = "Toplam Burs Hacmi";
+                tileItemBurs.Elements[0].Text = bursMiktari;
+                tileItemBurs.AppearanceItem.Normal.BackColor = Color.FromArgb(39, 174, 96);
+
+                // 3. Tile: En Başarılı Öğrenci
+                SqlCommand cmd3 = new SqlCommand("SELECT TOP 1 AD + ' ' + SOYAD FROM Ogrenciler ORDER BY AGNO DESC", aktifBaglanti);
+                object kralOgrenci = cmd3.ExecuteScalar();
+
+                tileItemBasari.Text = "Okul Birincisi";
+                tileItemBasari.Elements[0].Text = (kralOgrenci != null) ? kralOgrenci.ToString() : "-";
+                tileItemBasari.AppearanceItem.Normal.BackColor = Color.FromArgb(142, 68, 173);
+
+                // İşlem bitince kapatıyoruz
+                aktifBaglanti.Close();
             }
             catch (Exception ex)
             {
-                if (conn.State == ConnectionState.Open) conn.Close();
-                MessageBox.Show("İstatistik hatası kanka: " + ex.Message);
+                XtraMessageBox.Show("Dashboard yüklenirken hata kanka: " + ex.Message);
             }
         }
 
-        private void Anasayfa_Load(object sender, EventArgs e)
+        void BolumGrafiginiCiz()
         {
-            // Form açıldığında sayıları hemen güncelle
-            IstatistikleriGetir();
+            try
+            {
+                SqlConnection aktifBaglanti = bgl.baglanti();
+
+                SqlDataAdapter da = new SqlDataAdapter("SELECT BÖLÜMÜ, COUNT(*) as Sayi FROM Ogrenciler WHERE BÖLÜMÜ IS NOT NULL GROUP BY BÖLÜMÜ", aktifBaglanti);
+                DataTable dt = new DataTable();
+                da.Fill(dt);
+
+                if (dt.Rows.Count == 0) return;
+
+                chartControl1.Series.Clear();
+                Series seri = new Series("Öğrenci Dağılımı", ViewType.Pie);
+
+                foreach (DataRow dr in dt.Rows)
+                {
+                    string bolum = dr["BÖLÜMÜ"].ToString();
+                    if (string.IsNullOrEmpty(bolum)) bolum = "Belirtilmemiş";
+                    double adet = Convert.ToDouble(dr["Sayi"]);
+                    seri.Points.Add(new SeriesPoint(bolum, adet));
+                }
+
+                chartControl1.Series.Add(seri);
+                seri.Label.TextPattern = "{A}: {V}";
+                seri.LabelsVisibility = DevExpress.Utils.DefaultBoolean.True;
+
+                aktifBaglanti.Close();
+            }
+            catch (Exception ex)
+            {
+                XtraMessageBox.Show("Grafik Çizim Hatası kanka: " + ex.Message);
+            }
         }
     }
 }

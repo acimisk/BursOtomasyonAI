@@ -16,6 +16,11 @@ namespace bursoto1
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
+
+            // Modern bir görünüm için:
+            DevExpress.UserSkins.BonusSkins.Register();
+            DevExpress.LookAndFeel.UserLookAndFeel.Default.SetSkinStyle("Office 2019 Colorful"); // Veya "The Bezier"
+
             Application.Run(new Menu());
         }
     }
