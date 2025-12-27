@@ -156,6 +156,7 @@ namespace bursoto1
             this.Name = "Login";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Login Page";
+            this.Load += new System.EventHandler(this.Login_Load);
             ((System.ComponentModel.ISupportInitialize)(this.txtKullaniciAdi.Properties)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.txtSifre.Properties)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.svgKey)).EndInit();

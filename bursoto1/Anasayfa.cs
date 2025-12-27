@@ -28,59 +28,88 @@ namespace bursoto1
         {
             try
             {
-                // DÜZELTME: bgl.baglanti() metodunu çağırıyoruz
+                // Bağlantıyı alıyoruz
                 SqlConnection aktifBaglanti = bgl.baglanti();
 
-                // 1. Tile: Toplam Öğrenci
+                // --- 1. VERİLERİ SQL'DEN ÇEKME ---
+
+                // Toplam Öğrenci Sayısı
                 SqlCommand cmd1 = new SqlCommand("SELECT COUNT(*) FROM Ogrenciler", aktifBaglanti);
-                string ogrSayisi = cmd1.ExecuteScalar().ToString();
+                string toplamOgr = cmd1.ExecuteScalar().ToString();
 
-                tileItemOgrenci.Text = "Toplam Öğrenci";
-                tileItemOgrenci.Elements[0].Text = ogrSayisi;
-                tileItemOgrenci.AppearanceItem.Normal.BackColor = Color.FromArgb(41, 128, 185);
-
-                // 2. Tile: Toplam Burs Yükü
+                // Toplam Burs Yükü (TL)
                 SqlCommand cmd2 = new SqlCommand("SELECT SUM([TOPLAM HANE GELİRİ]) FROM Ogrenciler", aktifBaglanti);
                 object sonucBurs = cmd2.ExecuteScalar();
                 string bursMiktari = (sonucBurs != DBNull.Value) ? string.Format("{0:C0}", sonucBurs) : "0 ₺";
 
-                tileItemBurs.Text = "Toplam Burs Hacmi";
-                tileItemBurs.Elements[0].Text = bursMiktari;
-                tileItemBurs.AppearanceItem.Normal.BackColor = Color.FromArgb(39, 174, 96);
+                // Burs Verilen Öğrenci Sayısı (Puanı olanlar burs almış kabul edilsin)
+                SqlCommand cmd3 = new SqlCommand("SELECT COUNT(*) FROM Ogrenciler WHERE AISkor IS NOT NULL", aktifBaglanti);
+                string bursluOgr = cmd3.ExecuteScalar().ToString();
 
-                // 3. Tile: En Başarılı Öğrenci
-                SqlCommand cmd3 = new SqlCommand("SELECT TOP 1 AD + ' ' + SOYAD FROM Ogrenciler ORDER BY AGNO DESC", aktifBaglanti);
-                object kralOgrenci = cmd3.ExecuteScalar();
+                // En Başarılı Öğrenci ve AGNO
+                SqlCommand cmd4 = new SqlCommand("SELECT TOP 1 AD + ' ' + SOYAD, AGNO FROM Ogrenciler ORDER BY AGNO DESC", aktifBaglanti);
+                SqlDataReader dr = cmd4.ExecuteReader();
 
-                tileItemBasari.Text = "Okul Birincisi";
-                tileItemBasari.Elements[0].Text = (kralOgrenci != null) ? kralOgrenci.ToString() : "-";
-                tileItemBasari.AppearanceItem.Normal.BackColor = Color.FromArgb(142, 68, 173);
+                string kralOgrenci = "-";
+                decimal maxAgno = 0;
 
-                // En yüksek AGNO'yu çekelim
-                SqlCommand cmdAgno = new SqlCommand("SELECT MAX(AGNO) FROM Ogrenciler", bgl.baglanti());
-                object maxAgnoObj = cmdAgno.ExecuteScalar();
-
-                if (maxAgnoObj != DBNull.Value && maxAgnoObj != null)
+                if (dr.Read())
                 {
-                    decimal maxAgno = Convert.ToDecimal(maxAgnoObj);
+                    kralOgrenci = dr[0].ToString();
+                    maxAgno = Convert.ToDecimal(dr[1]);
+                }
+                dr.Close();
 
-                    // Eğer ortalama 3.80 üzerindeyse kutu altın rengi (Gold) olsun
-                    if (maxAgno >= 3.80m)
-                    {
-                        tileItemBasari.AppearanceItem.Normal.BackColor = Color.Gold;
-                        tileItemBasari.AppearanceItem.Normal.ForeColor = Color.Black; // Yazı siyah olsun ki okunsun
-                        tileItemBasari.Elements[0].Text = "★ " + tileItemBasari.Elements[0].Text + " (Üstün Başarı)";
-                    }
+                // --- 2. TILE ELEMENTLERİNİ GÜZELLEŞTİRME ---
+
+                // Ortak Element Ayarlayıcı Metot (Aşağıda tanımladık)
+                TileAyarla(tileItemOgrenci, "TOPLAM ÖĞRENCİ", toplamOgr, Color.FromArgb(41, 128, 185));
+                TileAyarla(tileItemBurs, "TOPLAM BURS HACMİ", bursMiktari, Color.FromArgb(39, 174, 96));
+
+                // Yeni İstediğin: Burslu Sayısı
+                // Eğer tasarımda 4. bir Tile eklediysen adını 'tileItemBursluSayisi' yapabilirsin
+                // Şimdilik bunu mevcut bir Tile'ın altına küçük yazı olarak da ekleyebiliriz.
+
+                // Başarı Kutusu Özel Ayarı (Gold Efekti)
+                if (maxAgno >= 3.80m)
+                {
+                    TileAyarla(tileItemBasari, "★ OKUL BİRİNCİSİ", kralOgrenci + " (" + maxAgno + ")", Color.Gold);
+                    tileItemBasari.AppearanceItem.Normal.ForeColor = Color.Black;
+                }
+                else
+                {
+                    TileAyarla(tileItemBasari, "LİDER ÖĞRENCİ", kralOgrenci, Color.FromArgb(142, 68, 173));
                 }
 
-
-                // İşlem bitince kapatıyoruz
                 aktifBaglanti.Close();
             }
             catch (Exception ex)
             {
-                XtraMessageBox.Show("Dashboard yüklenirken hata kanka: " + ex.Message);
+                XtraMessageBox.Show("Dashboard verileri çekilirken bir hata oluştu: " + ex.Message, "Hata", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
+        }
+
+        // Kanka kod tekrarını engellemek için bu yardımcı metodu da sınıfın içine ekle:
+        void TileAyarla(DevExpress.XtraEditors.TileItem item, string baslik, string deger, Color renk)
+        {
+            item.Elements.Clear();
+            item.AppearanceItem.Normal.BackColor = renk;
+            item.AppearanceItem.Normal.BorderColor = renk;
+
+            // Başlık Elementi
+            TileItemElement elBaslik = new TileItemElement();
+            elBaslik.Text = baslik;
+            elBaslik.TextAlignment = TileItemContentAlignment.TopLeft;
+            elBaslik.Appearance.Normal.FontSizeDelta = -1; // Biraz küçük olsun
+
+            // Değer Elementi
+            TileItemElement elDeger = new TileItemElement();
+            elDeger.Text = deger;
+            elDeger.TextAlignment = TileItemContentAlignment.MiddleCenter;
+            elDeger.Appearance.Normal.Font = new Font("Segoe UI", 12, FontStyle.Bold);
+
+            item.Elements.Add(elBaslik);
+            item.Elements.Add(elDeger);
         }
 
         void BolumGrafiginiCiz()
@@ -116,6 +145,11 @@ namespace bursoto1
             {
                 XtraMessageBox.Show("Grafik Çizim Hatası kanka: " + ex.Message);
             }
+        }
+
+        private void tileItemBurs_ItemClick(object sender, TileItemEventArgs e)
+        {
+
         }
     }
 }

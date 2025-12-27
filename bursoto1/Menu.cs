@@ -51,8 +51,8 @@ namespace bursoto1
             }
             
         }
-        
-        SqlConnection baglanti = new SqlConnection(@"Data Source=(localdb)\MSSQLLocalDB; initial catalog=bursOtoDeneme1; Integrated Security=TRUE");
+
+        public SqlBaglanti bgl = new SqlBaglanti();
         private void btnEkle_ItemClick(object sender, ItemClickEventArgs e)
         {
             // 1. Önce FrmOgrenciler açık mı kontrol etmeliyiz
@@ -60,12 +60,12 @@ namespace bursoto1
             {
                 try
                 {
-                    if (baglanti.State == ConnectionState.Closed) baglanti.Open();
+                    if (bgl.baglanti().State == ConnectionState.Closed) bgl.baglanti();
 
                     string sorgu = "INSERT INTO Ogrenciler (AD, SOYAD, [KARDEŞ SAYISI], [TOPLAM HANE GELİRİ], BÖLÜMÜ, SINIF, AGNO, FOTO, TELEFON) " +
                                    "VALUES (@p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8, @p9)";
 
-                    using (SqlCommand komut = new SqlCommand(sorgu, baglanti))
+                    using (SqlCommand komut = new SqlCommand(sorgu, bgl.baglanti()))
                     {
                         // Parametreleri eklerken boş kalma ihtimaline karşı kontroller ekliyoruz
                         komut.Parameters.AddWithValue("@p1", fr1.txtOgrAd.Text ?? "");
@@ -94,14 +94,14 @@ namespace bursoto1
                         komut.ExecuteNonQuery();
                     }
 
-                    baglanti.Close();
+                    bgl.baglanti().Close();
 
                     XtraMessageBox.Show("Öğrenci başarıyla kaydedildi.", "Bilgi", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     fr1.Listele();
                 }
                 catch (Exception ex)
                 {
-                    if (baglanti.State == ConnectionState.Open) baglanti.Close();
+                    if (conn.State == ConnectionState.Open) conn.Close();
                     XtraMessageBox.Show("Hata oluştu kanka: " + ex.Message, "Hata", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
@@ -138,36 +138,32 @@ namespace bursoto1
         SqlConnection conn = new SqlConnection(@"Data Source=(localdb)\MSSQLLocalDB; initial catalog=bursOtoDeneme1; Integrated Security=TRUE");
         private void btnSil_ItemClick(object sender, ItemClickEventArgs e)
         {
-            // 1. GridView'dan seçili olan satırın ID'sini alıyoruz
-            var secilenID = fr1.gridView1.GetFocusedRowCellValue("ID");
+            // 1. GridView'dan seçili olan tüm satırların Handle numaralarını al
+            int[] seciliSatirlar = fr1.gridView1.GetSelectedRows();
 
-            if (secilenID != null)
+            if (seciliSatirlar.Length > 0)
             {
-                DialogResult onay = MessageBox.Show("Bu öğrenci kaydını silmek istediğinize emin misiniz?", "Kayıt Silme", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                DialogResult onay = XtraMessageBox.Show($"{seciliSatirlar.Length} adet öğrenciyi silmek istediğinize emin misiniz?", "Toplu Silme", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
 
                 if (onay == DialogResult.Yes)
                 {
                     try
                     {
-                        if (conn.State == ConnectionState.Closed) conn.Open();
-                        SqlCommand cmd = new SqlCommand("DELETE FROM Ogrenciler WHERE ID=@p1", conn);
-                        cmd.Parameters.AddWithValue("@p1", secilenID);
-                        cmd.ExecuteNonQuery();
+                        SqlConnection conn = bgl.baglanti();
+                        foreach (int satirHandle in seciliSatirlar)
+                        {
+                            // Her bir satırın ID değerini alıyoruz
+                            var id = fr1.gridView1.GetRowCellValue(satirHandle, "ID");
+                            SqlCommand cmd = new SqlCommand("DELETE FROM Ogrenciler WHERE ID=@p1", conn);
+                            cmd.Parameters.AddWithValue("@p1", id);
+                            cmd.ExecuteNonQuery();
+                        }
                         conn.Close();
-
-                        MessageBox.Show("Öğrenci başarıyla silindi.", "Bilgi", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                        fr1.Listele(); // Listeyi yenile ki silinen veri gitsin
+                        XtraMessageBox.Show("Seçili öğrenciler silindi kanka.", "Bilgi");
+                        fr1.Listele();
                     }
-                    catch (Exception ex)
-                    {
-                        if (conn.State == ConnectionState.Open) conn.Close();
-                        MessageBox.Show("Hata oluştu: " + ex.Message);
-                    }
+                    catch (Exception ex) { XtraMessageBox.Show("Hata: " + ex.Message); }
                 }
-            }
-            else
-            {
-                MessageBox.Show("Lütfen silmek istediğiniz öğrenciyi seçin!", "Uyarı", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
         }
         Anasayfa frAna;

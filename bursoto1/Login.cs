@@ -92,5 +92,10 @@ namespace bursoto1
         {
 
         }
+
+        private void Login_Load(object sender, EventArgs e)
+        {
+
+        }
     }
 }
