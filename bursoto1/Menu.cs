@@ -1,91 +1,138 @@
-﻿using System;
+﻿using DevExpress.XtraBars;
+using DevExpress.XtraEditors;
+using System;
+using System.Drawing;
 using System.Windows.Forms;
-using DevExpress.XtraBars;
+using System.Data.SqlClient;
 
 namespace bursoto1
 {
     public partial class Menu : DevExpress.XtraBars.Ribbon.RibbonForm
     {
+        // Form referansları
+        FrmOgrenciler fr1;
+        FrmBurslar frBurs;
+        FrmBursVerenler frBagis;
+        Ara frAra;
+        Anasayfa frAna;
+
         public Menu()
         {
             InitializeComponent();
-            // Form ayarları
+
+            // Form açılış ayarları (Ortada ve boyutlandırılabilir)
             this.WindowState = FormWindowState.Normal;
             this.StartPosition = FormStartPosition.CenterScreen;
-            this.Size = new System.Drawing.Size(1300, 800);
+            this.Size = new Size(1300, 750);
+            this.FormBorderStyle = FormBorderStyle.Sizable;
         }
 
-        // GENERIC FORM AÇMA METODU (DRY Prensibi)
-        private void FormGetir<T>() where T : Form, new()
+        // --- SAYFA AÇMA YÖNETİMİ (GENERIC METOT - DRY) ---
+        // Bu metot, form açıksa öne getirir, kapalıysa veya yoksa yenisini oluşturur.
+        private void FormGetir<T>(ref T formField) where T : Form, new()
         {
-            foreach (Form form in this.MdiChildren)
+            if (formField == null || formField.IsDisposed)
             {
-                if (form is T)
-                {
-                    form.Activate();
-                    return;
-                }
+                formField = new T();
+                formField.MdiParent = this;
+                formField.Show();
             }
-            T yeniForm = new T();
-            yeniForm.MdiParent = this;
-            yeniForm.Show();
+            else
+            {
+                formField.Activate();
+            }
         }
 
-        // --- BUTON YÖNLENDİRMELERİ ---
+        // --- MENÜ BUTONLARI ---
 
         private void btnAnasayfa_ItemClick(object sender, ItemClickEventArgs e)
         {
-            FormGetir<Anasayfa>();
+            FormGetir(ref frAna);
         }
 
-        private void btnOgrenciListesi_ItemClick(object sender, ItemClickEventArgs e)
+        private void btnOgrenciler_ItemClick(object sender, ItemClickEventArgs e)
         {
-            FormGetir<FrmOgrenciler>();
-        }
-
-        // Hata veren btnOgrenciler aslında Listeyi açmalı
-        public void btnOgrenciler_ItemClick(object sender, ItemClickEventArgs e)
-        {
-            FormGetir<FrmOgrenciler>();
+            FormGetir(ref fr1);
         }
 
         private void btnBurslar_ItemClick(object sender, ItemClickEventArgs e)
         {
-            FormGetir<FrmBurslar>();
+            FormGetir(ref frBurs);
         }
 
-        // Hata veren BursTurleri aslında Bursları açmalı
-        public void btnBursTurleri_ItemClick(object sender, ItemClickEventArgs e)
-        {
-            FormGetir<FrmBurslar>();
-        }
-
-        // Bağışçılar butonu
         private void btnBagiscilar_ItemClick(object sender, ItemClickEventArgs e)
         {
-            FormGetir<FrmBursVerenler>();
+            FormGetir(ref frBagis);
         }
 
-        // Ara butonu (Ara formunu açar)
         public void btnAra_ItemClick(object sender, ItemClickEventArgs e)
         {
-            FormGetir<Ara>();
+            FormGetir(ref frAra);
         }
 
-        // --- BOŞ OLMASI GEREKEN METODLAR (Hata Vermesin Diye Ekledik) ---
-        // Bu butonlar muhtemelen eski tasarımdan kaldı veya işlevsiz.
-        // Hata vermemesi için içlerini boş bıraktık.
+        // --- İŞLEM BUTONLARI (EKLE / SİL - AKILLI YÖNETİM) ---
 
-        public void btnEkle_ItemClick(object sender, ItemClickEventArgs e) { }
-        public void btnSil_ItemClick(object sender, ItemClickEventArgs e) { }
-        public void btnTopluAnaliz_ItemClick(object sender, ItemClickEventArgs e) { }
-        public void ribbon_Click(object sender, EventArgs e) { }
-        public void Menu_Load(object sender, EventArgs e) { }
-
-        // Form kapanırken uygulamayı tamamen kapat
-        public void Menu_FormClosing(object sender, FormClosingEventArgs e)
+        private void btnEkle_ItemClick(object sender, ItemClickEventArgs e)
         {
-            Application.Exit();
+            // O an açık olan ve odaklanılmış formu buluyoruz
+            Form aktifForm = this.ActiveMdiChild;
+
+            if (aktifForm is FrmOgrenciler ogrenciForm)
+            {
+                // FrmOgrenciler içindeki Public metoda erişim
+                ogrenciForm.btnKaydet_Click(null, null);
+            }
+            else
+            {
+                // Kullanıcıya kolaylık: Sayfa açık değilse açıp uyarı veriyoruz
+                XtraMessageBox.Show("Ekleme işlemi için önce 'Öğrenci Listesi' sayfasını açmalısınız.", "Bilgi", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                btnOgrenciler_ItemClick(null, null);
+            }
         }
+
+        private void btnSil_ItemClick(object sender, ItemClickEventArgs e)
+        {
+            Form aktifForm = this.ActiveMdiChild;
+
+            if (aktifForm is FrmOgrenciler ogrenciForm)
+            {
+                ogrenciForm.btnSil_Click(null, null);
+            }
+            else if (aktifForm is FrmBursVerenler)
+            {
+                XtraMessageBox.Show("Bağışçılar listesinde satıra sağ tıklayarak silme işlemi yapabilirsiniz.", "Bilgi", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            else
+            {
+                XtraMessageBox.Show("Silme işlemi için geçerli bir liste sayfası (Öğrenciler vb.) açık olmalıdır.", "Uyarı", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+        }
+
+        // --- UYGULAMA OLAYLARI ---
+
+        private void Menu_Load(object sender, EventArgs e)
+        {
+            // Uygulama başladığında Anasayfa otomatik gelsin
+            btnAnasayfa_ItemClick(null, null);
+        }
+
+        private void Menu_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            DialogResult secim = XtraMessageBox.Show("Uygulamadan çıkmak istediğinize emin misiniz?", "Çıkış Onayı", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+
+            if (secim == DialogResult.No)
+            {
+                e.Cancel = true;
+            }
+            else
+            {
+                Application.ExitThread();
+            }
+        }
+
+        // Tasarımcı hatası almamak için boş bırakılan eventler
+        public void ribbon_Click(object sender, EventArgs e) { }
+        public void btnBursTurleri_ItemClick(object sender, ItemClickEventArgs e) { btnBurslar_ItemClick(sender, e); }
+        public void btnTopluAnaliz_ItemClick(object sender, ItemClickEventArgs e) { }
     }
 }

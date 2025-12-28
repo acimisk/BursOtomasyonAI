@@ -38,12 +38,11 @@
             this.btnAnasayfa = new DevExpress.XtraBars.BarButtonItem();
             this.btnAra = new DevExpress.XtraBars.BarButtonItem();
             this.btnBursTurleri = new DevExpress.XtraBars.BarButtonItem();
-            this.btnTopluAnaliz = new DevExpress.XtraBars.BarButtonItem();
+            this.btnBagiscilar = new DevExpress.XtraBars.BarButtonItem();
             this.ribbonPage1 = new DevExpress.XtraBars.Ribbon.RibbonPage();
             this.ribbonPageGroup1 = new DevExpress.XtraBars.Ribbon.RibbonPageGroup();
             this.repositoryItemTextEdit1 = new DevExpress.XtraEditors.Repository.RepositoryItemTextEdit();
             this.xtraTabbedMdiManager1 = new DevExpress.XtraTabbedMdi.XtraTabbedMdiManager(this.components);
-            this.btnBagiscilar = new DevExpress.XtraBars.BarButtonItem();
             ((System.ComponentModel.ISupportInitialize)(this.ribbon)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.repositoryItemTextEdit1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.xtraTabbedMdiManager1)).BeginInit();
@@ -52,7 +51,7 @@
             // ribbonStatusBar
             // 
             this.ribbonStatusBar.Location = new System.Drawing.Point(0, 488);
-            this.ribbonStatusBar.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.ribbonStatusBar.Margin = new System.Windows.Forms.Padding(5);
             this.ribbonStatusBar.Name = "ribbonStatusBar";
             this.ribbonStatusBar.Ribbon = this.ribbon;
             this.ribbonStatusBar.Size = new System.Drawing.Size(975, 30);
@@ -69,11 +68,10 @@
             this.btnAnasayfa,
             this.btnAra,
             this.btnBursTurleri,
-            this.btnTopluAnaliz,
             this.btnBagiscilar});
             this.ribbon.Location = new System.Drawing.Point(0, 0);
-            this.ribbon.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
-            this.ribbon.MaxItemId = 12;
+            this.ribbon.Margin = new System.Windows.Forms.Padding(5);
+            this.ribbon.MaxItemId = 13;
             this.ribbon.Name = "ribbon";
             this.ribbon.OptionsMenuMinWidth = 515;
             this.ribbon.Pages.AddRange(new DevExpress.XtraBars.Ribbon.RibbonPage[] {
@@ -137,14 +135,14 @@
             this.btnBursTurleri.Name = "btnBursTurleri";
             this.btnBursTurleri.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnBursTurleri_ItemClick);
             // 
-            // btnTopluAnaliz
+            // btnBagiscilar
             // 
-            this.btnTopluAnaliz.Caption = "Toplu AI Analizi";
-            this.btnTopluAnaliz.Id = 10;
-            this.btnTopluAnaliz.ImageOptions.Image = ((System.Drawing.Image)(resources.GetObject("btnTopluAnaliz.ImageOptions.Image")));
-            this.btnTopluAnaliz.ImageOptions.LargeImage = ((System.Drawing.Image)(resources.GetObject("btnTopluAnaliz.ImageOptions.LargeImage")));
-            this.btnTopluAnaliz.Name = "btnTopluAnaliz";
-            this.btnTopluAnaliz.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnTopluAnaliz_ItemClick);
+            this.btnBagiscilar.Caption = "Bağışçılar";
+            this.btnBagiscilar.Id = 11;
+            this.btnBagiscilar.ImageOptions.Image = ((System.Drawing.Image)(resources.GetObject("btnBagiscilar.ImageOptions.Image")));
+            this.btnBagiscilar.ImageOptions.LargeImage = ((System.Drawing.Image)(resources.GetObject("btnBagiscilar.ImageOptions.LargeImage")));
+            this.btnBagiscilar.Name = "btnBagiscilar";
+            this.btnBagiscilar.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnBagiscilar_ItemClick);
             // 
             // ribbonPage1
             // 
@@ -161,7 +159,6 @@
             this.ribbonPageGroup1.ItemLinks.Add(this.btnSil);
             this.ribbonPageGroup1.ItemLinks.Add(this.btnAra);
             this.ribbonPageGroup1.ItemLinks.Add(this.btnBursTurleri);
-            this.ribbonPageGroup1.ItemLinks.Add(this.btnTopluAnaliz);
             this.ribbonPageGroup1.ItemLinks.Add(this.btnBagiscilar);
             this.ribbonPageGroup1.Name = "ribbonPageGroup1";
             // 
@@ -173,15 +170,6 @@
             // xtraTabbedMdiManager1
             // 
             this.xtraTabbedMdiManager1.MdiParent = this;
-            // 
-            // btnBagiscilar
-            // 
-            this.btnBagiscilar.Caption = "Bağışçılar";
-            this.btnBagiscilar.Id = 11;
-            this.btnBagiscilar.ImageOptions.Image = ((System.Drawing.Image)(resources.GetObject("barButtonItem1.ImageOptions.Image")));
-            this.btnBagiscilar.ImageOptions.LargeImage = ((System.Drawing.Image)(resources.GetObject("barButtonItem1.ImageOptions.LargeImage")));
-            this.btnBagiscilar.Name = "btnBagiscilar";
-            this.btnBagiscilar.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnBagiscilar_ItemClick);
             // 
             // Menu
             // 
@@ -220,7 +208,6 @@
         private DevExpress.XtraEditors.Repository.RepositoryItemTextEdit repositoryItemTextEdit1;
         private DevExpress.XtraBars.BarButtonItem btnAra;
         private DevExpress.XtraBars.BarButtonItem btnBursTurleri;
-        private DevExpress.XtraBars.BarButtonItem btnTopluAnaliz;
         private DevExpress.XtraBars.BarButtonItem btnBagiscilar;
     }
 }

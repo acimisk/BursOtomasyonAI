@@ -37,24 +37,24 @@ namespace bursoto1
             this.btnGoster = new DevExpress.XtraEditors.SimpleButton();
             this.sqlDataSource1 = new DevExpress.DataAccess.Sql.SqlDataSource(this.components);
             this.groupControl1 = new DevExpress.XtraEditors.GroupControl();
+            this.txtSinif = new System.Windows.Forms.ComboBox();
+            this.txtOgrKardesSayisi = new System.Windows.Forms.ComboBox();
+            this.txtBolum = new System.Windows.Forms.ComboBox();
             this.txtAgno = new DevExpress.XtraEditors.TextEdit();
             this.labelAgno = new DevExpress.XtraEditors.LabelControl();
             this.txtTelNo = new DevExpress.XtraEditors.TextEdit();
             this.labelNumara = new DevExpress.XtraEditors.LabelControl();
             this.btnResimSec = new DevExpress.XtraEditors.SimpleButton();
             this.pictureResim = new DevExpress.XtraEditors.PictureEdit();
-            this.txtBolum = new DevExpress.XtraEditors.TextEdit();
             this.labelBolum = new DevExpress.XtraEditors.LabelControl();
             this.labelSinif = new DevExpress.XtraEditors.LabelControl();
             this.labelGelir = new DevExpress.XtraEditors.LabelControl();
             this.labelKardes = new DevExpress.XtraEditors.LabelControl();
             this.labelSoyad = new DevExpress.XtraEditors.LabelControl();
             this.labelAd = new DevExpress.XtraEditors.LabelControl();
-            this.txtHaneGeliri = new DevExpress.XtraEditors.TextEdit();
-            this.txtOgrSoyad = new DevExpress.XtraEditors.TextEdit();
-            this.txtOgrAd = new DevExpress.XtraEditors.TextEdit();
-            this.txtOgrKardesSayisi = new DevExpress.XtraEditors.ComboBoxEdit();
-            this.txtSinif = new DevExpress.XtraEditors.ComboBoxEdit();
+            this.txtOgrAd = new System.Windows.Forms.TextBox();
+            this.txtOgrSoyad = new System.Windows.Forms.TextBox();
+            this.txtHaneGeliri = new System.Windows.Forms.TextBox();
             ((System.ComponentModel.ISupportInitialize)(this.gridControl1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridView1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.groupControl1)).BeginInit();
@@ -62,12 +62,6 @@ namespace bursoto1
             ((System.ComponentModel.ISupportInitialize)(this.txtAgno.Properties)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.txtTelNo.Properties)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureResim.Properties)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.txtBolum.Properties)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.txtHaneGeliri.Properties)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.txtOgrSoyad.Properties)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.txtOgrAd.Properties)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.txtOgrKardesSayisi.Properties)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.txtSinif.Properties)).BeginInit();
             this.SuspendLayout();
             // 
             // gridControl1
@@ -112,35 +106,77 @@ namespace bursoto1
             // 
             // groupControl1
             // 
+            this.groupControl1.Controls.Add(this.txtHaneGeliri);
+            this.groupControl1.Controls.Add(this.txtOgrSoyad);
+            this.groupControl1.Controls.Add(this.txtOgrAd);
+            this.groupControl1.Controls.Add(this.txtSinif);
+            this.groupControl1.Controls.Add(this.txtOgrKardesSayisi);
+            this.groupControl1.Controls.Add(this.txtBolum);
             this.groupControl1.Controls.Add(this.txtAgno);
             this.groupControl1.Controls.Add(this.labelAgno);
             this.groupControl1.Controls.Add(this.txtTelNo);
             this.groupControl1.Controls.Add(this.labelNumara);
             this.groupControl1.Controls.Add(this.btnResimSec);
             this.groupControl1.Controls.Add(this.pictureResim);
-            this.groupControl1.Controls.Add(this.txtBolum);
             this.groupControl1.Controls.Add(this.labelBolum);
             this.groupControl1.Controls.Add(this.labelSinif);
             this.groupControl1.Controls.Add(this.labelGelir);
             this.groupControl1.Controls.Add(this.labelKardes);
             this.groupControl1.Controls.Add(this.labelSoyad);
             this.groupControl1.Controls.Add(this.labelAd);
-            this.groupControl1.Controls.Add(this.txtHaneGeliri);
-            this.groupControl1.Controls.Add(this.txtOgrSoyad);
-            this.groupControl1.Controls.Add(this.txtOgrAd);
-            this.groupControl1.Controls.Add(this.txtOgrKardesSayisi);
-            this.groupControl1.Controls.Add(this.txtSinif);
             this.groupControl1.Location = new System.Drawing.Point(800, 1);
             this.groupControl1.Name = "groupControl1";
-            this.groupControl1.Size = new System.Drawing.Size(579, 347);
+            this.groupControl1.Size = new System.Drawing.Size(713, 347);
             this.groupControl1.TabIndex = 7;
             this.groupControl1.Text = "groupControl1";
+            // 
+            // txtSinif
+            // 
+            this.txtSinif.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.txtSinif.FormattingEnabled = true;
+            this.txtSinif.Items.AddRange(new object[] {
+            "Hazırlık",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6"});
+            this.txtSinif.Location = new System.Drawing.Point(237, 166);
+            this.txtSinif.Name = "txtSinif";
+            this.txtSinif.Size = new System.Drawing.Size(184, 24);
+            this.txtSinif.TabIndex = 40;
+            // 
+            // txtOgrKardesSayisi
+            // 
+            this.txtOgrKardesSayisi.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.txtOgrKardesSayisi.FormattingEnabled = true;
+            this.txtOgrKardesSayisi.Items.AddRange(new object[] {
+            "0",
+            "1",
+            "2",
+            "3",
+            "4+"});
+            this.txtOgrKardesSayisi.Location = new System.Drawing.Point(237, 105);
+            this.txtOgrKardesSayisi.Name = "txtOgrKardesSayisi";
+            this.txtOgrKardesSayisi.Size = new System.Drawing.Size(184, 24);
+            this.txtOgrKardesSayisi.TabIndex = 39;
+            // 
+            // txtBolum
+            // 
+            this.txtBolum.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.SuggestAppend;
+            this.txtBolum.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.ListItems;
+            this.txtBolum.FormattingEnabled = true;
+            this.txtBolum.Location = new System.Drawing.Point(237, 199);
+            this.txtBolum.Name = "txtBolum";
+            this.txtBolum.Size = new System.Drawing.Size(184, 24);
+            this.txtBolum.TabIndex = 38;
             // 
             // txtAgno
             // 
             this.txtAgno.Location = new System.Drawing.Point(237, 274);
             this.txtAgno.Name = "txtAgno";
-            this.txtAgno.Size = new System.Drawing.Size(125, 22);
+            this.txtAgno.Size = new System.Drawing.Size(184, 22);
             this.txtAgno.TabIndex = 36;
             // 
             // labelAgno
@@ -157,7 +193,8 @@ namespace bursoto1
             // 
             this.txtTelNo.Location = new System.Drawing.Point(237, 237);
             this.txtTelNo.Name = "txtTelNo";
-            this.txtTelNo.Size = new System.Drawing.Size(125, 22);
+            this.txtTelNo.Properties.NullText = "0(5xx) xxx xx xx";
+            this.txtTelNo.Size = new System.Drawing.Size(184, 22);
             this.txtTelNo.TabIndex = 34;
             // 
             // labelNumara
@@ -172,28 +209,21 @@ namespace bursoto1
             // 
             // btnResimSec
             // 
-            this.btnResimSec.Location = new System.Drawing.Point(424, 270);
+            this.btnResimSec.Location = new System.Drawing.Point(503, 270);
             this.btnResimSec.Name = "btnResimSec";
             this.btnResimSec.Size = new System.Drawing.Size(94, 29);
             this.btnResimSec.TabIndex = 32;
             this.btnResimSec.Text = "Resim Seç";
-            this.btnResimSec.Click += new System.EventHandler(this.btnResimSec_Click_1);
+            this.btnResimSec.Click += new System.EventHandler(this.btnResimSec_Click);
             // 
             // pictureResim
             // 
-            this.pictureResim.Location = new System.Drawing.Point(384, 51);
+            this.pictureResim.Location = new System.Drawing.Point(463, 51);
             this.pictureResim.Name = "pictureResim";
             this.pictureResim.Properties.ShowCameraMenuItem = DevExpress.XtraEditors.Controls.CameraMenuItemVisibility.Auto;
             this.pictureResim.Properties.SizeMode = DevExpress.XtraEditors.Controls.PictureSizeMode.Stretch;
             this.pictureResim.Size = new System.Drawing.Size(175, 208);
             this.pictureResim.TabIndex = 31;
-            // 
-            // txtBolum
-            // 
-            this.txtBolum.Location = new System.Drawing.Point(237, 198);
-            this.txtBolum.Name = "txtBolum";
-            this.txtBolum.Size = new System.Drawing.Size(125, 22);
-            this.txtBolum.TabIndex = 30;
             // 
             // labelBolum
             // 
@@ -255,58 +285,26 @@ namespace bursoto1
             this.labelAd.TabIndex = 24;
             this.labelAd.Text = "Ad:";
             // 
-            // txtHaneGeliri
+            // txtOgrAd
             // 
-            this.txtHaneGeliri.Location = new System.Drawing.Point(237, 133);
-            this.txtHaneGeliri.Name = "txtHaneGeliri";
-            this.txtHaneGeliri.Size = new System.Drawing.Size(125, 22);
-            this.txtHaneGeliri.TabIndex = 22;
+            this.txtOgrAd.Location = new System.Drawing.Point(237, 47);
+            this.txtOgrAd.Name = "txtOgrAd";
+            this.txtOgrAd.Size = new System.Drawing.Size(184, 23);
+            this.txtOgrAd.TabIndex = 41;
             // 
             // txtOgrSoyad
             // 
-            this.txtOgrSoyad.Location = new System.Drawing.Point(237, 77);
+            this.txtOgrSoyad.Location = new System.Drawing.Point(237, 76);
             this.txtOgrSoyad.Name = "txtOgrSoyad";
-            this.txtOgrSoyad.Size = new System.Drawing.Size(125, 22);
-            this.txtOgrSoyad.TabIndex = 20;
+            this.txtOgrSoyad.Size = new System.Drawing.Size(184, 23);
+            this.txtOgrSoyad.TabIndex = 42;
             // 
-            // txtOgrAd
+            // txtHaneGeliri
             // 
-            this.txtOgrAd.Location = new System.Drawing.Point(237, 49);
-            this.txtOgrAd.Name = "txtOgrAd";
-            this.txtOgrAd.Size = new System.Drawing.Size(125, 22);
-            this.txtOgrAd.TabIndex = 19;
-            // 
-            // txtOgrKardesSayisi
-            // 
-            this.txtOgrKardesSayisi.Location = new System.Drawing.Point(237, 105);
-            this.txtOgrKardesSayisi.Name = "txtOgrKardesSayisi";
-            this.txtOgrKardesSayisi.Properties.Buttons.AddRange(new DevExpress.XtraEditors.Controls.EditorButton[] {
-            new DevExpress.XtraEditors.Controls.EditorButton(DevExpress.XtraEditors.Controls.ButtonPredefines.Combo)});
-            this.txtOgrKardesSayisi.Properties.DropDownRows = 5;
-            this.txtOgrKardesSayisi.Properties.Items.AddRange(new object[] {
-            "1",
-            "2",
-            "3",
-            "4+"});
-            this.txtOgrKardesSayisi.Size = new System.Drawing.Size(125, 22);
-            this.txtOgrKardesSayisi.TabIndex = 21;
-            // 
-            // txtSinif
-            // 
-            this.txtSinif.Location = new System.Drawing.Point(237, 161);
-            this.txtSinif.Name = "txtSinif";
-            this.txtSinif.Properties.Buttons.AddRange(new DevExpress.XtraEditors.Controls.EditorButton[] {
-            new DevExpress.XtraEditors.Controls.EditorButton(DevExpress.XtraEditors.Controls.ButtonPredefines.Combo)});
-            this.txtSinif.Properties.Items.AddRange(new object[] {
-            "Hazırlık",
-            "1",
-            "2",
-            "3",
-            "4",
-            "5",
-            "6"});
-            this.txtSinif.Size = new System.Drawing.Size(125, 22);
-            this.txtSinif.TabIndex = 23;
+            this.txtHaneGeliri.Location = new System.Drawing.Point(237, 136);
+            this.txtHaneGeliri.Name = "txtHaneGeliri";
+            this.txtHaneGeliri.Size = new System.Drawing.Size(184, 23);
+            this.txtHaneGeliri.TabIndex = 43;
             // 
             // FrmOgrenciler
             // 
@@ -314,7 +312,7 @@ namespace bursoto1
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.BackColor = System.Drawing.Color.Moccasin;
-            this.ClientSize = new System.Drawing.Size(1437, 409);
+            this.ClientSize = new System.Drawing.Size(1525, 409);
             this.Controls.Add(this.groupControl1);
             this.Controls.Add(this.btnGoster);
             this.Controls.Add(this.gridControl1);
@@ -329,12 +327,6 @@ namespace bursoto1
             ((System.ComponentModel.ISupportInitialize)(this.txtAgno.Properties)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.txtTelNo.Properties)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureResim.Properties)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.txtBolum.Properties)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.txtHaneGeliri.Properties)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.txtOgrSoyad.Properties)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.txtOgrAd.Properties)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.txtOgrKardesSayisi.Properties)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.txtSinif.Properties)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -354,19 +346,19 @@ namespace bursoto1
         public DevExpress.XtraEditors.LabelControl labelNumara;
         public DevExpress.XtraEditors.SimpleButton btnResimSec;
         public DevExpress.XtraEditors.PictureEdit pictureResim;
-        public DevExpress.XtraEditors.TextEdit txtBolum;
         public DevExpress.XtraEditors.LabelControl labelBolum;
         public DevExpress.XtraEditors.LabelControl labelSinif;
         public DevExpress.XtraEditors.LabelControl labelGelir;
         public DevExpress.XtraEditors.LabelControl labelKardes;
         public DevExpress.XtraEditors.LabelControl labelSoyad;
         public DevExpress.XtraEditors.LabelControl labelAd;
-        public DevExpress.XtraEditors.TextEdit txtHaneGeliri;
-        public DevExpress.XtraEditors.TextEdit txtOgrSoyad;
-        public DevExpress.XtraEditors.TextEdit txtOgrAd;
-        public DevExpress.XtraEditors.ComboBoxEdit txtOgrKardesSayisi;
-        public DevExpress.XtraEditors.ComboBoxEdit txtSinif;
         public DevExpress.XtraGrid.Views.Grid.GridView gridView1;
         public DevExpress.XtraGrid.GridControl gridControl1;
+        private System.Windows.Forms.ComboBox txtBolum;
+        private System.Windows.Forms.ComboBox txtSinif;
+        private System.Windows.Forms.ComboBox txtOgrKardesSayisi;
+        private System.Windows.Forms.TextBox txtHaneGeliri;
+        private System.Windows.Forms.TextBox txtOgrSoyad;
+        private System.Windows.Forms.TextBox txtOgrAd;
     }
 }
