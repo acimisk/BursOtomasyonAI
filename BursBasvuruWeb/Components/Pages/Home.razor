@@ -1,7 +1,7 @@
 ﻿@page "/"
 @using Microsoft.AspNetCore.Components.Web
 @rendermode InteractiveServer
-@using System.Data.SqlClient
+@using Microsoft.Data.SqlClient  @* <-- BURAYI DEĞİŞTİR *@
 @using System.IO
 @inject NavigationManager Nav
 
@@ -86,18 +86,34 @@
 </div>
 
 @code {
-    private string ad, soyad, sinif, bolum, telefon, aciklama, mesaj, fotoBase64;
+    // HATA ÇÖZÜMÜ: Değişkenlere varsayılan değerler atadık
+    private string ad = "";
+    private string soyad = "";
+    private string sinif = "";
+    private string bolum = "";
+    private string telefon = "";
+    private string aciklama = "";
+    private string mesaj = "";
+    private string fotoBase64 = "";
+
     private double agno;
     private decimal gelir;
     private int kardesSayisi;
 
     async Task FotoSec(InputFileChangeEventArgs e)
     {
-        var format = "image/png";
-        var resizedImage = await e.File.RequestImageFileAsync(format, 300, 300);
-        var buffer = new byte[resizedImage.Size];
-        await resizedImage.OpenReadStream().ReadAsync(buffer);
-        fotoBase64 = $"data:{format};base64,{Convert.ToBase64String(buffer)}";
+        try
+        {
+            var format = "image/png";
+            var resizedImage = await e.File.RequestImageFileAsync(format, 300, 300);
+            var buffer = new byte[resizedImage.Size];
+            await resizedImage.OpenReadStream().ReadAsync(buffer);
+            fotoBase64 = $"data:{format};base64,{Convert.ToBase64String(buffer)}";
+        }
+        catch (Exception ex)
+        {
+            mesaj = "Fotoğraf yüklenirken hata: " + ex.Message;
+        }
     }
 
     private void Kaydet()
@@ -113,22 +129,24 @@
                 string query = @"INSERT INTO Ogrenciler
                                 (AD, SOYAD, [KARDEŞ SAYISI], [TOPLAM HANE GELİRİ], SINIF, BÖLÜMÜ, AGNO, TELEFON, FOTO, AINotu)
                                 VALUES (@p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8, @p9, @p10)";
-
                 using (SqlCommand cmd = new SqlCommand(query, conn))
                 {
-                    cmd.Parameters.AddWithValue("@p1", ad ?? "");
-                    cmd.Parameters.AddWithValue("@p2", soyad ?? "");
+                    cmd.Parameters.AddWithValue("@p1", ad);
+                    cmd.Parameters.AddWithValue("@p2", soyad);
                     cmd.Parameters.AddWithValue("@p3", kardesSayisi);
                     cmd.Parameters.AddWithValue("@p4", gelir);
-                    cmd.Parameters.AddWithValue("@p5", sinif ?? "");
-                    cmd.Parameters.AddWithValue("@p6", bolum ?? "");
+                    cmd.Parameters.AddWithValue("@p5", sinif);
+                    cmd.Parameters.AddWithValue("@p6", bolum);
                     cmd.Parameters.AddWithValue("@p7", agno);
-                    cmd.Parameters.AddWithValue("@p8", telefon ?? "");
-                    cmd.Parameters.AddWithValue("@p9", fotoBase64 ?? ""); // Fotoğraf Base64 olarak gidiyor
-                    cmd.Parameters.AddWithValue("@p10", aciklama ?? "");
-
+                    cmd.Parameters.AddWithValue("@p8", telefon);
+                    cmd.Parameters.AddWithValue("@p9", fotoBase64); // Eğer boşsa boş string gider, hata vermez
+                    cmd.Parameters.AddWithValue("@p10", aciklama);
                     cmd.ExecuteNonQuery();
                     mesaj = "Başvurunuz başarıyla kaydedildi kanka!";
+
+                    // Formu Temizle
+                    ad = soyad = bolum = sinif = telefon = aciklama = fotoBase64 = "";
+                    agno = 0; gelir = 0; kardesSayisi = 0;
                 }
             }
         }

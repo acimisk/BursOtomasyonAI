@@ -1,80 +1,132 @@
 ﻿@page "/burs-ver"
-@using System.Data.SqlClient
+@using Microsoft.Data.SqlClient
 @inject NavigationManager NavManager
+@rendermode InteractiveServer
 
-<PageTitle>Burs Ver - Eğitim Gönüllüsü Ol</PageTitle>
+<PageTitle>Eğitim Gönüllüsü Ol - Burs Ver</PageTitle>
 
-<div class="container mt-5">
-    <div class="card shadow-lg border-0">
-        <div class="card-header bg-primary text-white text-center">
-            <h3>Eğitim Gönüllüsü Başvuru Formu</h3>
-        </div>
-        <div class="card-body p-4">
-            <p class="text-muted">Öğrencilerimize destek olmak için lütfen aşağıdaki formu doldurun. Sizinle iletişime geçeceğiz.</p>
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-lg border-0 rounded-4">
 
-            <div class="row g-3">
-                <div class="col-md-6">
-                    <label class="form-label">Ad Soyad</label>
-                    <input type="text" @bind="adSoyad" class="form-control" placeholder="Adınız Soyadınız">
+                <div class="card-header bg-primary bg-gradient text-white text-center py-4 rounded-top-4">
+                    <h3 class="fw-bold mb-0"><i class="bi bi-heart-fill me-2"></i>Eğitim Gönüllüsü Ol</h3>
+                    <p class="mb-0 mt-2 opacity-75">Geleceğin mimarlarına bir tuğla da siz koyun.</p>
                 </div>
-                <div class="col-md-6">
-                    <label class="form-label">Kurum / Şirket Adı (Opsiyonel)</label>
-                    <input type="text" @bind="kurumAdi" class="form-control" placeholder="Varsa kurumunuz">
-                </div>
-                <div class="col-md-6">
-                    <label class="form-label">E-Posta</label>
-                    <input type="email" @bind="eposta" class="form-control" placeholder="ornek@mail.com">
-                </div>
-                <div class="col-md-6">
-                    <label class="form-label">Bağışlamak İstediğiniz Toplam Tutar (₺)</label>
-                    <input type="number" @bind="miktar" class="form-control">
-                </div>
-                <div class="col-12 mt-4">
-                    <button class="btn btn-success btn-lg w-100" @onclick="BursuKaydet">Başvuruyu Tamamla</button>
+
+                <div class="card-body p-5">
+
+                    @if (!string.IsNullOrEmpty(mesaj))
+                    {
+                        var alertClass = mesaj.Contains("Hata") ? "alert-danger" : "alert-success";
+                        <div class="alert @alertClass d-flex align-items-center mb-4 shadow-sm" role="alert">
+                            @if (mesaj.Contains("Hata"))
+                            {
+                                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                            }
+                            else
+                            {
+
+                                <i class="bi bi-check-circle-fill me-2"></i>
+                            }
+                            <div>@mesaj</div>
+                        </div>
+                    }
+
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold text-secondary">Ad Soyad</label>
+                            <input type="text" @bind="adSoyad" class="form-control form-control-lg bg-light" placeholder="Adınız Soyadınız">
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold text-secondary">Telefon</label>
+                            <input type="tel" @bind="telefon" class="form-control form-control-lg bg-light" placeholder="05XX XXX XX XX">
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold text-secondary">E-Posta</label>
+                            <input type="email" @bind="eposta" class="form-control form-control-lg bg-light" placeholder="mail@ornek.com">
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold text-secondary">Kurum / Şirket (Opsiyonel)</label>
+                            <input type="text" @bind="kurumAdi" class="form-control form-control-lg bg-light" placeholder="Varsa kurumunuz">
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label fw-bold text-secondary">Bağışlamak İstediğiniz Tutar (₺)</label>
+                            <div class="input-group input-group-lg">
+                                <span class="input-group-text bg-success text-white fw-bold">₺</span>
+                                <input type="number" @bind="miktar" class="form-control bg-light" placeholder="Örn: 5000">
+                            </div>
+                            <div class="form-text mt-2"><i class="bi bi-info-circle"></i> Bağışınız doğrudan burs havuzuna aktarılacaktır.</div>
+                        </div>
+
+                        <div class="col-12 mt-4">
+                            <button class="btn btn-primary btn-lg w-100 py-3 fw-bold shadow hover-scale" @onclick="BursuKaydet">
+                                BAŞVURUYU TAMAMLA <i class="bi bi-arrow-right-circle ms-2"></i>
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
-
-            @if (!string.IsNullOrEmpty(mesaj))
-            {
-                <div class="alert alert-info mt-3">@mesaj</div>
-            }
         </div>
     </div>
 </div>
 
 @code {
-    private string adSoyad;
-    private string kurumAdi;
-    private string eposta;
-    private decimal miktar;
-    private string mesaj;
+    // Başlangıç değerlerini boş veriyoruz ki sayfa açılırken "NullReference" hatası verip beyaz ekran yapmasın.
+    private string adSoyad = "";
+    private string kurumAdi = "";
+    private string eposta = "";
+    private string telefon = "";
+    private string mesaj = "";
+    private decimal miktar = 0;
 
-    // Kanka buradaki Connection String masaüstündekiyle aynı olmalı!
-    string connectionString = @"Data Source=(localdb)\MSSQLLocalDB; initial catalog=bursOtoDeneme1; Integrated Security=TRUE";
+    // KRİTİK NOKTA: TrustServerCertificate=True ve Encrypt=False ekledik!
+    // Bu sayede "SSL Provider" hatası almadan LocalDB'ye bağlanacak.
+    string connectionString = @"Data Source=(localdb)\MSSQLLocalDB; initial catalog=bursOtoDeneme1; Integrated Security=TRUE; Encrypt=False; TrustServerCertificate=True;";
 
     private void BursuKaydet()
     {
+        // Basit bir validasyon (boş alan kontrolü)
+        if (string.IsNullOrWhiteSpace(adSoyad) || string.IsNullOrWhiteSpace(telefon) || miktar <= 0)
+        {
+            mesaj = "Hata: Lütfen Ad Soyad, Telefon ve geçerli bir Tutar giriniz.";
+            return;
+        }
+
         try
         {
             using (SqlConnection conn = new SqlConnection(connectionString))
             {
                 conn.Open();
-                string query = "INSERT INTO BursVerenler (AdSoyad, KurumAdı, BagisMiktari, Eposta, Durum) VALUES (@p1, @p2, @p3, @p4, 'Beklemede')";
+
+                // SQL Sorgusu: Tablo adının ve sütunların veritabanındakiyle aynı olduğuna emin ol.
+                string query = "INSERT INTO BursVerenler (AdSoyad, KurumAdı, BagisMiktari, Eposta, Telefon, Durum) VALUES (@p1, @p2, @p3, @p4, @p5, 'Beklemede')";
+
                 using (SqlCommand cmd = new SqlCommand(query, conn))
                 {
                     cmd.Parameters.AddWithValue("@p1", adSoyad);
-                    cmd.Parameters.AddWithValue("@p2", kurumAdi ?? "");
+                    cmd.Parameters.AddWithValue("@p2", kurumAdi); // Boşsa boş string gider
                     cmd.Parameters.AddWithValue("@p3", miktar);
                     cmd.Parameters.AddWithValue("@p4", eposta);
+                    cmd.Parameters.AddWithValue("@p5", telefon);
+
                     cmd.ExecuteNonQuery();
                 }
             }
-            mesaj = "Başvurunuz alındı kanka! Eğitim gönüllüsü olduğunuz için teşekkürler.";
-            // Formu temizle
-            adSoyad = eposta = kurumAdi = ""; miktar = 0;
+
+            mesaj = "Teşekkürler! Bağış başvurunuz başarıyla alındı. Sizinle iletişime geçeceğiz.";
+
+            // Başarılı olursa kutuları temizle
+            adSoyad = ""; kurumAdi = ""; eposta = ""; telefon = ""; miktar = 0;
         }
         catch (Exception ex)
         {
+            // Hata mesajını ekrana basıyoruz ki sorunu görelim
             mesaj = "Hata oluştu: " + ex.Message;
         }
     }
