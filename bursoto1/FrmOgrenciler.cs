@@ -5,6 +5,7 @@ using System.Data.SqlClient;
 using System.Drawing;
 using System.IO;
 using System.Windows.Forms; // Standart ComboBox için
+using bursoto1.Helpers; // MessageHelper ve ImageHelper için
 
 namespace bursoto1
 {
@@ -24,13 +25,16 @@ namespace bursoto1
             try
             {
                 DataTable dt = new DataTable();
-                SqlDataAdapter da = new SqlDataAdapter("SELECT * FROM Ogrenciler", bgl.baglanti());
-                da.Fill(dt);
+                using (SqlConnection conn = bgl.baglanti())
+                {
+                    SqlDataAdapter da = new SqlDataAdapter("SELECT * FROM Ogrenciler", conn);
+                    da.Fill(dt);
+                }
                 gridControl1.DataSource = dt;
             }
             catch (Exception ex)
             {
-                XtraMessageBox.Show("Listeleme hatası: " + ex.Message, "Hata", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageHelper.ShowException(ex, "Listeleme Hatası");
             }
         }
 
@@ -45,23 +49,23 @@ namespace bursoto1
                 txtBolum.AutoCompleteMode = AutoCompleteMode.SuggestAppend;
                 txtBolum.AutoCompleteSource = AutoCompleteSource.ListItems;
 
-                SqlConnection conn = bgl.baglanti();
-                // DISTINCT: Aynı bölümler tekrar etmesin
-                SqlCommand cmd = new SqlCommand("SELECT DISTINCT BolumAdi FROM Bolumler ORDER BY BolumAdi ASC", conn);
-                SqlDataReader dr = cmd.ExecuteReader();
-
-                while (dr.Read())
+                using (SqlConnection conn = bgl.baglanti())
                 {
-                    // Büyük harf standardı
-                    txtBolum.Items.Add(dr[0].ToString().ToUpper());
+                    // DISTINCT: Aynı bölümler tekrar etmesin
+                    SqlCommand cmd = new SqlCommand("SELECT DISTINCT BolumAdi FROM Bolumler ORDER BY BolumAdi ASC", conn);
+                    using (SqlDataReader dr = cmd.ExecuteReader())
+                    {
+                        while (dr.Read())
+                        {
+                            // Büyük harf standardı
+                            txtBolum.Items.Add(dr[0].ToString().ToUpper());
+                        }
+                    }
                 }
-
-                dr.Close();
-                conn.Close();
             }
             catch (Exception ex)
             {
-                XtraMessageBox.Show("Bölümler yüklenirken hata oluştu: " + ex.Message);
+                MessageHelper.ShowException(ex, "Bölüm Yükleme Hatası");
             }
         }
 
@@ -104,7 +108,7 @@ namespace bursoto1
                 }
                 else
                 {
-                    XtraMessageBox.Show("Lütfen listeden geçerli bir bölüm seçiniz.", "Geçersiz Bölüm", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    MessageHelper.ShowWarning("Lütfen listeden geçerli bir bölüm seçiniz.", "Geçersiz Bölüm");
                     txtBolum.Text = "";
                     txtBolum.Focus();
                 }
@@ -122,7 +126,7 @@ namespace bursoto1
             // Bölüm listede var mı kontrolü
             if (string.IsNullOrWhiteSpace(txtBolum.Text) || !txtBolum.Items.Contains(txtBolum.Text))
             {
-                XtraMessageBox.Show("Lütfen listeden geçerli bir bölüm seçiniz.", "Hatalı Bölüm", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageHelper.ShowWarning("Lütfen listeden geçerli bir bölüm seçiniz.", "Hatalı Bölüm");
                 return;
             }
 
@@ -131,7 +135,7 @@ namespace bursoto1
 
             if (string.IsNullOrWhiteSpace(txtHaneGeliri.Text) || !decimal.TryParse(txtHaneGeliri.Text, out decimal gelir))
             {
-                XtraMessageBox.Show("Lütfen 'Hane Geliri' alanına geçerli bir sayı giriniz.", "Hata", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageHelper.ShowWarning("Lütfen 'Hane Geliri' alanına geçerli bir sayı giriniz.", "Geçersiz Değer");
                 return;
             }
 
@@ -139,12 +143,12 @@ namespace bursoto1
             string agnoRaw = txtAgno.Text.Replace(".", ",");
             if (string.IsNullOrWhiteSpace(agnoRaw) || !decimal.TryParse(agnoRaw, out decimal agno))
             {
-                XtraMessageBox.Show("Lütfen 'AGNO' alanına geçerli bir not giriniz.", "Hata", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageHelper.ShowWarning("Lütfen 'AGNO' alanına geçerli bir not giriniz.", "Geçersiz Değer");
                 return;
             }
             if (agno < 0 || agno > 4)
             {
-                XtraMessageBox.Show("AGNO 0 ile 4 arasında olmalıdır.", "Hata", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageHelper.ShowWarning("AGNO 0 ile 4 arasında olmalıdır.", "Geçersiz Aralık");
                 return;
             }
 
@@ -154,33 +158,34 @@ namespace bursoto1
                 string sorgu = "INSERT INTO Ogrenciler (AD, SOYAD, [KARDEŞ SAYISI], [TOPLAM HANE GELİRİ], BÖLÜMÜ, SINIF, AGNO, FOTO, TELEFON) " +
                                "VALUES (@p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8, @p9)";
 
-                SqlCommand cmd = new SqlCommand(sorgu, bgl.baglanti());
+                using (SqlConnection conn = bgl.baglanti())
+                {
+                    SqlCommand cmd = new SqlCommand(sorgu, conn);
+                    cmd.Parameters.AddWithValue("@p1", txtOgrAd.Text.Trim().ToUpper());
+                    cmd.Parameters.AddWithValue("@p2", txtOgrSoyad.Text.Trim().ToUpper());
+                    cmd.Parameters.AddWithValue("@p3", txtOgrKardesSayisi.Text);
+                    cmd.Parameters.AddWithValue("@p4", gelir);
+                    cmd.Parameters.AddWithValue("@p5", txtBolum.Text);
+                    cmd.Parameters.AddWithValue("@p6", txtSinif.Text);
+                    cmd.Parameters.AddWithValue("@p7", agno);
+                    cmd.Parameters.AddWithValue("@p8", dosyaYolu ?? "");
+                    cmd.Parameters.AddWithValue("@p9", txtTelNo.Text.Trim());
+                    cmd.ExecuteNonQuery();
+                }
 
-                cmd.Parameters.AddWithValue("@p1", txtOgrAd.Text.Trim().ToUpper());
-                cmd.Parameters.AddWithValue("@p2", txtOgrSoyad.Text.Trim().ToUpper());
-                cmd.Parameters.AddWithValue("@p3", txtOgrKardesSayisi.Text);
-                cmd.Parameters.AddWithValue("@p4", gelir);
-                cmd.Parameters.AddWithValue("@p5", txtBolum.Text);
-                cmd.Parameters.AddWithValue("@p6", txtSinif.Text);
-                cmd.Parameters.AddWithValue("@p7", agno);
-                cmd.Parameters.AddWithValue("@p8", dosyaYolu ?? "");
-                cmd.Parameters.AddWithValue("@p9", txtTelNo.Text.Trim());
-
-                cmd.ExecuteNonQuery();
-
-                XtraMessageBox.Show("Öğrenci sisteme başarıyla kaydedildi.", "Başarılı", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageHelper.ShowSuccess("Öğrenci sisteme başarıyla kaydedildi.", "Kayıt Başarılı");
                 Listele();
                 Temizle();
             }
             catch (Exception ex)
             {
-                XtraMessageBox.Show("Kayıt işlemi sırasında hata oluştu: " + ex.Message, "Hata", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageHelper.ShowException(ex, "Kayıt Hatası");
             }
         }
 
         private void UyariVer(string alan)
         {
-            XtraMessageBox.Show($"Lütfen '{alan}' alanını doldurunuz.", "Eksik Bilgi", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            MessageHelper.ShowMissingField(alan);
         }
 
         // 4. SİL
@@ -190,33 +195,34 @@ namespace bursoto1
 
             if (seciliSatirlar.Length == 0)
             {
-                XtraMessageBox.Show("Lütfen silinecek kayıtları seçiniz.", "Seçim Yapılmadı", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageHelper.ShowWarning("Lütfen silinecek kayıtları seçiniz.", "Seçim Yapılmadı");
                 return;
             }
 
-            if (XtraMessageBox.Show($"{seciliSatirlar.Length} adet kaydı silmek istediğinize emin misiniz?", "Silme Onayı", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+            if (MessageHelper.ShowConfirm($"{seciliSatirlar.Length} adet kaydı silmek istediğinize emin misiniz?", "Silme Onayı"))
             {
                 try
                 {
-                    SqlConnection conn = bgl.baglanti();
-                    foreach (int rowHandle in seciliSatirlar)
+                    using (SqlConnection conn = bgl.baglanti())
                     {
-                        var id = gridView1.GetRowCellValue(rowHandle, "ID");
-                        if (id != null)
+                        foreach (int rowHandle in seciliSatirlar)
                         {
-                            SqlCommand cmd = new SqlCommand("DELETE FROM Ogrenciler WHERE ID=@p1", conn);
-                            cmd.Parameters.AddWithValue("@p1", id);
-                            cmd.ExecuteNonQuery();
+                            var id = gridView1.GetRowCellValue(rowHandle, "ID");
+                            if (id != null)
+                            {
+                                SqlCommand cmd = new SqlCommand("DELETE FROM Ogrenciler WHERE ID=@p1", conn);
+                                cmd.Parameters.AddWithValue("@p1", id);
+                                cmd.ExecuteNonQuery();
+                            }
                         }
                     }
-                    conn.Close();
 
-                    XtraMessageBox.Show("Seçilen kayıtlar başarıyla silindi.", "Bilgi", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    MessageHelper.ShowSuccess("Seçilen kayıtlar başarıyla silindi.", "Silme Başarılı");
                     Listele();
                 }
                 catch (Exception ex)
                 {
-                    XtraMessageBox.Show("Silme hatası: " + ex.Message);
+                    MessageHelper.ShowException(ex, "Silme Hatası");
                 }
             }
         }
@@ -246,12 +252,11 @@ namespace bursoto1
                 try
                 {
                     pictureResim.Image = Image.FromFile(ofd.FileName);
-                    byte[] imageArray = File.ReadAllBytes(ofd.FileName);
-                    dosyaYolu = "data:image/png;base64," + Convert.ToBase64String(imageArray);
+                    dosyaYolu = ImageHelper.FileToBase64(ofd.FileName);
                 }
                 catch (Exception ex)
                 {
-                    XtraMessageBox.Show("Resim yüklenirken hata: " + ex.Message);
+                    MessageHelper.ShowException(ex, "Resim Yükleme Hatası");
                 }
             }
         }

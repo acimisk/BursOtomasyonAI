@@ -10,6 +10,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using bursoto1.Helpers; // MessageHelper ve ImageHelper için
 
 namespace bursoto1
 {
@@ -28,7 +29,7 @@ namespace bursoto1
 
                 if (secilenOgrenciID <= 0)
                 {
-                    MessageBox.Show("Öğrenci ID bilgisi alınamadı!");
+                    MessageHelper.ShowError("Öğrenci ID bilgisi alınamadı!", "Veri Hatası");
                     return;
                 }
 
@@ -47,29 +48,29 @@ namespace bursoto1
 
                     if (baglanti.State == ConnectionState.Closed) baglanti.Open();
 
-                    SqlCommand cmd = new SqlCommand("UPDATE Ogrenciler SET AISkor=@p1 WHERE ID=@p2", baglanti);
-                    cmd.Parameters.AddWithValue("@p1", puan);
-                    cmd.Parameters.AddWithValue("@p2", secilenOgrenciID); // Dışarıdan gelen ID
-
-                    int etkilenenSatir = cmd.ExecuteNonQuery();
+                    int etkilenenSatir = 0;
+                    using (SqlCommand cmd = new SqlCommand("UPDATE Ogrenciler SET AISkor=@p1 WHERE ID=@p2", baglanti))
+                    {
+                        cmd.Parameters.AddWithValue("@p1", puan);
+                        cmd.Parameters.AddWithValue("@p2", secilenOgrenciID); // Dışarıdan gelen ID
+                        etkilenenSatir = cmd.ExecuteNonQuery();
+                    }
                     baglanti.Close();
 
                     if (etkilenenSatir > 0)
                     {
-                        MessageBox.Show($"AI Skoru ({puan}) başarıyla veritabanına kaydedildi.");
-                        // frm.Listele(); -> Bu satır hata verebilir çünkü frm yeni bir form. 
-                        // Şimdilik burayı yorum satırı yap veya ana formdaki listeyi yenilemek için delegate kullanmalısın.
+                        MessageHelper.ShowSuccess($"AI Skoru ({puan}) başarıyla veritabanına kaydedildi.", "Kayıt Başarılı");
                     }
                     else
                     {
-                        MessageBox.Show("Kayıt güncellenemedi (ID bulunamadı).");
+                        MessageHelper.ShowWarning("Kayıt güncellenemedi (ID bulunamadı).", "Güncelleme Hatası");
                     }
                 }
             }
             catch (Exception ex)
             {
                 if (baglanti.State == ConnectionState.Open) baglanti.Close();
-                MessageBox.Show("Hata: " + ex.Message);
+                MessageHelper.ShowException(ex, "AI Analiz Hatası");
             }
         }
 
@@ -83,28 +84,7 @@ namespace bursoto1
         {
 
         }
-        public Image Base64ToImage(string base64String)
-        {
-            if (string.IsNullOrEmpty(base64String)) return null;
-
-            try
-            {
-                // Eğer başında "data:image..." kısmı varsa temizle, yoksa olduğu gibi al
-                string temizBase64 = base64String.Contains(",") ? base64String.Split(',')[1] : base64String;
-
-                byte[] imageBytes = Convert.FromBase64String(temizBase64);
-                using (MemoryStream ms = new MemoryStream(imageBytes))
-                {
-                    // MemoryStream'den Image oluştururken kopya oluşturmak WinForms'ta daha sağlıklıdır
-                    return Image.FromStream(ms);
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("Resim dönüştürme hatası: " + ex.Message);
-                return null;
-            }
-        }
+        // Base64ToImage metodu ImageHelper'a taşındı (DRY prensibi)
         private void OgrenciProfili_Load(object sender, EventArgs e)
         {
             txtOgrAd.Text = ad;
@@ -123,10 +103,10 @@ namespace bursoto1
                 {
                     if (fotoYolu.StartsWith("data:") || fotoYolu.Length > 260) // Base64 tespiti
                     {
-                        Image resim = Base64ToImage(fotoYolu);
+                        Image resim = ImageHelper.Base64ToImage(fotoYolu);
                         if (resim != null)
                         {
-                            pictureEdit1.EditValue = resim; // Image yerine EditValue dene
+                            pictureEdit1.EditValue = resim;
                         }
                     }
                     else if (File.Exists(fotoYolu)) // Normal dosya yoluysa

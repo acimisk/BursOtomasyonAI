@@ -3,6 +3,7 @@ using System;
 using System.Data;
 using System.Data.SqlClient;
 using System.Windows.Forms;
+using bursoto1.Helpers; // MessageHelper için
 
 namespace bursoto1
 {
@@ -18,9 +19,12 @@ namespace bursoto1
         public void Listele()
         {
             // Listeleme yaparken bağlantıyı her seferinde taze alıyoruz
-            SqlDataAdapter da = new SqlDataAdapter("SELECT * FROM Burslar", bgl.baglanti());
             DataTable dt = new DataTable();
-            da.Fill(dt);
+            using (SqlConnection conn = bgl.baglanti())
+            {
+                SqlDataAdapter da = new SqlDataAdapter("SELECT * FROM Burslar", conn);
+                da.Fill(dt);
+            }
             gridControl1.DataSource = dt;
         }
 
@@ -48,23 +52,24 @@ namespace bursoto1
             var secilenID = gridView1.GetFocusedRowCellValue("ID"); // Sütun adının ID olduğundan emin ol
             if (secilenID == null) return;
 
-            if (XtraMessageBox.Show("Bu burs türünü silmek istiyor musunuz?", "Silme Onayı", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+            if (MessageHelper.ShowConfirm("Bu burs türünü silmek istiyor musunuz?", "Silme Onayı"))
             {
                 try
                 {
-                    SqlConnection conn = bgl.baglanti();
-                    SqlCommand cmd = new SqlCommand("DELETE FROM Burslar WHERE ID=@p1", conn);
-                    cmd.Parameters.AddWithValue("@p1", secilenID);
-                    cmd.ExecuteNonQuery();
-                    conn.Close();
+                    using (SqlConnection conn = bgl.baglanti())
+                    {
+                        SqlCommand cmd = new SqlCommand("DELETE FROM Burslar WHERE ID=@p1", conn);
+                        cmd.Parameters.AddWithValue("@p1", secilenID);
+                        cmd.ExecuteNonQuery();
+                    }
 
-                    XtraMessageBox.Show("Burs başarıyla silindi.", "Bilgi", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    MessageHelper.ShowSuccess("Burs başarıyla silindi.", "Silme Başarılı");
                     Listele();
                     FormuTemizle();
                 }
                 catch (Exception ex)
                 {
-                    XtraMessageBox.Show("Silme hatası: " + ex.Message);
+                    MessageHelper.ShowException(ex, "Silme Hatası");
                 }
             }
         }
@@ -81,33 +86,34 @@ namespace bursoto1
         {
             if (string.IsNullOrEmpty(txtBursAd.Text) || string.IsNullOrEmpty(txtMiktar.Text))
             {
-                XtraMessageBox.Show("Lütfen burs adını ve miktarını giriniz!", "Eksik Bilgi", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageHelper.ShowWarning("Lütfen burs adını ve miktarını giriniz!", "Eksik Bilgi");
                 return;
             }
 
             try
             {
-                SqlConnection conn = bgl.baglanti();
                 // SQL Sütun isimlerinin [BursAdı] falan doğru olduğundan emin ol kanka
                 string sorgu = "INSERT INTO Burslar (BursAdı, Miktar, Kontenjan, Aciklama) VALUES (@p1, @p2, @p3, @p4)";
 
-                using (SqlCommand cmd = new SqlCommand(sorgu, conn))
+                using (SqlConnection conn = bgl.baglanti())
                 {
-                    cmd.Parameters.AddWithValue("@p1", txtBursAd.Text);
-                    cmd.Parameters.AddWithValue("@p2", decimal.Parse(txtMiktar.Text.Replace(".", ",")));
-                    cmd.Parameters.AddWithValue("@p3", int.Parse(txtKontenjan.Text));
-                    cmd.Parameters.AddWithValue("@p4", txtAciklama.Text ?? "");
-                    cmd.ExecuteNonQuery();
+                    using (SqlCommand cmd = new SqlCommand(sorgu, conn))
+                    {
+                        cmd.Parameters.AddWithValue("@p1", txtBursAd.Text);
+                        cmd.Parameters.AddWithValue("@p2", decimal.Parse(txtMiktar.Text.Replace(".", ",")));
+                        cmd.Parameters.AddWithValue("@p3", int.Parse(txtKontenjan.Text));
+                        cmd.Parameters.AddWithValue("@p4", txtAciklama.Text ?? "");
+                        cmd.ExecuteNonQuery();
+                    }
                 }
-                conn.Close();
 
-                XtraMessageBox.Show("Burs başarıyla kaydedildi.", "Bilgi", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageHelper.ShowSuccess("Burs başarıyla kaydedildi.", "Kayıt Başarılı");
                 FormuTemizle();
                 Listele();
             }
             catch (Exception ex)
             {
-                XtraMessageBox.Show("Kaydetme hatası: " + ex.Message);
+                MessageHelper.ShowException(ex, "Kaydetme Hatası");
             }
         }
     }

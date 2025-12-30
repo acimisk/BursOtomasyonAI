@@ -6,6 +6,7 @@ using System.Globalization; // Eklendi
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using DevExpress.XtraEditors; // DevExpress mesaj kutusu için
+using DevExpress.LookAndFeel; // DevExpress LookAndFeel için
 
 namespace bursoto1
 {
@@ -29,19 +30,34 @@ namespace bursoto1
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
 
+            // 3. DEVEXPRESS MODERN UI AYARLARI
+            UserLookAndFeel.Default.SetSkinStyle("Office 2019 Colorful");
+            UserLookAndFeel.Default.UseWindowsXPTheme = false;
+            UserLookAndFeel.Default.Style = LookAndFeelStyle.Skin;
+
             // Başlangıç formu
-            Application.Run(new Menu());
+            Application.Run(new Login());
         }
 
         static void GlobalHataYakala(object sender, ThreadExceptionEventArgs e)
         {
-            XtraMessageBox.Show("Beklenmedik bir uygulama hatası oluştu:\n" + e.Exception.Message, "Hata", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            XtraMessageBox.Show(
+                $"Beklenmedik bir uygulama hatası oluştu:\n\n{e.Exception.Message}\n\nDetay: {e.Exception.GetType().Name}",
+                "Sistem Hatası",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Error
+            );
         }
 
         static void GlobalKritikHataYakala(object sender, UnhandledExceptionEventArgs e)
         {
             Exception ex = (Exception)e.ExceptionObject;
-            XtraMessageBox.Show("Kritik sistem hatası:\n" + ex.Message, "Kritik Hata", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            XtraMessageBox.Show(
+                $"Kritik sistem hatası oluştu:\n\n{ex.Message}\n\nUygulama kapatılabilir.",
+                "Kritik Hata",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Stop
+            );
         }
     }
 }

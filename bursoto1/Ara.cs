@@ -3,6 +3,7 @@ using System;
 using System.Data;
 using System.Data.SqlClient;
 using System.Windows.Forms;
+using bursoto1.Helpers; // MessageHelper için
 
 namespace bursoto1
 {
@@ -32,22 +33,24 @@ namespace bursoto1
                 if (!string.IsNullOrEmpty(txtTelNo.Text)) sorgu += " AND TELEFON LIKE @p4";
                 if (!string.IsNullOrEmpty(txtSınıf.Text)) sorgu += " AND SINIF LIKE @p5";
 
-                SqlDataAdapter da = new SqlDataAdapter(sorgu, bgl.baglanti());
-
-                // KRİTİK NOKTA: Başındaki % işaretini kaldırdık! 
-                // Artık sadece "s" yazınca "S" ile başlayanları getirir.
-                if (!string.IsNullOrEmpty(txtAraAd.Text)) da.SelectCommand.Parameters.AddWithValue("@p1", txtAraAd.Text + "%");
-                if (!string.IsNullOrEmpty(txtAraSoyad.Text)) da.SelectCommand.Parameters.AddWithValue("@p2", txtAraSoyad.Text + "%");
-                if (!string.IsNullOrEmpty(txtAraBolum.Text)) da.SelectCommand.Parameters.AddWithValue("@p3", txtAraBolum.Text + "%");
-                if (!string.IsNullOrEmpty(txtTelNo.Text)) da.SelectCommand.Parameters.AddWithValue("@p4", txtTelNo.Text + "%");
-                if (!string.IsNullOrEmpty(txtSınıf.Text)) da.SelectCommand.Parameters.AddWithValue("@p5", txtSınıf.Text + "%");
-
                 DataTable dt = new DataTable();
-                da.Fill(dt);
+                using (SqlConnection conn = bgl.baglanti())
+                {
+                    SqlDataAdapter da = new SqlDataAdapter(sorgu, conn);
+
+                    // KRİTİK NOKTA: Başındaki % işaretini kaldırdık! 
+                    // Artık sadece "s" yazınca "S" ile başlayanları getirir.
+                    if (!string.IsNullOrEmpty(txtAraAd.Text)) da.SelectCommand.Parameters.AddWithValue("@p1", txtAraAd.Text + "%");
+                    if (!string.IsNullOrEmpty(txtAraSoyad.Text)) da.SelectCommand.Parameters.AddWithValue("@p2", txtAraSoyad.Text + "%");
+                    if (!string.IsNullOrEmpty(txtAraBolum.Text)) da.SelectCommand.Parameters.AddWithValue("@p3", txtAraBolum.Text + "%");
+                    if (!string.IsNullOrEmpty(txtTelNo.Text)) da.SelectCommand.Parameters.AddWithValue("@p4", txtTelNo.Text + "%");
+                    if (!string.IsNullOrEmpty(txtSınıf.Text)) da.SelectCommand.Parameters.AddWithValue("@p5", txtSınıf.Text + "%");
+
+                    da.Fill(dt);
+                }
                 gridAraSonuc.DataSource = dt;
 
                 this.Text = "Arama: " + dt.Rows.Count + " Kayıt";
-                bgl.baglanti().Close();
             }
             catch (Exception ex)
             {

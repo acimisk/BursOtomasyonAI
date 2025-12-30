@@ -4,6 +4,7 @@ using System;
 using System.Drawing;
 using System.Windows.Forms;
 using System.Data.SqlClient;
+using bursoto1.Helpers; // MessageHelper için
 
 namespace bursoto1
 {
@@ -25,6 +26,14 @@ namespace bursoto1
             this.StartPosition = FormStartPosition.CenterScreen;
             this.Size = new Size(1300, 750);
             this.FormBorderStyle = FormBorderStyle.Sizable;
+
+            // Modern UI iyileştirmeleri
+            this.ribbon.ShowPageHeadersMode = DevExpress.XtraBars.Ribbon.ShowPageHeadersMode.Show;
+            this.ribbon.ShowToolbarCustomizeItem = false;
+            this.ribbon.ShowExpandCollapseButton = DevExpress.Utils.DefaultBoolean.True;
+            
+            // Ribbon görünüm ayarları
+            this.ribbonPageGroup1.ShowCaptionButton = false;
         }
 
         // --- SAYFA AÇMA YÖNETİMİ (GENERIC METOT - DRY) ---
@@ -85,7 +94,7 @@ namespace bursoto1
             else
             {
                 // Kullanıcıya kolaylık: Sayfa açık değilse açıp uyarı veriyoruz
-                XtraMessageBox.Show("Ekleme işlemi için önce 'Öğrenci Listesi' sayfasını açmalısınız.", "Bilgi", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageHelper.ShowInfo("Ekleme işlemi için önce 'Öğrenci Listesi' sayfasını açmalısınız.", "Bilgi");
                 btnOgrenciler_ItemClick(null, null);
             }
         }
@@ -100,11 +109,11 @@ namespace bursoto1
             }
             else if (aktifForm is FrmBursVerenler)
             {
-                XtraMessageBox.Show("Bağışçılar listesinde satıra sağ tıklayarak silme işlemi yapabilirsiniz.", "Bilgi", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageHelper.ShowInfo("Bağışçılar listesinde satıra sağ tıklayarak silme işlemi yapabilirsiniz.", "Bilgi");
             }
             else
             {
-                XtraMessageBox.Show("Silme işlemi için geçerli bir liste sayfası (Öğrenciler vb.) açık olmalıdır.", "Uyarı", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageHelper.ShowWarning("Silme işlemi için geçerli bir liste sayfası (Öğrenciler vb.) açık olmalıdır.", "Uyarı");
             }
         }
 
@@ -118,9 +127,7 @@ namespace bursoto1
 
         private void Menu_FormClosing(object sender, FormClosingEventArgs e)
         {
-            DialogResult secim = XtraMessageBox.Show("Uygulamadan çıkmak istediğinize emin misiniz?", "Çıkış Onayı", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-
-            if (secim == DialogResult.No)
+            if (!MessageHelper.ShowConfirm("Uygulamadan çıkmak istediğinize emin misiniz?", "Çıkış Onayı"))
             {
                 e.Cancel = true;
             }

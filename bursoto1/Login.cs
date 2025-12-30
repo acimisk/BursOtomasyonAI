@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Data.SqlClient; // Sql kütüphanesi yeterli
 using DevExpress.XtraEditors; // XtraMessageBox kullanabilmek için
+using bursoto1.Helpers; // MessageHelper için
 
 namespace bursoto1
 {
@@ -20,6 +21,9 @@ namespace bursoto1
         public Login()
         {
             InitializeComponent();
+            // Modern UI ayarları
+            this.BackColor = Color.FromArgb(240, 240, 240);
+            this.Padding = new Padding(20);
         }
 
         private void btnCikis_Click(object sender, EventArgs e)
@@ -33,33 +37,32 @@ namespace bursoto1
             {
                 // 1. ADIM: Bağlantıyı alıp komutu hazırlıyoruz
                 // bgl.baglanti() zaten açık bağlantı döndürüyor
-                SqlConnection conn = bgl.baglanti();
-                SqlCommand cmd = new SqlCommand("SELECT * FROM login WHERE K_adi=@p1 AND Sifre=@p2", conn);
-                cmd.Parameters.AddWithValue("@p1", txtKullaniciAdi.Text);
-                cmd.Parameters.AddWithValue("@p2", txtSifre.Text);
-
-                SqlDataReader dr = cmd.ExecuteReader();
-
-                // 2. ADIM: Eğer kullanıcı varsa
-                if (dr.Read())
+                using (SqlConnection conn = bgl.baglanti())
                 {
-                    // Giriş başarılıysa Ana Menü formunu açıyoruz
-                    Menu anaMenu = new Menu();
-                    anaMenu.Show();
-                    this.Hide(); // Login formunu gizle
-                }
-                else
-                {
-                    XtraMessageBox.Show("Kullanıcı adı veya şifre hatalı kanka!", "Hata", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
+                    SqlCommand cmd = new SqlCommand("SELECT * FROM login WHERE K_adi=@p1 AND Sifre=@p2", conn);
+                    cmd.Parameters.AddWithValue("@p1", txtKullaniciAdi.Text);
+                    cmd.Parameters.AddWithValue("@p2", txtSifre.Text);
 
-                // 3. ADIM: Kaynakları temizleyelim (Memory leak olmasın)
-                dr.Close();
-                conn.Close();
+                    using (SqlDataReader dr = cmd.ExecuteReader())
+                    {
+                        // 2. ADIM: Eğer kullanıcı varsa
+                        if (dr.Read())
+                        {
+                            // Giriş başarılıysa Ana Menü formunu açıyoruz
+                            Menu anaMenu = new Menu();
+                            anaMenu.Show();
+                            this.Hide(); // Login formunu gizle
+                        }
+                        else
+                        {
+                            MessageHelper.ShowError("Kullanıcı adı veya şifre hatalı. Lütfen bilgilerinizi kontrol ediniz.", "Giriş Hatası");
+                        }
+                    }
+                }
             }
             catch (Exception ex)
             {
-                XtraMessageBox.Show("Bağlantı hatası kanka: " + ex.Message);
+                MessageHelper.ShowException(ex, "Bağlantı Hatası");
             }
         }
 

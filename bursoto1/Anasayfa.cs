@@ -5,6 +5,7 @@ using System.Data;
 using System.Data.SqlClient;
 using System.Drawing;
 using System.Windows.Forms;
+using bursoto1.Helpers; // MessageHelper için
 
 namespace bursoto1
 {
@@ -29,7 +30,8 @@ namespace bursoto1
             try
             {
                 // Bağlantıyı alıyoruz
-                SqlConnection aktifBaglanti = bgl.baglanti();
+                using (SqlConnection aktifBaglanti = bgl.baglanti())
+                {
 
                 // --- 1. VERİLERİ SQL'DEN ÇEKME ---
 
@@ -46,46 +48,45 @@ namespace bursoto1
                 SqlCommand cmd3 = new SqlCommand("SELECT COUNT(*) FROM Ogrenciler WHERE AISkor IS NOT NULL", aktifBaglanti);
                 string bursluOgr = cmd3.ExecuteScalar().ToString();
 
-                // En Başarılı Öğrenci ve AGNO
-                SqlCommand cmd4 = new SqlCommand("SELECT TOP 1 AD + ' ' + SOYAD, AGNO FROM Ogrenciler ORDER BY AGNO DESC", aktifBaglanti);
-                SqlDataReader dr = cmd4.ExecuteReader();
+                    // En Başarılı Öğrenci ve AGNO
+                    SqlCommand cmd4 = new SqlCommand("SELECT TOP 1 AD + ' ' + SOYAD, AGNO FROM Ogrenciler ORDER BY AGNO DESC", aktifBaglanti);
+                    string kralOgrenci = "-";
+                    decimal maxAgno = 0;
 
-                string kralOgrenci = "-";
-                decimal maxAgno = 0;
+                    using (SqlDataReader dr = cmd4.ExecuteReader())
+                    {
+                        if (dr.Read())
+                        {
+                            kralOgrenci = dr[0].ToString();
+                            maxAgno = Convert.ToDecimal(dr[1]);
+                        }
+                    }
 
-                if (dr.Read())
-                {
-                    kralOgrenci = dr[0].ToString();
-                    maxAgno = Convert.ToDecimal(dr[1]);
+                    // --- 2. TILE ELEMENTLERİNİ GÜZELLEŞTİRME ---
+
+                    // Ortak Element Ayarlayıcı Metot (Aşağıda tanımladık)
+                    TileAyarla(tileItemOgrenci, "TOPLAM ÖĞRENCİ", toplamOgr, Color.FromArgb(41, 128, 185));
+                    TileAyarla(tileItemBurs, "TOPLAM BURS HACMİ", bursMiktari, Color.FromArgb(39, 174, 96));
+
+                    // Yeni İstediğin: Burslu Sayısı
+                    // Eğer tasarımda 4. bir Tile eklediysen adını 'tileItemBursluSayisi' yapabilirsin
+                    // Şimdilik bunu mevcut bir Tile'ın altına küçük yazı olarak da ekleyebiliriz.
+
+                    // Başarı Kutusu Özel Ayarı (Gold Efekti)
+                    if (maxAgno >= 3.80m)
+                    {
+                        TileAyarla(tileItemBasari, "★ OKUL BİRİNCİSİ", kralOgrenci + " (" + maxAgno + ")", Color.Gold);
+                        tileItemBasari.AppearanceItem.Normal.ForeColor = Color.Black;
+                    }
+                    else
+                    {
+                        TileAyarla(tileItemBasari, "LİDER ÖĞRENCİ", kralOgrenci, Color.FromArgb(142, 68, 173));
+                    }
                 }
-                dr.Close();
-
-                // --- 2. TILE ELEMENTLERİNİ GÜZELLEŞTİRME ---
-
-                // Ortak Element Ayarlayıcı Metot (Aşağıda tanımladık)
-                TileAyarla(tileItemOgrenci, "TOPLAM ÖĞRENCİ", toplamOgr, Color.FromArgb(41, 128, 185));
-                TileAyarla(tileItemBurs, "TOPLAM BURS HACMİ", bursMiktari, Color.FromArgb(39, 174, 96));
-
-                // Yeni İstediğin: Burslu Sayısı
-                // Eğer tasarımda 4. bir Tile eklediysen adını 'tileItemBursluSayisi' yapabilirsin
-                // Şimdilik bunu mevcut bir Tile'ın altına küçük yazı olarak da ekleyebiliriz.
-
-                // Başarı Kutusu Özel Ayarı (Gold Efekti)
-                if (maxAgno >= 3.80m)
-                {
-                    TileAyarla(tileItemBasari, "★ OKUL BİRİNCİSİ", kralOgrenci + " (" + maxAgno + ")", Color.Gold);
-                    tileItemBasari.AppearanceItem.Normal.ForeColor = Color.Black;
-                }
-                else
-                {
-                    TileAyarla(tileItemBasari, "LİDER ÖĞRENCİ", kralOgrenci, Color.FromArgb(142, 68, 173));
-                }
-
-                aktifBaglanti.Close();
             }
             catch (Exception ex)
             {
-                XtraMessageBox.Show("Dashboard verileri çekilirken bir hata oluştu: " + ex.Message, "Hata", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageHelper.ShowException(ex, "Dashboard Hatası");
             }
         }
 
@@ -116,7 +117,8 @@ namespace bursoto1
         {
             try
             {
-                SqlConnection aktifBaglanti = bgl.baglanti();
+                using (SqlConnection aktifBaglanti = bgl.baglanti())
+                {
 
                 SqlDataAdapter da = new SqlDataAdapter("SELECT BÖLÜMÜ, COUNT(*) as Sayi FROM Ogrenciler WHERE BÖLÜMÜ IS NOT NULL GROUP BY BÖLÜMÜ", aktifBaglanti);
                 DataTable dt = new DataTable();
@@ -135,15 +137,14 @@ namespace bursoto1
                     seri.Points.Add(new SeriesPoint(bolum, adet));
                 }
 
-                chartControl1.Series.Add(seri);
-                seri.Label.TextPattern = "{A}: {V}";
-                seri.LabelsVisibility = DevExpress.Utils.DefaultBoolean.True;
-
-                aktifBaglanti.Close();
+                    chartControl1.Series.Add(seri);
+                    seri.Label.TextPattern = "{A}: {V}";
+                    seri.LabelsVisibility = DevExpress.Utils.DefaultBoolean.True;
+                }
             }
             catch (Exception ex)
             {
-                XtraMessageBox.Show("Grafik Çizim Hatası kanka: " + ex.Message);
+                MessageHelper.ShowException(ex, "Grafik Çizim Hatası");
             }
         }
 
