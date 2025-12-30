@@ -28,10 +28,10 @@
         /// </summary>
         private void InitializeComponent()
         {
-            DevExpress.XtraEditors.TileItemElement tileItemElement13 = new DevExpress.XtraEditors.TileItemElement();
-            DevExpress.XtraEditors.TileItemElement tileItemElement14 = new DevExpress.XtraEditors.TileItemElement();
-            DevExpress.XtraEditors.TileItemElement tileItemElement15 = new DevExpress.XtraEditors.TileItemElement();
-            DevExpress.XtraEditors.TileItemElement tileItemElement16 = new DevExpress.XtraEditors.TileItemElement();
+            DevExpress.XtraEditors.TileItemElement tileItemElement5 = new DevExpress.XtraEditors.TileItemElement();
+            DevExpress.XtraEditors.TileItemElement tileItemElement6 = new DevExpress.XtraEditors.TileItemElement();
+            DevExpress.XtraEditors.TileItemElement tileItemElement7 = new DevExpress.XtraEditors.TileItemElement();
+            DevExpress.XtraEditors.TileItemElement tileItemElement8 = new DevExpress.XtraEditors.TileItemElement();
             this.tileControl1 = new DevExpress.XtraEditors.TileControl();
             this.tileGroup2 = new DevExpress.XtraEditors.TileGroup();
             this.tileItemOgrenci = new DevExpress.XtraEditors.TileItem();
@@ -52,10 +52,10 @@
             // 
             this.tileControl1.Groups.Add(this.tileGroup2);
             this.tileControl1.ItemContentAnimation = DevExpress.XtraEditors.TileItemContentAnimationType.RandomSegmentedFade;
-            this.tileControl1.Location = new System.Drawing.Point(625, 164);
+            this.tileControl1.Location = new System.Drawing.Point(625, 12);
             this.tileControl1.MaxId = 5;
             this.tileControl1.Name = "tileControl1";
-            this.tileControl1.Size = new System.Drawing.Size(812, 269);
+            this.tileControl1.Size = new System.Drawing.Size(812, 579);
             this.tileControl1.TabIndex = 3;
             this.tileControl1.Text = "tileControl1";
             // 
@@ -71,16 +71,16 @@
             // 
             // tileItemOgrenci
             // 
-            tileItemElement13.Text = "tileItemogrenci";
-            this.tileItemOgrenci.Elements.Add(tileItemElement13);
+            tileItemElement5.Text = "tileItemogrenci";
+            this.tileItemOgrenci.Elements.Add(tileItemElement5);
             this.tileItemOgrenci.Id = 0;
             this.tileItemOgrenci.ItemSize = DevExpress.XtraEditors.TileItemSize.Large;
             this.tileItemOgrenci.Name = "tileItemOgrenci";
             // 
             // tileItemBurs
             // 
-            tileItemElement14.Text = "tileItemBurs";
-            this.tileItemBurs.Elements.Add(tileItemElement14);
+            tileItemElement6.Text = "tileItemBurs";
+            this.tileItemBurs.Elements.Add(tileItemElement6);
             this.tileItemBurs.Id = 1;
             this.tileItemBurs.ItemSize = DevExpress.XtraEditors.TileItemSize.Large;
             this.tileItemBurs.Name = "tileItemBurs";
@@ -88,16 +88,16 @@
             // 
             // tileItemBasari
             // 
-            tileItemElement15.Text = "tileItem1";
-            this.tileItemBasari.Elements.Add(tileItemElement15);
+            tileItemElement7.Text = "tileItem1";
+            this.tileItemBasari.Elements.Add(tileItemElement7);
             this.tileItemBasari.Id = 2;
             this.tileItemBasari.ItemSize = DevExpress.XtraEditors.TileItemSize.Large;
             this.tileItemBasari.Name = "tileItemBasari";
             // 
             // tileItemKasa
             // 
-            tileItemElement16.Text = "tileItemKasa";
-            this.tileItemKasa.Elements.Add(tileItemElement16);
+            tileItemElement8.Text = "tileItemKasa";
+            this.tileItemKasa.Elements.Add(tileItemElement8);
             this.tileItemKasa.Id = 3;
             this.tileItemKasa.ItemSize = DevExpress.XtraEditors.TileItemSize.Large;
             this.tileItemKasa.Name = "tileItemKasa";
@@ -142,7 +142,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1468, 546);
+            this.ClientSize = new System.Drawing.Size(1468, 642);
             this.Controls.Add(this.chartControl1);
             this.Controls.Add(this.tileControl1);
             this.Name = "Anasayfa";

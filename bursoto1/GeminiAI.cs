@@ -10,23 +10,61 @@ namespace bursoto1
 {
     public class GeminiAI
     {
-        private string apiKey = ConfigurationManager.AppSettings["GeminiApiKey"];
-        // Kesin çalışan v1beta URL'si ve model adı
-        private string apiUrl =>
-    $"https://generativelanguage.googleapis.com/v1/models/gemini-2.5-pro:generateContent?key={apiKey}";
+        // Groq API - Ücretsiz ve hızlı LLM servisi
+        private string apiKey = ConfigurationManager.AppSettings["GroqApiKey"];
+        private const string apiUrl = "https://api.groq.com/openai/v1/chat/completions";
 
+        /// <summary>
+        /// Öğrenci verilerini analiz eder ve burs uygunluk puanı verir.
+        /// Groq API kullanarak tüm faktörleri değerlendirir.
+        /// </summary>
         public async Task<string> BursAnaliziYap(string ogrenciVerisi)
         {
             try
             {
                 using (HttpClient client = new HttpClient())
                 {
-                    string talimat = "Sen bir burs komisyonu başkanısın. Cevabını asla yıldız (*) kullanmadan düz metin ver. " +
-                                     "Format tam olarak şöyle olsun: SKOR: [sayı] ACIKLAMA: [cümle]. Veri: " + ogrenciVerisi;
+                    client.Timeout = TimeSpan.FromSeconds(60);
+                    client.DefaultRequestHeaders.Add("Authorization", $"Bearer {apiKey}");
+
+                    string sistemMesaji = @"Sen tecrübeli bir burs komisyonu başkanısın. Öğrencinin verdiği cevapları derinlemesine analiz et.
+
+PUANLAMA:
+- Akademik (40p): AGNO 3.5+=40, 3.0-3.49=30, 2.5-2.99=20, 2.0-2.49=10, <2.0=0
+- Ekonomik (40p): KişiBaşıGelir=HaneGeliri/(Kardeş+2). <3000TL=40, 3-5k=30, 5-8k=20, 8-12k=10, >12k=0
+- Motivasyon (20p): Samimi/detaylı=20, Orta=10, Boş=0
+
+ÖĞRENCİNİN CEVAPLARINI TEK TEK ANALİZ ET:
+- [İHTİYAÇ] sorusuna ne demiş? Gerçekten ihtiyacı var mı yoksa abartıyor mu?
+- [HEDEFLER] sorusuna ne demiş? Gerçekçi mi, hayalperest mi?
+- [KULLANIM] sorusuna ne demiş? Parayı doğru kullanacak mı?
+- [FARK] sorusuna ne demiş? Kendini öne çıkaran bir özelliği var mı?
+
+CEVAP FORMATI:
+SKOR: [toplam puan]/100
+
+ANALİZ:
+- İhtiyaç cevabı: [Bu cevap hakkında 1 cümle yorum - samimi mi, abartılı mı, inandırıcı mı]
+- Hedefler cevabı: [Bu cevap hakkında 1 cümle yorum - gerçekçi mi, azimli mi]
+- Kullanım cevabı: [Bu cevap hakkında 1 cümle yorum - planlı mı, bilinçli mi]
+- Fark cevabı: [Bu cevap hakkında 1 cümle yorum - öne çıkan özellik var mı]
+
+KİŞİLİK: [2-3 cümle - nasıl biri bu öğrenci? Karakteri, potansiyeli, güvenilirliği]
+
+KARAR: [UYGUN/ŞARTLI/UYGUN DEĞİL] - [Neden bu kararı verdin, 1-2 cümle]
+
+NOT: Cevaplar boşsa 'Cevap verilmemiş' yaz. Yıldız/hashtag kullanma.";
 
                     var payload = new
                     {
-                        contents = new[] { new { parts = new[] { new { text = talimat } } } }
+                        model = "llama-3.3-70b-versatile",
+                        messages = new[]
+                        {
+                            new { role = "system", content = sistemMesaji },
+                            new { role = "user", content = "Bu öğrenciyi değerlendir:\n\n" + ogrenciVerisi }
+                        },
+                        temperature = 0.3,
+                        max_tokens = 500
                     };
 
                     string jsonPayload = JsonConvert.SerializeObject(payload);
@@ -37,7 +75,7 @@ namespace bursoto1
                     if (response.IsSuccessStatusCode)
                     {
                         dynamic data = JsonConvert.DeserializeObject(responseString);
-                        string rawText = data.candidates[0].content.parts[0].text;
+                        string rawText = data.choices[0].message.content;
                         return Regex.Replace(rawText, @"[*#_]", "").Trim();
                     }
                     return "AI Hatası: " + responseString;

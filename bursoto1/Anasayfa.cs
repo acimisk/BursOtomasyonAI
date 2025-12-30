@@ -5,18 +5,55 @@ using System.Data;
 using System.Data.SqlClient;
 using System.Drawing;
 using System.Windows.Forms;
-using bursoto1.Helpers; // MessageHelper için
+using bursoto1.Helpers;
 
 namespace bursoto1
 {
     public partial class Anasayfa : Form
     {
-        // Kanka sınıfı çağırdık
         SqlBaglanti bgl = new SqlBaglanti();
 
         public Anasayfa()
         {
             InitializeComponent();
+            ModernUIAyarla();
+            
+            // Otomatik yenileme için event'lere abone ol
+            DataChangedNotifier.OgrenciDegisti += OnVerilerDegisti;
+            DataChangedNotifier.BursVerenDegisti += OnVerilerDegisti;
+            DataChangedNotifier.BursDegisti += OnVerilerDegisti;
+        }
+
+        private void ModernUIAyarla()
+        {
+            // Göz dostu soft gray background
+            this.BackColor = Color.FromArgb(233, 236, 239);
+        }
+
+        /// <summary>
+        /// Veritabanı değişikliklerinde otomatik yenileme
+        /// </summary>
+        private void OnVerilerDegisti()
+        {
+            // UI thread'de güvenli çalıştır
+            if (this.InvokeRequired)
+            {
+                this.Invoke(new Action(OnVerilerDegisti));
+                return;
+            }
+
+            // Dashboard'u yenile
+            DashboardVerileriniGetir();
+            BolumGrafiginiCiz();
+        }
+
+        protected override void OnFormClosed(FormClosedEventArgs e)
+        {
+            // Event'lerden aboneliği kaldır (memory leak önleme)
+            DataChangedNotifier.OgrenciDegisti -= OnVerilerDegisti;
+            DataChangedNotifier.BursVerenDegisti -= OnVerilerDegisti;
+            DataChangedNotifier.BursDegisti -= OnVerilerDegisti;
+            base.OnFormClosed(e);
         }
 
         private void Anasayfa_Load(object sender, EventArgs e)

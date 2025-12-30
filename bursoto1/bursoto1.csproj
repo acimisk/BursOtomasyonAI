@@ -161,6 +161,7 @@
     <Compile Include="SqlBaglanti.cs" />
     <Compile Include="Helpers\MessageHelper.cs" />
     <Compile Include="Helpers\ImageHelper.cs" />
+    <Compile Include="Helpers\DataChangedNotifier.cs" />
     <EmbeddedResource Include="Anasayfa.resx">
       <DependentUpon>Anasayfa.cs</DependentUpon>
     </EmbeddedResource>

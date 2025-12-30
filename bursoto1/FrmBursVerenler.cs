@@ -144,6 +144,9 @@ namespace bursoto1
                         "Bağışçı aktif bağışçılar listesine taşındı.",
                         "Onay Başarılı");
                     Listele();
+                    
+                    // Diğer formları bilgilendir (Anasayfa otomatik yenilenecek)
+                    DataChangedNotifier.NotifyBursVerenChanged();
                 }
                 catch (Exception ex)
                 {
@@ -195,6 +198,9 @@ namespace bursoto1
                         $"{adSoyad} kişisinin bağışı reddedildi ve kayıt silindi.",
                         "Reddetme Başarılı");
                     Listele();
+                    
+                    // Diğer formları bilgilendir
+                    DataChangedNotifier.NotifyBursVerenChanged();
                 }
                 catch (Exception ex)
                 {

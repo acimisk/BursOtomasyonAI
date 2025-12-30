@@ -82,11 +82,36 @@
                 }
             </div>
 
-            <div class="mt-3">
-                <label class="form-label fw-semibold">Neden Burs Almalısın?</label>
-                <textarea @bind="aciklama" class="form-control" rows="4"
-                          placeholder="Ailenizin durumu, akademik hedeflerin ve seni öne çıkaran noktaları kısaca anlat."></textarea>
-                <small class="form-text text-muted">Bu açıklama, komisyonun seni daha iyi tanımasına yardımcı olur.</small>
+            <div class="card mt-4 border-0 shadow-sm">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0 fw-bold text-secondary">Motivasyon Soruları</h5>
+                    <small class="text-muted">Bu sorular, komisyonun seni daha iyi tanımasını sağlar. Lütfen samimi ve detaylı yanıtlar ver.</small>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">1. Neden bu bursa ihtiyacın var?</label>
+                        <textarea @bind="soru1" class="form-control" rows="3"
+                                  placeholder="Ailenin ekonomik durumunu, gelir kaynaklarını ve maddi zorluklarını açıkla..."></textarea>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">2. Akademik hedeflerin neler?</label>
+                        <textarea @bind="soru2" class="form-control" rows="3"
+                                  placeholder="Mezun olduktan sonra ne yapmak istiyorsun? Kariyer planların neler?"></textarea>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">3. Burs aldığında nasıl kullanacaksın?</label>
+                        <textarea @bind="soru3" class="form-control" rows="3"
+                                  placeholder="Bursu eğitim masrafları, kitap, barınma gibi hangi alanlarda kullanmayı planlıyorsun?"></textarea>
+                    </div>
+                    
+                    <div class="mb-0">
+                        <label class="form-label fw-semibold">4. Seni diğer adaylardan ayıran özelliğin ne?</label>
+                        <textarea @bind="soru4" class="form-control" rows="3"
+                                  placeholder="Gönüllü çalışmalar, projeler, başarılar veya zorluklara rağmen elde ettiğin kazanımlar..."></textarea>
+                    </div>
+                </div>
             </div>
 
             <button class="btn btn-success btn-lg w-100 mt-4 fw-bold" @onclick="Kaydet">
@@ -111,14 +136,22 @@
     private string sinif = "";
     private string bolum = "";
     private string telefon = "";
-    private string aciklama = "";
     private string mesaj = "";
     private string fotoBase64 = "";
+
+    // Motivasyon soruları
+    private string soru1 = ""; // Neden bursa ihtiyacın var?
+    private string soru2 = ""; // Akademik hedeflerin
+    private string soru3 = ""; // Bursu nasıl kullanacaksın?
+    private string soru4 = ""; // Seni ayıran özellik
 
     private double agno;
     private decimal gelir;
     private int kardesSayisi;
     private List<string> bolumler = new List<string>();
+
+    // Tüm motivasyon cevaplarını birleştir
+    private string TumMotivasyonlar => $"[İHTİYAÇ]: {soru1}\n[HEDEFLER]: {soru2}\n[KULLANIM]: {soru3}\n[FARK]: {soru4}";
 
     protected override async Task OnInitializedAsync()
     {
@@ -205,6 +238,14 @@
             return false;
         }
 
+        // En az bir motivasyon sorusu doldurulmalı
+        if (string.IsNullOrWhiteSpace(soru1) && string.IsNullOrWhiteSpace(soru2) && 
+            string.IsNullOrWhiteSpace(soru3) && string.IsNullOrWhiteSpace(soru4))
+        {
+            mesaj = "Hata: Lütfen motivasyon sorularından en az birini cevaplayınız.";
+            return false;
+        }
+
         return true;
     }
 
@@ -221,9 +262,14 @@
             using (SqlConnection conn = new SqlConnection(connString))
             {
                 conn.Open();
+                
+                // Öğrenciyi ekle ve ID'yi al
                 string query = @"INSERT INTO Ogrenciler
                                 (AD, SOYAD, [KARDEŞ SAYISI], [TOPLAM HANE GELİRİ], SINIF, BÖLÜMÜ, AGNO, TELEFON, FOTO, AINotu)
-                                VALUES (@p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8, @p9, @p10)";
+                                VALUES (@p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8, @p9, @p10);
+                                SELECT SCOPE_IDENTITY();";
+                
+                int yeniOgrenciID;
                 using (SqlCommand cmd = new SqlCommand(query, conn))
                 {
                     cmd.Parameters.AddWithValue("@p1", ad.Trim().ToUpper());
@@ -234,15 +280,31 @@
                     cmd.Parameters.AddWithValue("@p6", bolum);
                     cmd.Parameters.AddWithValue("@p7", agno);
                     cmd.Parameters.AddWithValue("@p8", telefon);
-                    cmd.Parameters.AddWithValue("@p9", fotoBase64); // Eğer boşsa boş string gider, hata vermez
-                    cmd.Parameters.AddWithValue("@p10", aciklama);
-                    cmd.ExecuteNonQuery();
-                    mesaj = "Başvurunuz başarıyla kaydedildi. Değerlendirme sonucunuz tarafınıza bildirilecektir.";
-
-                    // Formu Temizle
-                    ad = soyad = bolum = sinif = telefon = aciklama = fotoBase64 = "";
-                    agno = 0; gelir = 0; kardesSayisi = 0;
+                    cmd.Parameters.AddWithValue("@p9", fotoBase64);
+                    cmd.Parameters.AddWithValue("@p10", TumMotivasyonlar); // Tüm motivasyon cevapları
+                    yeniOgrenciID = Convert.ToInt32(cmd.ExecuteScalar());
                 }
+
+                // OgrenciBurslari tablosuna beklemede kaydı ekle (BursID=1 varsayılan burs)
+                try
+                {
+                    string bursQuery = @"INSERT INTO OgrenciBurslari (OgrenciID, BursID, BaslangicTarihi, Durum) 
+                                         VALUES (@ogrID, 1, @tarih, 0)";
+                    using (SqlCommand bursCmd = new SqlCommand(bursQuery, conn))
+                    {
+                        bursCmd.Parameters.AddWithValue("@ogrID", yeniOgrenciID);
+                        bursCmd.Parameters.AddWithValue("@tarih", DateTime.Now);
+                        bursCmd.ExecuteNonQuery();
+                    }
+                }
+                catch { } // Burs kaydı opsiyonel, hata olursa öğrenci yine kaydedilmiş olur
+
+                mesaj = "Başvurunuz başarıyla kaydedildi. Komisyon değerlendirmesi sonrasında tarafınıza bilgi verilecektir.";
+
+                // Formu Temizle
+                ad = soyad = bolum = sinif = telefon = fotoBase64 = "";
+                soru1 = soru2 = soru3 = soru4 = "";
+                agno = 0; gelir = 0; kardesSayisi = 0;
             }
         }
         catch (Exception)

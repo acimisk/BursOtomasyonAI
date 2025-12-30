@@ -120,8 +120,12 @@ namespace bursoto1
 
             try
             {
+                // Öğrenciyi ekle ve ID'sini al
                 string sorgu = "INSERT INTO Ogrenciler (AD, SOYAD, [KARDEŞ SAYISI], [TOPLAM HANE GELİRİ], BÖLÜMÜ, SINIF, AGNO, FOTO, TELEFON) " +
+                               "OUTPUT INSERTED.ID " +
                                "VALUES (@p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8, @p9)";
+
+                int yeniOgrenciID = 0;
 
                 using (SqlConnection conn = bgl.baglanti())
                 {
@@ -135,10 +139,31 @@ namespace bursoto1
                     cmd.Parameters.AddWithValue("@p7", agno);
                     cmd.Parameters.AddWithValue("@p8", dosyaYolu ?? "");
                     cmd.Parameters.AddWithValue("@p9", txtTelNo.Text.Trim());
-                    cmd.ExecuteNonQuery();
+                    
+                    // Yeni eklenen öğrencinin ID'sini al
+                    yeniOgrenciID = Convert.ToInt32(cmd.ExecuteScalar());
+
+                    // Öğrenciyi "Beklemede" durumuna ekle (OgrenciBurslari tablosuna)
+                    // BursID = 0 veya NULL ile beklemede kaydı oluştur
+                    try
+                    {
+                        string beklemeSorgu = @"INSERT INTO OgrenciBurslari (OgrenciID, BursID, BaslangicTarihi, Durum) 
+                                               VALUES (@OgrenciID, 1, @Tarih, 0)"; // Durum = 0: Beklemede
+                        SqlCommand cmdBekleme = new SqlCommand(beklemeSorgu, conn);
+                        cmdBekleme.Parameters.AddWithValue("@OgrenciID", yeniOgrenciID);
+                        cmdBekleme.Parameters.AddWithValue("@Tarih", DateTime.Now);
+                        cmdBekleme.ExecuteNonQuery();
+                    }
+                    catch
+                    {
+                        // OgrenciBurslari tablosu yoksa veya hata olursa devam et
+                    }
                 }
 
-                MessageHelper.ShowSuccess("Öğrenci sisteme başarıyla kaydedildi.", "Kayıt Başarılı");
+                // Diğer formları bilgilendir (Anasayfa otomatik yenilenecek)
+                DataChangedNotifier.NotifyOgrenciChanged();
+
+                MessageHelper.ShowSuccess("Öğrenci sisteme başarıyla kaydedildi.\nDurum: Beklemede", "Kayıt Başarılı");
                 Temizle();
             }
             catch (Exception ex)
