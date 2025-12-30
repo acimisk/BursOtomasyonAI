@@ -68,7 +68,7 @@ namespace bursoto1
             // 
             this.labelKullaniciAdi.Appearance.Font = new System.Drawing.Font("Tahoma", 12F, System.Drawing.FontStyle.Bold);
             this.labelKullaniciAdi.Appearance.Options.UseFont = true;
-            this.labelKullaniciAdi.Location = new System.Drawing.Point(45, 71);
+            this.labelKullaniciAdi.Location = new System.Drawing.Point(15, 48);
             this.labelKullaniciAdi.Name = "labelKullaniciAdi";
             this.labelKullaniciAdi.Size = new System.Drawing.Size(126, 24);
             this.labelKullaniciAdi.TabIndex = 2;
@@ -79,7 +79,7 @@ namespace bursoto1
             // 
             this.labelSifre.Appearance.Font = new System.Drawing.Font("Tahoma", 12F, System.Drawing.FontStyle.Bold);
             this.labelSifre.Appearance.Options.UseFont = true;
-            this.labelSifre.Location = new System.Drawing.Point(122, 112);
+            this.labelSifre.Location = new System.Drawing.Point(92, 89);
             this.labelSifre.Name = "labelSifre";
             this.labelSifre.Size = new System.Drawing.Size(48, 24);
             this.labelSifre.TabIndex = 3;

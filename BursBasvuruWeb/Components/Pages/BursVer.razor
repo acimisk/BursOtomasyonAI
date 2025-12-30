@@ -19,15 +19,14 @@
 
                     @if (!string.IsNullOrEmpty(mesaj))
                     {
-                        var alertClass = mesaj.Contains("Hata") ? "alert-danger" : "alert-success";
+                        var alertClass = IsErrorMessage ? "alert-danger" : "alert-success";
                         <div class="alert @alertClass d-flex align-items-center mb-4 shadow-sm" role="alert">
-                            @if (mesaj.Contains("Hata"))
+                            @if (IsErrorMessage)
                             {
                                 <i class="bi bi-exclamation-triangle-fill me-2"></i>
                             }
                             else
                             {
-
                                 <i class="bi bi-check-circle-fill me-2"></i>
                             }
                             <div>@mesaj</div>
@@ -89,6 +88,9 @@
     // Bu sayede "SSL Provider" hatası almadan LocalDB'ye bağlanacak.
     string connectionString = @"Data Source=(localdb)\MSSQLLocalDB; initial catalog=bursOtoDeneme1; Integrated Security=TRUE; Encrypt=False; TrustServerCertificate=True;";
 
+    private bool IsErrorMessage =>
+        !string.IsNullOrEmpty(mesaj) && mesaj.StartsWith("Hata");
+
     private void BursuKaydet()
     {
         // Basit bir validasyon (boş alan kontrolü)
@@ -127,7 +129,7 @@
         catch (Exception ex)
         {
             // Hata mesajını ekrana basıyoruz ki sorunu görelim
-            mesaj = "Hata oluştu: " + ex.Message;
+            mesaj = "Hata: Bağış kaydedilirken bir sorun oluştu. Lütfen daha sonra tekrar deneyin.";
         }
     }
 }

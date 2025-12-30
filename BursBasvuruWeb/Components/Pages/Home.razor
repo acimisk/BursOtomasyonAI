@@ -1,37 +1,47 @@
 ﻿@page "/"
 @using Microsoft.AspNetCore.Components.Web
 @rendermode InteractiveServer
-@using Microsoft.Data.SqlClient  @* <-- BURAYI DEĞİŞTİR *@
-@using System.IO
+@using Microsoft.Data.SqlClient
 @inject NavigationManager Nav
 
 <PageTitle>Burs Başvuru Sistemi</PageTitle>
 
 <div class="container mt-5">
-    <div class="card shadow">
-        <div class="card-header bg-primary text-white">
-            <h3 class="mb-0">Öğrenci Burs Başvuru Formu</h3>
-        </div>
-        <div class="card-body">
-            <div class="row">
-                <div class="col-md-6 mb-3">
-                    <label>Ad</label>
-                    <input type="text" @bind="ad" class="form-control" />
+    <div class="card shadow-lg border-0 rounded-4">
+        <div class="card-header bg-primary bg-gradient text-white rounded-top-4">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h3 class="mb-0 fw-bold">Öğrenci Burs Başvuru Formu</h3>
+                    <small class="opacity-75">Lütfen bilgilerinizi eksiksiz ve doğru giriniz.</small>
                 </div>
-                <div class="col-md-6 mb-3">
-                    <label>Soyad</label>
-                    <input type="text" @bind="soyad" class="form-control" />
+            </div>
+        </div>
+        <div class="card-body p-4 p-lg-5">
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold">Ad</label>
+                    <input type="text" @bind="ad" class="form-control form-control-lg" placeholder="Adınız" />
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold">Soyad</label>
+                    <input type="text" @bind="soyad" class="form-control form-control-lg" placeholder="Soyadınız" />
                 </div>
             </div>
 
-            <div class="row">
-                <div class="col-md-4 mb-3">
-                    <label>Bölüm</label>
-                    <input type="text" @bind="bolum" class="form-control" placeholder="Örn: Bilgisayar Müh." />
+            <div class="row g-3 mt-1">
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold">Bölüm</label>
+                    <select @bind="bolum" class="form-select form-select-lg">
+                        <option value="">Bölüm Seçiniz...</option>
+                        @foreach (var item in bolumler)
+                        {
+                            <option value="@item">@item</option>
+                        }
+                    </select>
                 </div>
-                <div class="col-md-4 mb-3">
-                    <label>Sınıf</label>
-                    <select @bind="sinif" class="form-control">
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold">Sınıf</label>
+                    <select @bind="sinif" class="form-select form-select-lg">
                         <option value="">Seçiniz...</option>
                         <option value="Hazırlık">Hazırlık</option>
                         <option value="1. Sınıf">1. Sınıf</option>
@@ -40,53 +50,62 @@
                         <option value="4. Sınıf">4. Sınıf</option>
                     </select>
                 </div>
-                <div class="col-md-4 mb-3">
-                    <label>AGNO (0-4)</label>
-                    <input type="number" step="0.01" @bind="agno" class="form-control" />
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold">AGNO (0-4)</label>
+                    <input type="number" step="0.01" min="0" max="4" @bind="agno" class="form-control form-control-lg" placeholder="Örn: 3,25" />
+                    <small class="form-text text-muted">Lütfen transkriptinizdeki güncel ortalamayı giriniz.</small>
                 </div>
             </div>
 
-            <div class="row">
-                <div class="col-md-4 mb-3">
-                    <label>Kardeş Sayısı</label>
-                    <input type="number" @bind="kardesSayisi" class="form-control" />
+            <div class="row g-3 mt-1">
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold">Kardeş Sayısı</label>
+                    <input type="number" min="0" @bind="kardesSayisi" class="form-control form-control-lg" />
                 </div>
-                <div class="col-md-4 mb-3">
-                    <label>Hane Geliri</label>
-                    <input type="number" @bind="gelir" class="form-control" />
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold">Toplam Hane Geliri (₺)</label>
+                    <input type="number" min="0" @bind="gelir" class="form-control form-control-lg" placeholder="Aylık toplam gelir" />
                 </div>
-                <div class="col-md-4 mb-3">
-                    <label>Telefon</label>
-                    <input type="text" @bind="telefon" class="form-control" placeholder="0555..." />
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold">Telefon</label>
+                    <input type="text" @bind="telefon" class="form-control form-control-lg" placeholder="05XX XXX XX XX" />
                 </div>
             </div>
 
-            <div class="mb-3">
-                <label>Profil Fotoğrafı</label>
+            <div class="mt-3">
+                <label class="form-label fw-semibold">Profil Fotoğrafı</label>
                 <InputFile OnChange="FotoSec" class="form-control" />
+                <small class="form-text text-muted d-block mt-1">Yüzünüzün net göründüğü güncel bir fotoğraf yükleyiniz. (Opsiyonel)</small>
                 @if (!string.IsNullOrEmpty(fotoBase64))
                 {
-                    <img src="@fotoBase64" style="width:100px; margin-top:10px; border-radius:5px;" />
+                    <img src="@fotoBase64" class="mt-3 rounded shadow-sm" style="width:120px; height:120px; object-fit:cover;" />
                 }
             </div>
 
-            <div class="mb-3">
-                <label>Neden Burs Almalısın? (AI Analiz Notu)</label>
-                <textarea @bind="aciklama" class="form-control" rows="4"></textarea>
+            <div class="mt-3">
+                <label class="form-label fw-semibold">Neden Burs Almalısın?</label>
+                <textarea @bind="aciklama" class="form-control" rows="4"
+                          placeholder="Ailenizin durumu, akademik hedeflerin ve seni öne çıkaran noktaları kısaca anlat."></textarea>
+                <small class="form-text text-muted">Bu açıklama, komisyonun seni daha iyi tanımasına yardımcı olur.</small>
             </div>
 
-            <button class="btn btn-success w-100" @onclick="Kaydet">Başvuruyu Gönder</button>
+            <button class="btn btn-success btn-lg w-100 mt-4 fw-bold" @onclick="Kaydet">
+                Başvuruyu Gönder
+            </button>
 
             @if (!string.IsNullOrEmpty(mesaj))
             {
-                <div class="alert alert-info mt-3">@mesaj</div>
+                var alertClass = mesaj.StartsWith("Hata") ? "alert-danger" : "alert-success";
+                <div class="alert @alertClass mt-4 mb-0" role="alert">
+                    @mesaj
+                </div>
             }
         </div>
     </div>
 </div>
 
 @code {
-    // HATA ÇÖZÜMÜ: Değişkenlere varsayılan değerler atadık
+    // Varsayılan değerler (null referans hatalarını engellemek için)
     private string ad = "";
     private string soyad = "";
     private string sinif = "";
@@ -99,6 +118,44 @@
     private double agno;
     private decimal gelir;
     private int kardesSayisi;
+    private List<string> bolumler = new List<string>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await BolumleriYukleAsync();
+    }
+
+    private async Task BolumleriYukleAsync()
+    {
+        try
+        {
+            string connString = @"Data Source=(localdb)\MSSQLLocalDB; initial catalog=bursOtoDeneme1; Integrated Security=TRUE";
+            using (SqlConnection conn = new SqlConnection(connString))
+            {
+                await conn.OpenAsync();
+                string query = "SELECT DISTINCT BolumAdi FROM Bolumler ORDER BY BolumAdi ASC";
+
+                using (SqlCommand cmd = new SqlCommand(query, conn))
+                using (SqlDataReader dr = await cmd.ExecuteReaderAsync())
+                {
+                    bolumler.Clear();
+                    while (await dr.ReadAsync())
+                    {
+                        var adi = dr["BolumAdi"]?.ToString();
+                        if (!string.IsNullOrWhiteSpace(adi))
+                        {
+                            bolumler.Add(adi);
+                        }
+                    }
+                }
+            }
+        }
+        catch
+        {
+            // Bölüm listesi yüklenemezse form yine de çalışsın,
+            // kullanıcı manuel yazabilsin diye fallback olarak listesi boş bırakıyoruz.
+        }
+    }
 
     async Task FotoSec(InputFileChangeEventArgs e)
     {
@@ -112,13 +169,51 @@
         }
         catch (Exception ex)
         {
-            mesaj = "Fotoğraf yüklenirken hata: " + ex.Message;
+            mesaj = "Hata: Fotoğraf yüklenirken bir sorun oluştu. Lütfen tekrar deneyin.";
         }
+    }
+
+    private bool FormGecerliMi()
+    {
+        if (string.IsNullOrWhiteSpace(ad) || string.IsNullOrWhiteSpace(soyad))
+        {
+            mesaj = "Hata: Lütfen ad ve soyad bilgilerini giriniz.";
+            return false;
+        }
+
+        if (string.IsNullOrWhiteSpace(bolum) || string.IsNullOrWhiteSpace(sinif))
+        {
+            mesaj = "Hata: Lütfen bölüm ve sınıf bilgilerini seçiniz.";
+            return false;
+        }
+
+        if (string.IsNullOrWhiteSpace(telefon))
+        {
+            mesaj = "Hata: Lütfen telefon numaranızı giriniz.";
+            return false;
+        }
+
+        if (gelir <= 0)
+        {
+            mesaj = "Hata: Lütfen geçerli bir hane geliri giriniz.";
+            return false;
+        }
+
+        if (agno < 0 || agno > 4)
+        {
+            mesaj = "Hata: AGNO 0 ile 4 arasında olmalıdır.";
+            return false;
+        }
+
+        return true;
     }
 
     private void Kaydet()
     {
-        if (agno < 0 || agno > 4) { mesaj = "Hata: AGNO 0-4 arası olmalı!"; return; }
+        if (!FormGecerliMi())
+        {
+            return;
+        }
 
         try
         {
@@ -142,7 +237,7 @@
                     cmd.Parameters.AddWithValue("@p9", fotoBase64); // Eğer boşsa boş string gider, hata vermez
                     cmd.Parameters.AddWithValue("@p10", aciklama);
                     cmd.ExecuteNonQuery();
-                    mesaj = "Başvurunuz başarıyla kaydedildi kanka!";
+                    mesaj = "Başvurunuz başarıyla kaydedildi. Değerlendirme sonucunuz tarafınıza bildirilecektir.";
 
                     // Formu Temizle
                     ad = soyad = bolum = sinif = telefon = aciklama = fotoBase64 = "";
@@ -150,9 +245,9 @@
                 }
             }
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            mesaj = "Hata: " + ex.Message;
+            mesaj = "Hata: Başvuru kaydedilirken bir sorun oluştu. Lütfen daha sonra tekrar deneyin.";
         }
     }
 }
