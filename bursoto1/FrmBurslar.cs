@@ -44,6 +44,59 @@ namespace bursoto1
                 txtMiktar.Text = dr["Miktar"].ToString();
                 txtKontenjan.Text = dr["Kontenjan"].ToString();
                 txtAciklama.Text = dr["Aciklama"].ToString();
+                
+                // Seçili bursu alan öğrencileri göster
+                BursAlanOgrencileriGetir(Convert.ToInt32(dr["BursID"]));
+            }
+        }
+
+        // Seçili bursu alan öğrencileri getir
+        private void BursAlanOgrencileriGetir(int bursID)
+        {
+            try
+            {
+                DataTable dt = new DataTable();
+                using (SqlConnection conn = bgl.baglanti())
+                {
+                    // OgrenciBurslari tablosu üzerinden burs alan öğrencileri getir
+                    string sorgu = @"SELECT o.ID, o.AD, o.SOYAD, o.BÖLÜMÜ, o.SINIF, o.AGNO,
+                                    ob.BaslangicTarihi,
+                                    CASE WHEN ob.Durum = 1 THEN 'Aktif' 
+                                         WHEN ob.Durum = 0 THEN 'Beklemede' 
+                                         ELSE 'Bilinmiyor' END AS [Durum]
+                                    FROM Ogrenciler o
+                                    INNER JOIN OgrenciBurslari ob ON o.ID = ob.OgrenciID
+                                    WHERE ob.BursID = @BursID
+                                    ORDER BY o.AD, o.SOYAD";
+                    
+                    using (SqlCommand cmd = new SqlCommand(sorgu, conn))
+                    {
+                        cmd.Parameters.AddWithValue("@BursID", bursID);
+                        using (SqlDataAdapter da = new SqlDataAdapter(cmd))
+                        {
+                            da.Fill(dt);
+                        }
+                    }
+                }
+                
+                // Öğrenci sayısını bilgi mesajı olarak göster
+                if (dt.Rows.Count > 0)
+                {
+                    MessageHelper.ShowInfo(
+                        $"Bu bursu alan toplam {dt.Rows.Count} öğrenci bulunmaktadır.\n\n" +
+                        $"Aktif: {dt.Select("[Durum] = 'Aktif'").Length} öğrenci\n" +
+                        $"Beklemede: {dt.Select("[Durum] = 'Beklemede'").Length} öğrenci",
+                        "Burs Alan Öğrenciler"
+                    );
+                }
+                else
+                {
+                    MessageHelper.ShowInfo("Bu bursu alan öğrenci bulunmamaktadır.", "Bilgi");
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageHelper.ShowException(ex, "Burs Alan Öğrenciler");
             }
         }
 

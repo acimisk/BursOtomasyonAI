@@ -31,11 +31,15 @@
             DevExpress.XtraEditors.TileItemElement tileItemElement13 = new DevExpress.XtraEditors.TileItemElement();
             DevExpress.XtraEditors.TileItemElement tileItemElement14 = new DevExpress.XtraEditors.TileItemElement();
             DevExpress.XtraEditors.TileItemElement tileItemElement15 = new DevExpress.XtraEditors.TileItemElement();
+            DevExpress.XtraEditors.TileItemElement tileItemElement16 = new DevExpress.XtraEditors.TileItemElement();
             this.tileControl1 = new DevExpress.XtraEditors.TileControl();
             this.tileGroup2 = new DevExpress.XtraEditors.TileGroup();
             this.tileItemOgrenci = new DevExpress.XtraEditors.TileItem();
             this.tileItemBurs = new DevExpress.XtraEditors.TileItem();
             this.tileItemBasari = new DevExpress.XtraEditors.TileItem();
+            this.tileItemKasa = new DevExpress.XtraEditors.TileItem();
+            this.tileItemGelir = new DevExpress.XtraEditors.TileItem();
+            this.tileItemGider = new DevExpress.XtraEditors.TileItem();
             this.tileGroup1 = new DevExpress.XtraEditors.TileGroup();
             this.tileGroup3 = new DevExpress.XtraEditors.TileGroup();
             this.tileGroup4 = new DevExpress.XtraEditors.TileGroup();
@@ -49,7 +53,7 @@
             this.tileControl1.Groups.Add(this.tileGroup2);
             this.tileControl1.ItemContentAnimation = DevExpress.XtraEditors.TileItemContentAnimationType.RandomSegmentedFade;
             this.tileControl1.Location = new System.Drawing.Point(625, 164);
-            this.tileControl1.MaxId = 3;
+            this.tileControl1.MaxId = 5;
             this.tileControl1.Name = "tileControl1";
             this.tileControl1.Size = new System.Drawing.Size(812, 269);
             this.tileControl1.TabIndex = 3;
@@ -60,6 +64,9 @@
             this.tileGroup2.Items.Add(this.tileItemOgrenci);
             this.tileGroup2.Items.Add(this.tileItemBurs);
             this.tileGroup2.Items.Add(this.tileItemBasari);
+            this.tileGroup2.Items.Add(this.tileItemKasa);
+            this.tileGroup2.Items.Add(this.tileItemGelir);
+            this.tileGroup2.Items.Add(this.tileItemGider);
             this.tileGroup2.Name = "tileGroup2";
             // 
             // tileItemOgrenci
@@ -86,6 +93,26 @@
             this.tileItemBasari.Id = 2;
             this.tileItemBasari.ItemSize = DevExpress.XtraEditors.TileItemSize.Large;
             this.tileItemBasari.Name = "tileItemBasari";
+            // 
+            // tileItemKasa
+            // 
+            tileItemElement16.Text = "tileItemKasa";
+            this.tileItemKasa.Elements.Add(tileItemElement16);
+            this.tileItemKasa.Id = 3;
+            this.tileItemKasa.ItemSize = DevExpress.XtraEditors.TileItemSize.Large;
+            this.tileItemKasa.Name = "tileItemKasa";
+            // 
+            // tileItemGelir
+            // 
+            this.tileItemGelir.Id = 4;
+            this.tileItemGelir.ItemSize = DevExpress.XtraEditors.TileItemSize.Large;
+            this.tileItemGelir.Name = "tileItemGelir";
+            // 
+            // tileItemGider
+            // 
+            this.tileItemGider.Id = 5;
+            this.tileItemGider.ItemSize = DevExpress.XtraEditors.TileItemSize.Large;
+            this.tileItemGider.Name = "tileItemGider";
             // 
             // tileGroup1
             // 
@@ -136,6 +163,9 @@
         private DevExpress.XtraEditors.TileGroup tileGroup4;
         private DevExpress.XtraEditors.TileGroup tileGroup5;
         private DevExpress.XtraEditors.TileItem tileItemBasari;
+        private DevExpress.XtraEditors.TileItem tileItemKasa;
+        private DevExpress.XtraEditors.TileItem tileItemGelir;
+        private DevExpress.XtraEditors.TileItem tileItemGider;
         private DevExpress.XtraCharts.ChartControl chartControl1;
     }
 }

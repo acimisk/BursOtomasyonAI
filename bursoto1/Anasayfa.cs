@@ -44,6 +44,31 @@ namespace bursoto1
                 object sonucBurs = cmd2.ExecuteScalar();
                 string bursMiktari = (sonucBurs != DBNull.Value) ? string.Format("{0:C0}", sonucBurs) : "0 ₺";
 
+                // TOPLAM GELİR (Onaylanmış bağışlar)
+                SqlCommand cmdGelir = new SqlCommand("SELECT SUM(BagisMiktari) FROM BursVerenler WHERE Durum = 'Onaylandı'", aktifBaglanti);
+                object sonucGelir = cmdGelir.ExecuteScalar();
+                decimal toplamGelir = (sonucGelir != DBNull.Value) ? Convert.ToDecimal(sonucGelir) : 0;
+
+                // TOPLAM GİDER (Öğrencilere gönderilen burslar)
+                decimal toplamGider = 0;
+                try
+                {
+                    SqlCommand cmdGider = new SqlCommand("SELECT SUM(Tutar) FROM BursGiderleri", aktifBaglanti);
+                    object sonucGider = cmdGider.ExecuteScalar();
+                    toplamGider = (sonucGider != DBNull.Value) ? Convert.ToDecimal(sonucGider) : 0;
+                }
+                catch
+                {
+                    // BursGiderleri tablosu yoksa, gider 0 olarak kalır
+                    toplamGider = 0;
+                }
+
+                // NET KASA (Gelir - Gider)
+                decimal netKasa = toplamGelir - toplamGider;
+                string toplamKasa = string.Format("{0:C0}", netKasa);
+                string gelirStr = string.Format("{0:C0}", toplamGelir);
+                string giderStr = string.Format("{0:C0}", toplamGider);
+
                 // Burs Verilen Öğrenci Sayısı (Puanı olanlar burs almış kabul edilsin)
                 SqlCommand cmd3 = new SqlCommand("SELECT COUNT(*) FROM Ogrenciler WHERE AISkor IS NOT NULL", aktifBaglanti);
                 string bursluOgr = cmd3.ExecuteScalar().ToString();
@@ -64,9 +89,17 @@ namespace bursoto1
 
                     // --- 2. TILE ELEMENTLERİNİ GÜZELLEŞTİRME ---
 
-                    // Ortak Element Ayarlayıcı Metot (Aşağıda tanımladık)
-                    TileAyarla(tileItemOgrenci, "TOPLAM ÖĞRENCİ", toplamOgr, Color.FromArgb(41, 128, 185));
-                    TileAyarla(tileItemBurs, "TOPLAM BURS HACMİ", bursMiktari, Color.FromArgb(39, 174, 96));
+                // Ortak Element Ayarlayıcı Metot (Aşağıda tanımladık)
+                TileAyarla(tileItemOgrenci, "TOPLAM ÖĞRENCİ", toplamOgr, Color.FromArgb(41, 128, 185));
+                TileAyarla(tileItemBurs, "TOPLAM BURS HACMİ", bursMiktari, Color.FromArgb(39, 174, 96));
+                
+                // GELİR ve GİDER tile'ları
+                TileAyarla(tileItemGelir, "TOPLAM GELİR", gelirStr, Color.FromArgb(46, 204, 113));
+                TileAyarla(tileItemGider, "TOPLAM GİDER", giderStr, Color.FromArgb(231, 76, 60));
+                
+                // NET KASA (Gelir - Gider) - Renk duruma göre değişir
+                Color kasaRengi = netKasa >= 0 ? Color.FromArgb(52, 152, 219) : Color.FromArgb(231, 76, 60);
+                TileAyarla(tileItemKasa, "NET KASA", toplamKasa, kasaRengi);
 
                     // Yeni İstediğin: Burslu Sayısı
                     // Eğer tasarımda 4. bir Tile eklediysen adını 'tileItemBursluSayisi' yapabilirsin

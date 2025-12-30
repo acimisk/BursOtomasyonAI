@@ -14,6 +14,8 @@ namespace bursoto1
         FrmOgrenciler fr1;
         FrmBurslar frBurs;
         FrmBursVerenler frBagis;
+        FrmAylikBurs frAylikBurs;
+        FrmOgrenciEkle frOgrenciEkle;
         Ara frAra;
         Anasayfa frAna;
 
@@ -83,19 +85,16 @@ namespace bursoto1
 
         private void btnEkle_ItemClick(object sender, ItemClickEventArgs e)
         {
-            // O an açık olan ve odaklanılmış formu buluyoruz
-            Form aktifForm = this.ActiveMdiChild;
-
-            if (aktifForm is FrmOgrenciler ogrenciForm)
+            // Yeni Öğrenci Ekleme Formunu Aç (MDI)
+            if (frOgrenciEkle == null || frOgrenciEkle.IsDisposed)
             {
-                // FrmOgrenciler içindeki Public metoda erişim
-                ogrenciForm.btnKaydet_Click(null, null);
+                frOgrenciEkle = new FrmOgrenciEkle();
+                frOgrenciEkle.MdiParent = this;
+                frOgrenciEkle.Show();
             }
             else
             {
-                // Kullanıcıya kolaylık: Sayfa açık değilse açıp uyarı veriyoruz
-                MessageHelper.ShowInfo("Ekleme işlemi için önce 'Öğrenci Listesi' sayfasını açmalısınız.", "Bilgi");
-                btnOgrenciler_ItemClick(null, null);
+                frOgrenciEkle.Activate();
             }
         }
 
@@ -140,6 +139,26 @@ namespace bursoto1
         // Tasarımcı hatası almamak için boş bırakılan eventler
         public void ribbon_Click(object sender, EventArgs e) { }
         public void btnBursTurleri_ItemClick(object sender, ItemClickEventArgs e) { btnBurslar_ItemClick(sender, e); }
-        public void btnTopluAnaliz_ItemClick(object sender, ItemClickEventArgs e) { }
+        public void btnTopluAnaliz_ItemClick(object sender, ItemClickEventArgs e)
+        {
+            // Aylık burs tanımlama ekranını aç
+            FormGetir(ref frAylikBurs);
+        }
+
+        private void btnOdeme_ItemClick_1(object sender, ItemClickEventArgs e)
+        {
+            // Aylık burs ödeme ekranını aç (MDI)
+            if (frAylikBurs == null || frAylikBurs.IsDisposed)
+            {
+                frAylikBurs = new FrmAylikBurs();
+                frAylikBurs.MdiParent = this;
+                frAylikBurs.Show();
+            }
+            else
+            {
+                frAylikBurs.Activate();
+            }
+        }
+
     }
 }

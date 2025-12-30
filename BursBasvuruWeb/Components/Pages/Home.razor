@@ -226,8 +226,8 @@
                                 VALUES (@p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8, @p9, @p10)";
                 using (SqlCommand cmd = new SqlCommand(query, conn))
                 {
-                    cmd.Parameters.AddWithValue("@p1", ad);
-                    cmd.Parameters.AddWithValue("@p2", soyad);
+                    cmd.Parameters.AddWithValue("@p1", ad.Trim().ToUpper());
+                    cmd.Parameters.AddWithValue("@p2", soyad.Trim().ToUpper());
                     cmd.Parameters.AddWithValue("@p3", kardesSayisi);
                     cmd.Parameters.AddWithValue("@p4", gelir);
                     cmd.Parameters.AddWithValue("@p5", sinif);

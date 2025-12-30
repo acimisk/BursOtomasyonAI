@@ -36,7 +36,7 @@ namespace bursoto1
             UserLookAndFeel.Default.Style = LookAndFeelStyle.Skin;
 
             // Başlangıç formu
-            Application.Run(new Login());
+            Application.Run(new Menu());
         }
 
         static void GlobalHataYakala(object sender, ThreadExceptionEventArgs e)

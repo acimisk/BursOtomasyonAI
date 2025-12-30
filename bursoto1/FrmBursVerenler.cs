@@ -4,6 +4,7 @@ using System.Data.SqlClient;
 using System.Drawing; // Renkler için gerekli
 using System.Windows.Forms;
 using DevExpress.XtraEditors; // Modern mesaj kutuları için
+using bursoto1.Helpers;
 
 namespace bursoto1
 {
@@ -20,102 +21,239 @@ namespace bursoto1
         {
             try
             {
-                // Bağlantıyı güvenli şekilde alıyoruz
-                DataTable dt = new DataTable();
-                SqlDataAdapter da = new SqlDataAdapter("SELECT * FROM BursVerenler", bgl.baglanti());
-                da.Fill(dt);
-                gridControl1.DataSource = dt;
+                DataTable dtBekleyen = new DataTable();
+                DataTable dtAktif = new DataTable();
 
-                // UI İYİLEŞTİRMESİ: Kullanıcının görmesine gerek olmayan ID'yi gizle
-                gridView1.Columns["ID"].Visible = false;
+                using (SqlConnection conn = bgl.baglanti())
+                {
+                    // Bekleyen bağışlar
+                    using (SqlDataAdapter da = new SqlDataAdapter("SELECT * FROM BursVerenler WHERE Durum = 'Beklemede'", conn))
+                    {
+                        da.Fill(dtBekleyen);
+                    }
 
-                // Grid üzerinde elle değişiklik yapmayı engelle (sadece sağ tık ile onaylasınlar)
-                gridView1.OptionsBehavior.Editable = false;
-                gridView1.OptionsView.ShowGroupPanel = false; // Üstteki gri alanı kaldır
+                    // Aktif (Onaylanmış) bağışçılar
+                    using (SqlDataAdapter da2 = new SqlDataAdapter("SELECT * FROM BursVerenler WHERE Durum = 'Onaylandı'", conn))
+                    {
+                        da2.Fill(dtAktif);
+                    }
+                }
+
+                gridControlBekleyen.DataSource = dtBekleyen;
+                gridControlAktif.DataSource = dtAktif;
+
+                if (gridViewBekleyen.Columns["ID"] != null)
+                    gridViewBekleyen.Columns["ID"].Visible = false;
+                if (gridViewAktif.Columns["ID"] != null)
+                    gridViewAktif.Columns["ID"].Visible = false;
             }
             catch (Exception ex)
             {
-                XtraMessageBox.Show("Liste yüklenirken hata: " + ex.Message, "Hata", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageHelper.ShowException(ex, "Burs Verenler Listesi");
             }
         }
 
         private void FrmBursVerenler_Load(object sender, EventArgs e)
         {
             Listele();
+            GridAyarlariYap();
 
-            // SAĞ TIK MENÜSÜ (Context Menu)
-            ContextMenuStrip sagTik = new ContextMenuStrip();
+            // SAĞ TIK MENÜSÜ (Sadece BEKLEYENLER için - ekstra seçenek)
+            ContextMenuStrip sagTikBekleyen = new ContextMenuStrip();
             ToolStripMenuItem itemOnayla = new ToolStripMenuItem("✅ Bağışı Onayla");
-            ToolStripMenuItem itemSil = new ToolStripMenuItem("❌ Kaydı Sil");
+            ToolStripMenuItem itemReddet = new ToolStripMenuItem("❌ Bağışı Reddet");
+            ToolStripMenuItem itemSil = new ToolStripMenuItem("🗑️ Kaydı Sil");
 
             itemOnayla.Click += ItemOnayla_Click;
+            itemReddet.Click += ItemReddet_Click;
             itemSil.Click += ItemSil_Click;
 
-            sagTik.Items.Add(itemOnayla);
-            sagTik.Items.Add(itemSil);
-            gridControl1.ContextMenuStrip = sagTik;
+            sagTikBekleyen.Items.Add(itemOnayla);
+            sagTikBekleyen.Items.Add(itemReddet);
+            sagTikBekleyen.Items.Add(new ToolStripSeparator());
+            sagTikBekleyen.Items.Add(itemSil);
+            gridControlBekleyen.ContextMenuStrip = sagTikBekleyen;
+
+            // Grid seçim değiştiğinde buton durumlarını güncelle
+            gridViewBekleyen.FocusedRowChanged += GridViewBekleyen_FocusedRowChanged;
+        }
+
+        private void GridAyarlariYap()
+        {
+            // Grid görünüm ayarları
+            gridViewBekleyen.OptionsSelection.MultiSelect = false;
+            gridViewAktif.OptionsSelection.MultiSelect = false;
+            
+            // Kolon genişliklerini otomatik ayarla
+            gridViewBekleyen.BestFitColumns();
+            gridViewAktif.BestFitColumns();
+        }
+
+        private void GridViewBekleyen_FocusedRowChanged(object sender, DevExpress.XtraGrid.Views.Base.FocusedRowChangedEventArgs e)
+        {
+            // Seçili satır varsa butonları aktif et
+            bool satirSecili = e.FocusedRowHandle >= 0;
+            btnOnayla.Enabled = satirSecili;
+            btnReddet.Enabled = satirSecili;
         }
 
         // --- RENKLENDİRME (UX DOKUNUŞU) ---
-        // Onaylananlar Yeşil, Bekleyenler Sarı görünsün
-        private void gridView1_RowStyle(object sender, DevExpress.XtraGrid.Views.Grid.RowStyleEventArgs e)
+        // Bekleyenler Sarı, Onaylılar Yeşil görünsün
+        private void gridViewBekleyen_RowStyle(object sender, DevExpress.XtraGrid.Views.Grid.RowStyleEventArgs e)
         {
             if (e.RowHandle >= 0)
             {
-                string durum = gridView1.GetRowCellDisplayText(e.RowHandle, "Durum");
-                if (durum == "Onaylandı")
-                {
-                    e.Appearance.BackColor = Color.LightGreen;
-                    e.Appearance.BackColor2 = Color.White;
-                }
-                else if (durum == "Beklemede")
+                string durum = gridViewBekleyen.GetRowCellDisplayText(e.RowHandle, "Durum");
+                if (durum == "Beklemede")
                 {
                     e.Appearance.BackColor = Color.LightYellow;
                 }
             }
         }
 
-        private void ItemOnayla_Click(object sender, EventArgs e)
+        // --- ONAYLAMA İŞLEMİ (DRY: Hem buton hem sağ tık menüsü için) ---
+        private void BagisiOnayla()
         {
-            var dr = gridView1.GetDataRow(gridView1.FocusedRowHandle);
-            if (dr == null) return;
+            var dr = gridViewBekleyen.GetDataRow(gridViewBekleyen.FocusedRowHandle);
+            if (dr == null)
+            {
+                MessageHelper.ShowWarning("Lütfen onaylamak istediğiniz bağışı seçiniz.", "Seçim Yapılmadı");
+                return;
+            }
 
+            string adSoyad = dr["AdSoyad"]?.ToString() ?? "Bilinmeyen";
+            decimal miktar = Convert.ToDecimal(dr["BagisMiktari"] ?? 0);
             string id = dr["ID"].ToString();
 
-            if (XtraMessageBox.Show($"{dr["AdSoyad"]} kişisinin bağışını onaylıyor musun?", "Onay", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+            if (MessageHelper.ShowConfirm(
+                $"{adSoyad} kişisinin {miktar:C} tutarındaki bağışını onaylıyor musunuz?\n\n" +
+                "Onaylandıktan sonra bağışçı aktif bağışçılar listesine taşınacak.",
+                "Bağışı Onayla"))
             {
                 try
                 {
-                    SqlConnection conn = bgl.baglanti();
-                    SqlCommand cmd = new SqlCommand("UPDATE BursVerenler SET Durum='Onaylandı' WHERE ID=@p1", conn);
-                    cmd.Parameters.AddWithValue("@p1", id);
-                    cmd.ExecuteNonQuery();
-                    conn.Close();
+                    using (SqlConnection conn = bgl.baglanti())
+                    {
+                        SqlCommand cmd = new SqlCommand("UPDATE BursVerenler SET Durum='Onaylandı' WHERE ID=@p1", conn);
+                        cmd.Parameters.AddWithValue("@p1", id);
+                        cmd.ExecuteNonQuery();
+                    }
 
-                    XtraMessageBox.Show("Bağış onaylandı, bütçeye eklendi!", "Başarılı", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    MessageHelper.ShowSuccess(
+                        $"{adSoyad} kişisinin {miktar:C} tutarındaki bağışı onaylandı.\n" +
+                        "Bağışçı aktif bağışçılar listesine taşındı.",
+                        "Onay Başarılı");
                     Listele();
                 }
-                catch (Exception ex) { XtraMessageBox.Show("Hata: " + ex.Message); }
+                catch (Exception ex)
+                {
+                    MessageHelper.ShowException(ex, "Onay Hatası");
+                }
             }
         }
 
-        private void ItemSil_Click(object sender, EventArgs e)
+        private void ItemOnayla_Click(object sender, EventArgs e)
         {
-            var dr = gridView1.GetDataRow(gridView1.FocusedRowHandle);
-            if (dr == null) return;
+            BagisiOnayla();
+        }
 
-            if (XtraMessageBox.Show("Bu kaydı silmek istediğine emin misin?", "Sil", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.Yes)
+        private void btnOnayla_Click(object sender, EventArgs e)
+        {
+            BagisiOnayla();
+        }
+
+        // --- REDDETME İŞLEMİ (DRY: Hem buton hem sağ tık menüsü için) ---
+        private void BagisiReddet()
+        {
+            var dr = gridViewBekleyen.GetDataRow(gridViewBekleyen.FocusedRowHandle);
+            if (dr == null)
+            {
+                MessageHelper.ShowWarning("Lütfen reddetmek istediğiniz bağışı seçiniz.", "Seçim Yapılmadı");
+                return;
+            }
+
+            string adSoyad = dr["AdSoyad"]?.ToString() ?? "Bilinmeyen";
+            decimal miktar = Convert.ToDecimal(dr["BagisMiktari"] ?? 0);
+            string id = dr["ID"].ToString();
+
+            if (MessageHelper.ShowConfirm(
+                $"{adSoyad} kişisinin {miktar:C} tutarındaki bağışını reddetmek istediğinize emin misiniz?\n\n" +
+                "Reddedilen bağış kaydı silinecektir.",
+                "Bağışı Reddet"))
             {
                 try
                 {
-                    SqlConnection conn = bgl.baglanti();
-                    SqlCommand cmd = new SqlCommand("DELETE FROM BursVerenler WHERE ID=@p1", conn);
-                    cmd.Parameters.AddWithValue("@p1", dr["ID"].ToString());
-                    cmd.ExecuteNonQuery();
-                    conn.Close();
+                    using (SqlConnection conn = bgl.baglanti())
+                    {
+                        // Reddedilen bağışı sil (veya Durum='Reddedildi' yapılabilir, şu an siliniyor)
+                        SqlCommand cmd = new SqlCommand("DELETE FROM BursVerenler WHERE ID=@p1", conn);
+                        cmd.Parameters.AddWithValue("@p1", id);
+                        cmd.ExecuteNonQuery();
+                    }
+
+                    MessageHelper.ShowSuccess(
+                        $"{adSoyad} kişisinin bağışı reddedildi ve kayıt silindi.",
+                        "Reddetme Başarılı");
                     Listele();
                 }
-                catch (Exception ex) { XtraMessageBox.Show("Hata: " + ex.Message); }
+                catch (Exception ex)
+                {
+                    MessageHelper.ShowException(ex, "Reddetme Hatası");
+                }
+            }
+        }
+
+        private void ItemReddet_Click(object sender, EventArgs e)
+        {
+            BagisiReddet();
+        }
+
+        private void btnReddet_Click(object sender, EventArgs e)
+        {
+            BagisiReddet();
+        }
+
+        // --- YENİLEME İŞLEMİ ---
+        private void btnYenile_Click(object sender, EventArgs e)
+        {
+            Listele();
+            MessageHelper.ShowInfo("Bağışçı listesi yenilendi.", "Bilgi");
+        }
+
+        // --- SİLME İŞLEMİ (Sadece sağ tık menüsü için) ---
+        private void ItemSil_Click(object sender, EventArgs e)
+        {
+            var dr = gridViewBekleyen.GetDataRow(gridViewBekleyen.FocusedRowHandle);
+            if (dr == null)
+            {
+                MessageHelper.ShowWarning("Lütfen silmek istediğiniz bağışı seçiniz.", "Seçim Yapılmadı");
+                return;
+            }
+
+            string adSoyad = dr["AdSoyad"]?.ToString() ?? "Bilinmeyen";
+            string id = dr["ID"].ToString();
+
+            if (MessageHelper.ShowConfirm(
+                $"{adSoyad} kişisinin bağış kaydını silmek istediğinize emin misiniz?\n\n" +
+                "Bu işlem geri alınamaz!",
+                "Bağış Kaydını Sil"))
+            {
+                try
+                {
+                    using (SqlConnection conn = bgl.baglanti())
+                    {
+                        SqlCommand cmd = new SqlCommand("DELETE FROM BursVerenler WHERE ID=@p1", conn);
+                        cmd.Parameters.AddWithValue("@p1", id);
+                        cmd.ExecuteNonQuery();
+                    }
+
+                    MessageHelper.ShowSuccess("Bağış kaydı başarıyla silindi.", "Silme Başarılı");
+                    Listele();
+                }
+                catch (Exception ex)
+                {
+                    MessageHelper.ShowException(ex, "Silme Hatası");
+                }
             }
         }
     }

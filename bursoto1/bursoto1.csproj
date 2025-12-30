@@ -119,11 +119,23 @@
     <Compile Include="FrmBursVerenler.Designer.cs">
       <DependentUpon>FrmBursVerenler.cs</DependentUpon>
     </Compile>
+    <Compile Include="FrmAylikBurs.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmAylikBurs.Designer.cs">
+      <DependentUpon>FrmAylikBurs.cs</DependentUpon>
+    </Compile>
     <Compile Include="FrmOgrenciler.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="FrmOgrenciler.Designer.cs">
       <DependentUpon>FrmOgrenciler.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FrmOgrenciEkle.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmOgrenciEkle.Designer.cs">
+      <DependentUpon>FrmOgrenciEkle.cs</DependentUpon>
     </Compile>
     <Compile Include="GeminiAI.cs" />
     <Compile Include="Login.cs">
@@ -161,8 +173,14 @@
     <EmbeddedResource Include="FrmBursVerenler.resx">
       <DependentUpon>FrmBursVerenler.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="FrmAylikBurs.resx">
+      <DependentUpon>FrmAylikBurs.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="FrmOgrenciler.resx">
       <DependentUpon>FrmOgrenciler.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmOgrenciEkle.resx">
+      <DependentUpon>FrmOgrenciEkle.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Login.resx">
       <DependentUpon>Login.cs</DependentUpon>

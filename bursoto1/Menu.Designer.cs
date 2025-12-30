@@ -43,6 +43,7 @@
             this.ribbonPageGroup1 = new DevExpress.XtraBars.Ribbon.RibbonPageGroup();
             this.repositoryItemTextEdit1 = new DevExpress.XtraEditors.Repository.RepositoryItemTextEdit();
             this.xtraTabbedMdiManager1 = new DevExpress.XtraTabbedMdi.XtraTabbedMdiManager(this.components);
+            this.btnOdeme = new DevExpress.XtraBars.BarButtonItem();
             ((System.ComponentModel.ISupportInitialize)(this.ribbon)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.repositoryItemTextEdit1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.xtraTabbedMdiManager1)).BeginInit();
@@ -68,10 +69,11 @@
             this.btnAnasayfa,
             this.btnAra,
             this.btnBursTurleri,
-            this.btnBagiscilar});
+            this.btnBagiscilar,
+            this.btnOdeme});
             this.ribbon.Location = new System.Drawing.Point(0, 0);
             this.ribbon.Margin = new System.Windows.Forms.Padding(5);
-            this.ribbon.MaxItemId = 13;
+            this.ribbon.MaxItemId = 14;
             this.ribbon.Name = "ribbon";
             this.ribbon.OptionsMenuMinWidth = 515;
             this.ribbon.Pages.AddRange(new DevExpress.XtraBars.Ribbon.RibbonPage[] {
@@ -160,6 +162,7 @@
             this.ribbonPageGroup1.ItemLinks.Add(this.btnAra);
             this.ribbonPageGroup1.ItemLinks.Add(this.btnBursTurleri);
             this.ribbonPageGroup1.ItemLinks.Add(this.btnBagiscilar);
+            this.ribbonPageGroup1.ItemLinks.Add(this.btnOdeme);
             this.ribbonPageGroup1.Name = "ribbonPageGroup1";
             // 
             // repositoryItemTextEdit1
@@ -170,6 +173,14 @@
             // xtraTabbedMdiManager1
             // 
             this.xtraTabbedMdiManager1.MdiParent = this;
+            // 
+            // btnOdeme
+            // 
+            this.btnOdeme.Caption = "Ödemeler";
+            this.btnOdeme.Id = 13;
+            this.btnOdeme.ImageOptions.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("btnOdeme.ImageOptions.SvgImage")));
+            this.btnOdeme.Name = "btnOdeme";
+            this.btnOdeme.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnOdeme_ItemClick_1);
             // 
             // Menu
             // 
@@ -209,5 +220,6 @@
         private DevExpress.XtraBars.BarButtonItem btnAra;
         private DevExpress.XtraBars.BarButtonItem btnBursTurleri;
         private DevExpress.XtraBars.BarButtonItem btnBagiscilar;
+        private DevExpress.XtraBars.BarButtonItem btnOdeme;
     }
 }
