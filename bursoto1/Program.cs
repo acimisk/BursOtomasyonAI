@@ -1,42 +1,62 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;     // Eklendi
-using System.Globalization; // Eklendi
-using System.Threading.Tasks;
+﻿using DevExpress.LookAndFeel;
+using DevExpress.Skins;
+using DevExpress.UserSkins;
+using DevExpress.XtraEditors;
+using System;
+using System.Drawing;
+using System.Globalization;
+using System.Threading;
 using System.Windows.Forms;
-using DevExpress.XtraEditors; // DevExpress mesaj kutusu için
-using DevExpress.LookAndFeel; // DevExpress LookAndFeel için
 
 namespace bursoto1
 {
     internal static class Program
     {
-        /// <summary>
-        /// The main entry point for the application.
-        /// </summary>
         [STAThread]
         static void Main()
         {
-            // 1. KÜLTÜR AYARI (i/ı sorununu çözer)
+            // 1. KÜLTÜR AYARI (Mevcut kodunu koruyoruz - Türkçe karakter sorunu için)
             CultureInfo culture = new CultureInfo("tr-TR");
             Thread.CurrentThread.CurrentCulture = culture;
             Thread.CurrentThread.CurrentUICulture = culture;
 
-            // 2. GLOBAL HATA YAKALAMA
+            // 2. MODERN DEVEXPRESS AYARLARI (Demodan Entegre Edildi)
+
+            // DPI Ayarları (Yüksek çözünürlüklü ekranlarda bulanıklığı önler)
+            if (!System.Windows.Forms.SystemInformation.TerminalServerSession && Screen.AllScreens.Length > 1)
+                WindowsFormsSettings.SetPerMonitorDpiAware();
+            else
+                WindowsFormsSettings.SetDPIAware();
+
+            // Form Skin (Tema) Ayarları
+            WindowsFormsSettings.EnableFormSkins();
+            WindowsFormsSettings.ForceDirectXPaint(); // Çizimleri hızlandırır (GPU kullanır)
+            WindowsFormsSettings.TrackWindowsAppMode = DevExpress.Utils.DefaultBoolean.True; // Windows Koyu/Açık moduna uyum sağlar
+
+            // En Yeni WXI (Windows 11) Temasını Aktif Et (Demodaki görünüm)
+            WindowsFormsSettings.DefaultLookAndFeel.SetSkinStyle(SkinStyle.WXI);
+
+            // Ribbon Stilini Office 365 Yap
+            WindowsFormsSettings.DefaultRibbonStyle = DefaultRibbonControlStyle.Office365;
+
+            // Font Ayarı (Modern ve okunaklı Segoe UI)
+            DevExpress.Utils.AppearanceObject.DefaultFont = new Font("Segoe UI", 9.25f);
+
+            // Grid ve Liste Ayarları (Excel tarzı filtreleme vb.)
+            WindowsFormsSettings.ColumnFilterPopupMode = ColumnFilterPopupMode.Excel;
+            WindowsFormsSettings.AllowPixelScrolling = DevExpress.Utils.DefaultBoolean.True;
+            WindowsFormsSettings.ScrollUIMode = ScrollUIMode.Touch;
+
+            // 3. GLOBAL HATA YAKALAMA (Mevcut kodunu koruyoruz)
             Application.ThreadException += new ThreadExceptionEventHandler(GlobalHataYakala);
             AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(GlobalKritikHataYakala);
 
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
 
-            // 3. DEVEXPRESS MODERN UI AYARLARI
-            UserLookAndFeel.Default.SetSkinStyle("Office 2019 Colorful");
-            UserLookAndFeel.Default.UseWindowsXPTheme = false;
-            UserLookAndFeel.Default.Style = LookAndFeelStyle.Skin;
-
-            // Başlangıç formu
-            Application.Run(new Menu());
+            // 4. BAŞLANGIÇ FORMU
+            // Eski 'Menu' formunu değil, yeni tasarladığımız modern 'MainForm'u açıyoruz.
+            Application.Run(new MainForm());
         }
 
         static void GlobalHataYakala(object sender, ThreadExceptionEventArgs e)
