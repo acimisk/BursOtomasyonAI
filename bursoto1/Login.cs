@@ -49,7 +49,7 @@ namespace bursoto1
                         if (dr.Read())
                         {
                             // Giriş başarılıysa Ana Menü formunu açıyoruz
-                            Menu anaMenu = new Menu();
+                            MainForm anaMenu = new MainForm();
                             anaMenu.Show();
                             this.Hide(); // Login formunu gizle
                         }
