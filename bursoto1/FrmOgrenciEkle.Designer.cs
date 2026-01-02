@@ -18,6 +18,11 @@ namespace bursoto1
         private void InitializeComponent()
         {
             this.groupControl1 = new DevExpress.XtraEditors.GroupControl();
+            this.btnIptal = new DevExpress.XtraEditors.SimpleButton();
+            this.btnKaydet = new DevExpress.XtraEditors.SimpleButton();
+            this.txtHaneGeliri = new System.Windows.Forms.TextBox();
+            this.txtOgrSoyad = new System.Windows.Forms.TextBox();
+            this.txtOgrAd = new System.Windows.Forms.TextBox();
             this.txtSinif = new System.Windows.Forms.ComboBox();
             this.txtOgrKardesSayisi = new System.Windows.Forms.ComboBox();
             this.txtBolum = new System.Windows.Forms.ComboBox();
@@ -33,11 +38,6 @@ namespace bursoto1
             this.labelKardes = new DevExpress.XtraEditors.LabelControl();
             this.labelSoyad = new DevExpress.XtraEditors.LabelControl();
             this.labelAd = new DevExpress.XtraEditors.LabelControl();
-            this.txtOgrAd = new System.Windows.Forms.TextBox();
-            this.txtOgrSoyad = new System.Windows.Forms.TextBox();
-            this.txtHaneGeliri = new System.Windows.Forms.TextBox();
-            this.btnKaydet = new DevExpress.XtraEditors.SimpleButton();
-            this.btnIptal = new DevExpress.XtraEditors.SimpleButton();
             ((System.ComponentModel.ISupportInitialize)(this.groupControl1)).BeginInit();
             this.groupControl1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.txtAgno.Properties)).BeginInit();
@@ -70,9 +70,60 @@ namespace bursoto1
             this.groupControl1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.groupControl1.Location = new System.Drawing.Point(0, 0);
             this.groupControl1.Name = "groupControl1";
-            this.groupControl1.Size = new System.Drawing.Size(800, 550);
+            this.groupControl1.Size = new System.Drawing.Size(700, 550);
             this.groupControl1.TabIndex = 0;
             this.groupControl1.Text = "Yeni Öğrenci Ekle";
+            // 
+            // btnIptal
+            // 
+            this.btnIptal.Appearance.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(231)))), ((int)(((byte)(76)))), ((int)(((byte)(60)))));
+            this.btnIptal.Appearance.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
+            this.btnIptal.Appearance.ForeColor = System.Drawing.Color.White;
+            this.btnIptal.Appearance.Options.UseBackColor = true;
+            this.btnIptal.Appearance.Options.UseFont = true;
+            this.btnIptal.Appearance.Options.UseForeColor = true;
+            this.btnIptal.Location = new System.Drawing.Point(370, 320);
+            this.btnIptal.Name = "btnIptal";
+            this.btnIptal.Size = new System.Drawing.Size(158, 40);
+            this.btnIptal.TabIndex = 45;
+            this.btnIptal.Text = "❌ İptal";
+            this.btnIptal.Click += new System.EventHandler(this.btnIptal_Click);
+            // 
+            // btnKaydet
+            // 
+            this.btnKaydet.Appearance.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(46)))), ((int)(((byte)(204)))), ((int)(((byte)(113)))));
+            this.btnKaydet.Appearance.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
+            this.btnKaydet.Appearance.ForeColor = System.Drawing.Color.White;
+            this.btnKaydet.Appearance.Options.UseBackColor = true;
+            this.btnKaydet.Appearance.Options.UseFont = true;
+            this.btnKaydet.Appearance.Options.UseForeColor = true;
+            this.btnKaydet.Location = new System.Drawing.Point(207, 320);
+            this.btnKaydet.Name = "btnKaydet";
+            this.btnKaydet.Size = new System.Drawing.Size(158, 40);
+            this.btnKaydet.TabIndex = 44;
+            this.btnKaydet.Text = "✅ Kaydet";
+            this.btnKaydet.Click += new System.EventHandler(this.btnKaydet_Click);
+            // 
+            // txtHaneGeliri
+            // 
+            this.txtHaneGeliri.Location = new System.Drawing.Point(207, 136);
+            this.txtHaneGeliri.Name = "txtHaneGeliri";
+            this.txtHaneGeliri.Size = new System.Drawing.Size(162, 23);
+            this.txtHaneGeliri.TabIndex = 43;
+            // 
+            // txtOgrSoyad
+            // 
+            this.txtOgrSoyad.Location = new System.Drawing.Point(207, 76);
+            this.txtOgrSoyad.Name = "txtOgrSoyad";
+            this.txtOgrSoyad.Size = new System.Drawing.Size(162, 23);
+            this.txtOgrSoyad.TabIndex = 42;
+            // 
+            // txtOgrAd
+            // 
+            this.txtOgrAd.Location = new System.Drawing.Point(207, 47);
+            this.txtOgrAd.Name = "txtOgrAd";
+            this.txtOgrAd.Size = new System.Drawing.Size(162, 23);
+            this.txtOgrAd.TabIndex = 41;
             // 
             // txtSinif
             // 
@@ -86,9 +137,9 @@ namespace bursoto1
             "4",
             "5",
             "6"});
-            this.txtSinif.Location = new System.Drawing.Point(237, 166);
+            this.txtSinif.Location = new System.Drawing.Point(207, 166);
             this.txtSinif.Name = "txtSinif";
-            this.txtSinif.Size = new System.Drawing.Size(184, 24);
+            this.txtSinif.Size = new System.Drawing.Size(162, 24);
             this.txtSinif.TabIndex = 40;
             // 
             // txtOgrKardesSayisi
@@ -101,9 +152,9 @@ namespace bursoto1
             "2",
             "3",
             "4+"});
-            this.txtOgrKardesSayisi.Location = new System.Drawing.Point(237, 105);
+            this.txtOgrKardesSayisi.Location = new System.Drawing.Point(207, 105);
             this.txtOgrKardesSayisi.Name = "txtOgrKardesSayisi";
-            this.txtOgrKardesSayisi.Size = new System.Drawing.Size(184, 24);
+            this.txtOgrKardesSayisi.Size = new System.Drawing.Size(162, 24);
             this.txtOgrKardesSayisi.TabIndex = 39;
             // 
             // txtBolum
@@ -111,23 +162,23 @@ namespace bursoto1
             this.txtBolum.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.SuggestAppend;
             this.txtBolum.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.ListItems;
             this.txtBolum.FormattingEnabled = true;
-            this.txtBolum.Location = new System.Drawing.Point(237, 199);
+            this.txtBolum.Location = new System.Drawing.Point(207, 199);
             this.txtBolum.Name = "txtBolum";
-            this.txtBolum.Size = new System.Drawing.Size(184, 24);
+            this.txtBolum.Size = new System.Drawing.Size(162, 24);
             this.txtBolum.TabIndex = 38;
             // 
             // txtAgno
             // 
-            this.txtAgno.Location = new System.Drawing.Point(237, 274);
+            this.txtAgno.Location = new System.Drawing.Point(207, 274);
             this.txtAgno.Name = "txtAgno";
-            this.txtAgno.Size = new System.Drawing.Size(184, 22);
+            this.txtAgno.Size = new System.Drawing.Size(161, 22);
             this.txtAgno.TabIndex = 36;
             // 
             // labelAgno
             // 
             this.labelAgno.Appearance.Font = new System.Drawing.Font("Segoe UI", 13.8F, System.Drawing.FontStyle.Bold);
             this.labelAgno.Appearance.Options.UseFont = true;
-            this.labelAgno.Location = new System.Drawing.Point(151, 269);
+            this.labelAgno.Location = new System.Drawing.Point(132, 269);
             this.labelAgno.Name = "labelAgno";
             this.labelAgno.Size = new System.Drawing.Size(73, 31);
             this.labelAgno.TabIndex = 35;
@@ -135,17 +186,17 @@ namespace bursoto1
             // 
             // txtTelNo
             // 
-            this.txtTelNo.Location = new System.Drawing.Point(237, 237);
+            this.txtTelNo.Location = new System.Drawing.Point(207, 237);
             this.txtTelNo.Name = "txtTelNo";
             this.txtTelNo.Properties.NullText = "0(5xx) xxx xx xx";
-            this.txtTelNo.Size = new System.Drawing.Size(184, 22);
+            this.txtTelNo.Size = new System.Drawing.Size(161, 22);
             this.txtTelNo.TabIndex = 34;
             // 
             // labelNumara
             // 
             this.labelNumara.Appearance.Font = new System.Drawing.Font("Segoe UI", 13.8F, System.Drawing.FontStyle.Bold);
             this.labelNumara.Appearance.Options.UseFont = true;
-            this.labelNumara.Location = new System.Drawing.Point(99, 232);
+            this.labelNumara.Location = new System.Drawing.Point(87, 232);
             this.labelNumara.Name = "labelNumara";
             this.labelNumara.Size = new System.Drawing.Size(125, 31);
             this.labelNumara.TabIndex = 33;
@@ -153,27 +204,27 @@ namespace bursoto1
             // 
             // btnResimSec
             // 
-            this.btnResimSec.Location = new System.Drawing.Point(503, 270);
+            this.btnResimSec.Location = new System.Drawing.Point(440, 270);
             this.btnResimSec.Name = "btnResimSec";
-            this.btnResimSec.Size = new System.Drawing.Size(94, 29);
+            this.btnResimSec.Size = new System.Drawing.Size(82, 29);
             this.btnResimSec.TabIndex = 32;
             this.btnResimSec.Text = "Resim Seç";
             this.btnResimSec.Click += new System.EventHandler(this.btnResimSec_Click);
             // 
             // pictureResim
             // 
-            this.pictureResim.Location = new System.Drawing.Point(463, 51);
+            this.pictureResim.Location = new System.Drawing.Point(405, 51);
             this.pictureResim.Name = "pictureResim";
             this.pictureResim.Properties.ShowCameraMenuItem = DevExpress.XtraEditors.Controls.CameraMenuItemVisibility.Auto;
             this.pictureResim.Properties.SizeMode = DevExpress.XtraEditors.Controls.PictureSizeMode.Stretch;
-            this.pictureResim.Size = new System.Drawing.Size(175, 208);
+            this.pictureResim.Size = new System.Drawing.Size(153, 208);
             this.pictureResim.TabIndex = 31;
             // 
             // labelBolum
             // 
             this.labelBolum.Appearance.Font = new System.Drawing.Font("Segoe UI", 13.8F, System.Drawing.FontStyle.Bold);
             this.labelBolum.Appearance.Options.UseFont = true;
-            this.labelBolum.Location = new System.Drawing.Point(147, 195);
+            this.labelBolum.Location = new System.Drawing.Point(129, 195);
             this.labelBolum.Name = "labelBolum";
             this.labelBolum.Size = new System.Drawing.Size(77, 31);
             this.labelBolum.TabIndex = 29;
@@ -183,7 +234,7 @@ namespace bursoto1
             // 
             this.labelSinif.Appearance.Font = new System.Drawing.Font("Segoe UI", 13.8F, System.Drawing.FontStyle.Bold);
             this.labelSinif.Appearance.Options.UseFont = true;
-            this.labelSinif.Location = new System.Drawing.Point(168, 162);
+            this.labelSinif.Location = new System.Drawing.Point(147, 162);
             this.labelSinif.Name = "labelSinif";
             this.labelSinif.Size = new System.Drawing.Size(56, 31);
             this.labelSinif.TabIndex = 28;
@@ -193,7 +244,7 @@ namespace bursoto1
             // 
             this.labelGelir.Appearance.Font = new System.Drawing.Font("Segoe UI", 13.8F, System.Drawing.FontStyle.Bold);
             this.labelGelir.Appearance.Options.UseFont = true;
-            this.labelGelir.Location = new System.Drawing.Point(11, 132);
+            this.labelGelir.Location = new System.Drawing.Point(10, 132);
             this.labelGelir.Name = "labelGelir";
             this.labelGelir.Size = new System.Drawing.Size(213, 31);
             this.labelGelir.TabIndex = 27;
@@ -203,7 +254,7 @@ namespace bursoto1
             // 
             this.labelKardes.Appearance.Font = new System.Drawing.Font("Segoe UI", 13.8F, System.Drawing.FontStyle.Bold);
             this.labelKardes.Appearance.Options.UseFont = true;
-            this.labelKardes.Location = new System.Drawing.Point(79, 102);
+            this.labelKardes.Location = new System.Drawing.Point(69, 102);
             this.labelKardes.Name = "labelKardes";
             this.labelKardes.Size = new System.Drawing.Size(145, 31);
             this.labelKardes.TabIndex = 26;
@@ -213,7 +264,7 @@ namespace bursoto1
             // 
             this.labelSoyad.Appearance.Font = new System.Drawing.Font("Segoe UI", 13.8F, System.Drawing.FontStyle.Bold);
             this.labelSoyad.Appearance.Options.UseFont = true;
-            this.labelSoyad.Location = new System.Drawing.Point(153, 74);
+            this.labelSoyad.Location = new System.Drawing.Point(134, 74);
             this.labelSoyad.Name = "labelSoyad";
             this.labelSoyad.Size = new System.Drawing.Size(71, 31);
             this.labelSoyad.TabIndex = 25;
@@ -223,68 +274,17 @@ namespace bursoto1
             // 
             this.labelAd.Appearance.Font = new System.Drawing.Font("Segoe UI", 13.8F, System.Drawing.FontStyle.Bold);
             this.labelAd.Appearance.Options.UseFont = true;
-            this.labelAd.Location = new System.Drawing.Point(188, 47);
+            this.labelAd.Location = new System.Drawing.Point(164, 47);
             this.labelAd.Name = "labelAd";
             this.labelAd.Size = new System.Drawing.Size(36, 31);
             this.labelAd.TabIndex = 24;
             this.labelAd.Text = "Ad:";
             // 
-            // txtOgrAd
-            // 
-            this.txtOgrAd.Location = new System.Drawing.Point(237, 47);
-            this.txtOgrAd.Name = "txtOgrAd";
-            this.txtOgrAd.Size = new System.Drawing.Size(184, 23);
-            this.txtOgrAd.TabIndex = 41;
-            // 
-            // txtOgrSoyad
-            // 
-            this.txtOgrSoyad.Location = new System.Drawing.Point(237, 76);
-            this.txtOgrSoyad.Name = "txtOgrSoyad";
-            this.txtOgrSoyad.Size = new System.Drawing.Size(184, 23);
-            this.txtOgrSoyad.TabIndex = 42;
-            // 
-            // txtHaneGeliri
-            // 
-            this.txtHaneGeliri.Location = new System.Drawing.Point(237, 136);
-            this.txtHaneGeliri.Name = "txtHaneGeliri";
-            this.txtHaneGeliri.Size = new System.Drawing.Size(184, 23);
-            this.txtHaneGeliri.TabIndex = 43;
-            // 
-            // btnKaydet
-            // 
-            this.btnKaydet.Appearance.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(46)))), ((int)(((byte)(204)))), ((int)(((byte)(113)))));
-            this.btnKaydet.Appearance.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
-            this.btnKaydet.Appearance.ForeColor = System.Drawing.Color.White;
-            this.btnKaydet.Appearance.Options.UseBackColor = true;
-            this.btnKaydet.Appearance.Options.UseFont = true;
-            this.btnKaydet.Appearance.Options.UseForeColor = true;
-            this.btnKaydet.Location = new System.Drawing.Point(237, 320);
-            this.btnKaydet.Name = "btnKaydet";
-            this.btnKaydet.Size = new System.Drawing.Size(180, 40);
-            this.btnKaydet.TabIndex = 44;
-            this.btnKaydet.Text = "✅ Kaydet";
-            this.btnKaydet.Click += new System.EventHandler(this.btnKaydet_Click);
-            // 
-            // btnIptal
-            // 
-            this.btnIptal.Appearance.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(231)))), ((int)(((byte)(76)))), ((int)(((byte)(60)))));
-            this.btnIptal.Appearance.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
-            this.btnIptal.Appearance.ForeColor = System.Drawing.Color.White;
-            this.btnIptal.Appearance.Options.UseBackColor = true;
-            this.btnIptal.Appearance.Options.UseFont = true;
-            this.btnIptal.Appearance.Options.UseForeColor = true;
-            this.btnIptal.Location = new System.Drawing.Point(423, 320);
-            this.btnIptal.Name = "btnIptal";
-            this.btnIptal.Size = new System.Drawing.Size(180, 40);
-            this.btnIptal.TabIndex = 45;
-            this.btnIptal.Text = "❌ İptal";
-            this.btnIptal.Click += new System.EventHandler(this.btnIptal_Click);
-            // 
             // FrmOgrenciEkle
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(800, 550);
+            this.ClientSize = new System.Drawing.Size(700, 550);
             this.Controls.Add(this.groupControl1);
             this.Name = "FrmOgrenciEkle";
             this.Text = "Yeni Öğrenci Ekle";

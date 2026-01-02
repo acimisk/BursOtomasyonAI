@@ -238,13 +238,12 @@ namespace bursoto1
                 }
             }
 
-            // 2. İlgili modülü ekranda göster
+            // 2. İlgili modülü ekranda göster ve yenile
             if (modules.ContainsKey(moduleName))
             {
                 var moduleToFind = modules[moduleName];
 
                 // Modülümüzün olduğu sayfayı buluyoruz
-                // (Controls.Add yaptığımız için modül sayfanın Controls listesindedir)
                 var page = navigationFrame1.Pages.FindFirst(p => p.Controls.Contains(moduleToFind)) as NavigationPage;
 
                 // Ve o sayfayı seçiyoruz
@@ -252,6 +251,37 @@ namespace bursoto1
                 {
                     navigationFrame1.SelectedPage = page;
                 }
+
+                // Modülü yenile (responsive davranış için)
+                RefreshModule(moduleToFind);
+            }
+        }
+
+        // Modül yenileme - her navigasyonda güncel veri göster
+        void RefreshModule(XtraUserControl module)
+        {
+            try
+            {
+                if (module is AnasayfaModule anasayfa)
+                {
+                    anasayfa.Refresh(); // AnasayfaModule'de Refresh metodu olmalı
+                }
+                else if (module is OgrenciModule ogrenci)
+                {
+                    ogrenci.Listele();
+                }
+                else if (module is BursModule burs)
+                {
+                    burs.RefreshAndClear(); // Form temizle + listele
+                }
+                else if (module is BagisModule bagis)
+                {
+                    bagis.Listele();
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Modül yenileme hatası: {ex.Message}");
             }
         }
 

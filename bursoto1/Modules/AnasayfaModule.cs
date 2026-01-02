@@ -21,6 +21,17 @@ namespace bursoto1.Modules
 
         private void AnasayfaModule_Load(object sender, EventArgs e)
         {
+            RefreshDashboard();
+        }
+
+        // Navigasyon sırasında çağrılır - dashboard verilerini yenile
+        public new void Refresh()
+        {
+            RefreshDashboard();
+        }
+
+        private void RefreshDashboard()
+        {
             VerileriGetir();
             GrafikleriCiz();
         }

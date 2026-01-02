@@ -46,6 +46,15 @@ namespace bursoto1.Modules
 
         private void BursModule_Load(object sender, EventArgs e)
         {
+            RefreshAndClear();
+        }
+
+        // Navigasyon sırasında çağrılır - formu temizle ve listele
+        public void RefreshAndClear()
+        {
+            FormuTemizle();
+            _editingBursID = null;
+            btnBursTanimla.Text = "Burs Tanımla";
             Listele();
         }
 
