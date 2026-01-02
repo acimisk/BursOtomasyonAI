@@ -13,10 +13,61 @@ namespace bursoto1
     {
         SqlBaglanti bgl = new SqlBaglanti();
         public string dosyaYolu = "";
+        private int? _editingOgrenciID = null; // Edit mode tracking (ported from master)
 
         public FrmOgrenciEkle()
         {
             InitializeComponent();
+        }
+
+        // Constructor overload for edit mode (ported from master pattern)
+        public FrmOgrenciEkle(int ogrenciID) : this()
+        {
+            _editingOgrenciID = ogrenciID;
+            this.Text = "Öğrenci Düzenle";
+            LoadOgrenciData(ogrenciID);
+        }
+
+        // Load student data for editing (ported from master FrmOgrenciler pattern)
+        private void LoadOgrenciData(int ogrenciID)
+        {
+            try
+            {
+                using (SqlConnection conn = bgl.baglanti())
+                {
+                    SqlCommand cmd = new SqlCommand("SELECT * FROM Ogrenciler WHERE ID=@id", conn);
+                    cmd.Parameters.AddWithValue("@id", ogrenciID);
+                    using (SqlDataReader dr = cmd.ExecuteReader())
+                    {
+                        if (dr.Read())
+                        {
+                            txtOgrAd.Text = dr["AD"]?.ToString() ?? "";
+                            txtOgrSoyad.Text = dr["SOYAD"]?.ToString() ?? "";
+                            txtOgrKardesSayisi.Text = dr["KARDEŞ SAYISI"]?.ToString() ?? "";
+                            txtHaneGeliri.Text = dr["TOPLAM HANE GELİRİ"]?.ToString() ?? "";
+                            txtBolum.Text = dr["BÖLÜMÜ"]?.ToString() ?? "";
+                            txtSinif.Text = dr["SINIF"]?.ToString() ?? "";
+                            txtAgno.Text = dr["AGNO"]?.ToString() ?? "";
+                            txtTelNo.Text = dr["TELEFON"]?.ToString() ?? "";
+                            dosyaYolu = dr["FOTO"]?.ToString() ?? "";
+
+                            // Load image if exists
+                            if (!string.IsNullOrEmpty(dosyaYolu))
+                            {
+                                try
+                                {
+                                    pictureResim.Image = ImageHelper.Base64ToImage(dosyaYolu);
+                                }
+                                catch { }
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageHelper.ShowException(ex, "Öğrenci Verisi Yükleme Hatası");
+            }
         }
 
         private void FrmOgrenciEkle_Load(object sender, EventArgs e)
@@ -120,51 +171,75 @@ namespace bursoto1
 
             try
             {
-                // Öğrenciyi ekle ve ID'sini al
-                string sorgu = "INSERT INTO Ogrenciler (AD, SOYAD, [KARDEŞ SAYISI], [TOPLAM HANE GELİRİ], BÖLÜMÜ, SINIF, AGNO, FOTO, TELEFON) " +
-                               "OUTPUT INSERTED.ID " +
-                               "VALUES (@p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8, @p9)";
-
-                int yeniOgrenciID = 0;
-
                 using (SqlConnection conn = bgl.baglanti())
                 {
-                    SqlCommand cmd = new SqlCommand(sorgu, conn);
-                    cmd.Parameters.AddWithValue("@p1", txtOgrAd.Text.Trim().ToUpper());
-                    cmd.Parameters.AddWithValue("@p2", txtOgrSoyad.Text.Trim().ToUpper());
-                    cmd.Parameters.AddWithValue("@p3", txtOgrKardesSayisi.Text);
-                    cmd.Parameters.AddWithValue("@p4", gelir);
-                    cmd.Parameters.AddWithValue("@p5", txtBolum.Text);
-                    cmd.Parameters.AddWithValue("@p6", txtSinif.Text);
-                    cmd.Parameters.AddWithValue("@p7", agno);
-                    cmd.Parameters.AddWithValue("@p8", dosyaYolu ?? "");
-                    cmd.Parameters.AddWithValue("@p9", txtTelNo.Text.Trim());
-                    
-                    // Yeni eklenen öğrencinin ID'sini al
-                    yeniOgrenciID = Convert.ToInt32(cmd.ExecuteScalar());
+                    if (_editingOgrenciID.HasValue)
+                    {
+                        // UPDATE mode (edit existing - ported from master pattern)
+                        string updateQuery = @"UPDATE Ogrenciler SET 
+                            AD=@p1, SOYAD=@p2, [KARDEŞ SAYISI]=@p3, [TOPLAM HANE GELİRİ]=@p4, 
+                            BÖLÜMÜ=@p5, SINIF=@p6, AGNO=@p7, FOTO=@p8, TELEFON=@p9 
+                            WHERE ID=@p10";
 
-                    // Öğrenciyi "Beklemede" durumuna ekle (OgrenciBurslari tablosuna)
-                    // BursID = 0 veya NULL ile beklemede kaydı oluştur
-                    try
-                    {
-                        string beklemeSorgu = @"INSERT INTO OgrenciBurslari (OgrenciID, BursID, BaslangicTarihi, Durum) 
-                                               VALUES (@OgrenciID, 1, @Tarih, 0)"; // Durum = 0: Beklemede
-                        SqlCommand cmdBekleme = new SqlCommand(beklemeSorgu, conn);
-                        cmdBekleme.Parameters.AddWithValue("@OgrenciID", yeniOgrenciID);
-                        cmdBekleme.Parameters.AddWithValue("@Tarih", DateTime.Now);
-                        cmdBekleme.ExecuteNonQuery();
+                        SqlCommand cmd = new SqlCommand(updateQuery, conn);
+                        cmd.Parameters.AddWithValue("@p1", txtOgrAd.Text.Trim().ToUpper());
+                        cmd.Parameters.AddWithValue("@p2", txtOgrSoyad.Text.Trim().ToUpper());
+                        cmd.Parameters.AddWithValue("@p3", txtOgrKardesSayisi.Text);
+                        cmd.Parameters.AddWithValue("@p4", gelir);
+                        cmd.Parameters.AddWithValue("@p5", txtBolum.Text);
+                        cmd.Parameters.AddWithValue("@p6", txtSinif.Text);
+                        cmd.Parameters.AddWithValue("@p7", agno);
+                        cmd.Parameters.AddWithValue("@p8", dosyaYolu ?? "");
+                        cmd.Parameters.AddWithValue("@p9", txtTelNo.Text.Trim());
+                        cmd.Parameters.AddWithValue("@p10", _editingOgrenciID.Value);
+                        cmd.ExecuteNonQuery();
+
+                        MessageHelper.ShowSuccess("Öğrenci bilgileri başarıyla güncellendi.", "Güncelleme Başarılı");
                     }
-                    catch
+                    else
                     {
-                        // OgrenciBurslari tablosu yoksa veya hata olursa devam et
+                        // INSERT mode (add new - existing logic)
+                        string sorgu = "INSERT INTO Ogrenciler (AD, SOYAD, [KARDEŞ SAYISI], [TOPLAM HANE GELİRİ], BÖLÜMÜ, SINIF, AGNO, FOTO, TELEFON) " +
+                                       "OUTPUT INSERTED.ID " +
+                                       "VALUES (@p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8, @p9)";
+
+                        SqlCommand cmd = new SqlCommand(sorgu, conn);
+                        cmd.Parameters.AddWithValue("@p1", txtOgrAd.Text.Trim().ToUpper());
+                        cmd.Parameters.AddWithValue("@p2", txtOgrSoyad.Text.Trim().ToUpper());
+                        cmd.Parameters.AddWithValue("@p3", txtOgrKardesSayisi.Text);
+                        cmd.Parameters.AddWithValue("@p4", gelir);
+                        cmd.Parameters.AddWithValue("@p5", txtBolum.Text);
+                        cmd.Parameters.AddWithValue("@p6", txtSinif.Text);
+                        cmd.Parameters.AddWithValue("@p7", agno);
+                        cmd.Parameters.AddWithValue("@p8", dosyaYolu ?? "");
+                        cmd.Parameters.AddWithValue("@p9", txtTelNo.Text.Trim());
+                        
+                        int yeniOgrenciID = Convert.ToInt32(cmd.ExecuteScalar());
+
+                        // Öğrenciyi "Beklemede" durumuna ekle
+                        try
+                        {
+                            string beklemeSorgu = @"INSERT INTO OgrenciBurslari (OgrenciID, BursID, BaslangicTarihi, Durum) 
+                                                   VALUES (@OgrenciID, 1, @Tarih, 0)";
+                            SqlCommand cmdBekleme = new SqlCommand(beklemeSorgu, conn);
+                            cmdBekleme.Parameters.AddWithValue("@OgrenciID", yeniOgrenciID);
+                            cmdBekleme.Parameters.AddWithValue("@Tarih", DateTime.Now);
+                            cmdBekleme.ExecuteNonQuery();
+                        }
+                        catch
+                        {
+                            // OgrenciBurslari tablosu yoksa veya hata olursa devam et
+                        }
+
+                        MessageHelper.ShowSuccess("Öğrenci sisteme başarıyla kaydedildi.\nDurum: Beklemede", "Kayıt Başarılı");
                     }
                 }
 
-                // Diğer formları bilgilendir (Anasayfa otomatik yenilenecek)
+                // Diğer formları bilgilendir
                 DataChangedNotifier.NotifyOgrenciChanged();
 
-                MessageHelper.ShowSuccess("Öğrenci sisteme başarıyla kaydedildi.\nDurum: Beklemede", "Kayıt Başarılı");
-                Temizle();
+                if (!_editingOgrenciID.HasValue)
+                    Temizle();
                 
                 // Dialog sonucunu OK olarak işaretle
                 this.DialogResult = DialogResult.OK;

@@ -12,10 +12,13 @@ namespace bursoto1.Modules
     {
         SqlBaglanti bgl = new SqlBaglanti();
 
+        private int? _editingBursID = null; // Edit mode tracking
+
         public BursModule()
         {
             InitializeComponent();
             ConfigGrid();
+            WireEvents();
         }
 
         void ConfigGrid()
@@ -28,6 +31,17 @@ namespace bursoto1.Modules
                 gridView1.OptionsSelection.MultiSelect = true;
                 gridView1.OptionsSelection.MultiSelectMode = DevExpress.XtraGrid.Views.Grid.GridMultiSelectMode.CheckBoxRowSelect;
             }
+        }
+
+        void WireEvents()
+        {
+            // Wire button click (ported from master FrmBurslar)
+            if (btnBursTanimla != null)
+                btnBursTanimla.Click += btnBursTanimla_Click;
+
+            // Wire grid focus row changed for editing (ported from master)
+            if (gridView1 != null)
+                gridView1.FocusedRowChanged += gridView1_FocusedRowChanged;
         }
 
         private void BursModule_Load(object sender, EventArgs e)
@@ -59,9 +73,10 @@ namespace bursoto1.Modules
 
         public void btnYeni_ItemClick(object sender, ItemClickEventArgs e)
         {
-            // Yeni burs tanımlama ekranı
-            // TODO: FrmBursEkle formu oluşturulduğunda buraya bağlanacak
-            MessageHelper.ShowInfo("Yeni burs ekleme özelliği yakında eklenecek.", "Bilgi");
+            // Yeni burs moduna geç (formu temizle)
+            FormuTemizle();
+            _editingBursID = null;
+            btnBursTanimla.Text = "Burs Tanımla"; // Reset button text
         }
 
         public void btnSil_ItemClick(object sender, ItemClickEventArgs e)
@@ -79,6 +94,8 @@ namespace bursoto1.Modules
                         cmd.Parameters.AddWithValue("@p1", id);
                         cmd.ExecuteNonQuery();
                     }
+                    FormuTemizle();
+                    _editingBursID = null;
                     Listele();
                 }
                 catch (Exception ex)
@@ -86,6 +103,89 @@ namespace bursoto1.Modules
                     MessageHelper.ShowException(ex, "Silme Hatası");
                 }
             }
+        }
+
+        // --- PORTED FROM MASTER: Grid Focus Row Changed (for editing) ---
+        private void gridView1_FocusedRowChanged(object sender, DevExpress.XtraGrid.Views.Base.FocusedRowChangedEventArgs e)
+        {
+            DataRow dr = gridView1.GetDataRow(gridView1.FocusedRowHandle);
+            if (dr != null)
+            {
+                // Populate form fields (ported from master FrmBurslar)
+                txtBursAd.Text = dr["BursAdı"]?.ToString() ?? "";
+                txtMiktar.EditValue = dr["Miktar"];
+                txtKontenjan.EditValue = dr["Kontenjan"];
+                txtAciklama.Text = dr["Aciklama"]?.ToString() ?? "";
+
+                // Set edit mode
+                _editingBursID = Convert.ToInt32(dr["ID"]);
+                btnBursTanimla.Text = "Bursu Güncelle";
+            }
+        }
+
+        // --- PORTED FROM MASTER: Burs Add/Edit (btnBursTanimla_Click) ---
+        private void btnBursTanimla_Click(object sender, EventArgs e)
+        {
+            // Validation (ported from master)
+            if (string.IsNullOrEmpty(txtBursAd.Text) || string.IsNullOrEmpty(txtMiktar.Text))
+            {
+                MessageHelper.ShowWarning("Lütfen burs adını ve miktarını giriniz!", "Eksik Bilgi");
+                return;
+            }
+
+            try
+            {
+                using (SqlConnection conn = bgl.baglanti())
+                {
+                    if (_editingBursID.HasValue)
+                    {
+                        // UPDATE mode (edit existing)
+                        string updateQuery = "UPDATE Burslar SET BursAdı=@p1, Miktar=@p2, Kontenjan=@p3, Aciklama=@p4 WHERE ID=@p5";
+                        using (SqlCommand cmd = new SqlCommand(updateQuery, conn))
+                        {
+                            cmd.Parameters.AddWithValue("@p1", txtBursAd.Text);
+                            cmd.Parameters.AddWithValue("@p2", Convert.ToDecimal(txtMiktar.EditValue));
+                            cmd.Parameters.AddWithValue("@p3", Convert.ToInt32(txtKontenjan.EditValue));
+                            cmd.Parameters.AddWithValue("@p4", txtAciklama.Text ?? "");
+                            cmd.Parameters.AddWithValue("@p5", _editingBursID.Value);
+                            cmd.ExecuteNonQuery();
+                        }
+                        MessageHelper.ShowSuccess("Burs başarıyla güncellendi.", "Bilgi");
+                    }
+                    else
+                    {
+                        // INSERT mode (add new) - ported from master
+                        string sorgu = "INSERT INTO Burslar (BursAdı, Miktar, Kontenjan, Aciklama) VALUES (@p1, @p2, @p3, @p4)";
+                        using (SqlCommand cmd = new SqlCommand(sorgu, conn))
+                        {
+                            cmd.Parameters.AddWithValue("@p1", txtBursAd.Text);
+                            cmd.Parameters.AddWithValue("@p2", Convert.ToDecimal(txtMiktar.EditValue));
+                            cmd.Parameters.AddWithValue("@p3", Convert.ToInt32(txtKontenjan.EditValue));
+                            cmd.Parameters.AddWithValue("@p4", txtAciklama.Text ?? "");
+                            cmd.ExecuteNonQuery();
+                        }
+                        MessageHelper.ShowSuccess("Burs başarıyla kaydedildi.", "Bilgi");
+                    }
+                }
+
+                FormuTemizle();
+                _editingBursID = null;
+                btnBursTanimla.Text = "Burs Tanımla";
+                Listele();
+            }
+            catch (Exception ex)
+            {
+                MessageHelper.ShowException(ex, "Kaydetme Hatası");
+            }
+        }
+
+        // --- PORTED FROM MASTER: Form Clear ---
+        void FormuTemizle()
+        {
+            txtBursAd.Text = "";
+            txtMiktar.EditValue = 0;
+            txtKontenjan.EditValue = 0;
+            txtAciklama.Text = "";
         }
     }
 }

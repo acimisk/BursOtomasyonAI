@@ -119,6 +119,22 @@ namespace bursoto1.Modules
                 Listele();
         }
 
+        // --- PORTED FROM MASTER: Edit student (double-click or button) ---
+        public void btnDuzenle_ItemClick(object sender, ItemClickEventArgs e)
+        {
+            var id = gridView1.GetFocusedRowCellValue("ID");
+            if (id == null)
+            {
+                MessageHelper.ShowWarning("Lütfen düzenlenecek bir öğrenci seçiniz.", "Seçim Yapılmadı");
+                return;
+            }
+
+            int ogrenciID = Convert.ToInt32(id);
+            FrmOgrenciEkle frm = new FrmOgrenciEkle(ogrenciID);
+            if (frm.ShowDialog() == DialogResult.OK)
+                Listele();
+        }
+
         public void btnSil_ItemClick(object sender, ItemClickEventArgs e)
         {
             var id = gridView1.GetFocusedRowCellValue("ID");
@@ -158,14 +174,12 @@ namespace bursoto1.Modules
             DataRow dr = gridView1.GetDataRow(gridView1.FocusedRowHandle);
             if (dr == null) return;
 
-            OgrenciProfili frm = new OgrenciProfili
-            {
-                secilenOgrenciID = Convert.ToInt32(dr["ID"]),
-                ad = dr["AD"].ToString(),
-                soyad = dr["SOYAD"].ToString()
-            };
-
-            frm.Show();
+            // PORTED FROM MASTER: Double-click opens edit form (not profile)
+            // User can still access profile via other means if needed
+            int ogrenciID = Convert.ToInt32(dr["ID"]);
+            FrmOgrenciEkle frm = new FrmOgrenciEkle(ogrenciID);
+            if (frm.ShowDialog() == DialogResult.OK)
+                Listele();
         }
     }
 }
