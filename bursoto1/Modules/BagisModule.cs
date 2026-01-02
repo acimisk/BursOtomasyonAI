@@ -27,18 +27,40 @@ namespace bursoto1.Modules
             {
                 gridView1.OptionsBehavior.Editable = false;
                 gridView1.OptionsView.ShowGroupPanel = false;
-                gridView1.OptionsSelection.MultiSelect = false; // Tek seçim
+                gridView1.OptionsSelection.MultiSelect = false;
                 
                 // Row style event'i bağla (renklendirme için)
                 gridView1.RowStyle += GridView1_RowStyle;
+            }
+
+            // Filtre ComboBox event'i
+            if (cmbFiltre != null)
+            {
+                cmbFiltre.SelectedIndexChanged += CmbFiltre_SelectedIndexChanged;
             }
         }
 
         private void BagisModule_Load(object sender, EventArgs e)
         {
+            // Default filtre
+            if (cmbFiltre != null)
+                cmbFiltre.SelectedIndex = 0; // "Tümü"
+            
             Listele();
             SetupContextMenu();
             ApplyDarkGrid(gridView1);
+        }
+
+        private void CmbFiltre_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            Listele();
+        }
+
+        private string GetCurrentFilter()
+        {
+            if (cmbFiltre == null || cmbFiltre.SelectedIndex < 0)
+                return "Tümü";
+            return cmbFiltre.Properties.Items[cmbFiltre.SelectedIndex].ToString();
         }
 
         // Dark Mode Grid Ayarları
@@ -134,18 +156,49 @@ namespace bursoto1.Modules
                 DataTable dt = new DataTable();
                 using (SqlConnection conn = bgl.baglanti())
                 {
-                    SqlDataAdapter da = new SqlDataAdapter("SELECT * FROM BursVerenler", conn);
+                    // Önce tabloyu kontrol et
+                    SqlCommand cmdCheck = new SqlCommand(@"SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES 
+                        WHERE TABLE_NAME = 'BursVerenler'", conn);
+                    int tableExists = Convert.ToInt32(cmdCheck.ExecuteScalar());
+                    
+                    if (tableExists == 0)
+                    {
+                        // Tablo yoksa oluştur
+                        SqlCommand cmdCreate = new SqlCommand(@"CREATE TABLE BursVerenler (
+                            ID INT IDENTITY(1,1) PRIMARY KEY,
+                            AdSoyad NVARCHAR(100),
+                            Telefon NVARCHAR(20),
+                            Mail NVARCHAR(100),
+                            BagisMiktari DECIMAL(18,2),
+                            Aciklama NVARCHAR(500),
+                            Durum NVARCHAR(20) DEFAULT 'Beklemede',
+                            Tarih DATETIME DEFAULT GETDATE()
+                        )", conn);
+                        cmdCreate.ExecuteNonQuery();
+                        System.Diagnostics.Debug.WriteLine("BursVerenler tablosu oluşturuldu.");
+                    }
+
+                    // Filtreye göre sorgu oluştur
+                    string filtre = GetCurrentFilter();
+                    string query = "SELECT * FROM BursVerenler ";
+                    
+                    switch (filtre)
+                    {
+                        case "Onaylandı":
+                            query += "WHERE Durum = 'Onaylandı' ";
+                            break;
+                        case "Beklemede":
+                            query += "WHERE Durum = 'Beklemede' OR Durum IS NULL ";
+                            break;
+                        default: // Tümü
+                            break;
+                    }
+                    query += "ORDER BY Tarih DESC";
+
+                    SqlDataAdapter da = new SqlDataAdapter(query, conn);
                     da.Fill(dt);
                     
-                    // Debug: Kaç kayıt geldi
-                    System.Diagnostics.Debug.WriteLine($"BursVerenler tablosundan {dt.Rows.Count} kayıt çekildi.");
-                    
-                    // Kolon isimlerini logla
-                    if (dt.Columns.Count > 0)
-                    {
-                        string kolonlar = string.Join(", ", dt.Columns.Cast<DataColumn>().Select(c => c.ColumnName));
-                        System.Diagnostics.Debug.WriteLine($"BursVerenler kolonları: {kolonlar}");
-                    }
+                    System.Diagnostics.Debug.WriteLine($"BursVerenler tablosundan {dt.Rows.Count} kayıt çekildi (Filtre: {filtre}).");
                     
                     gridControl1.DataSource = dt;
                 }
@@ -153,14 +206,19 @@ namespace bursoto1.Modules
                 // ID kolonunu gizle (varsa)
                 if (gridView1.Columns["ID"] != null)
                     gridView1.Columns["ID"].Visible = false;
+                
+                // Kolon başlıklarını düzenle
+                if (gridView1.Columns["AdSoyad"] != null)
+                    gridView1.Columns["AdSoyad"].Caption = "Ad Soyad";
+                if (gridView1.Columns["BagisMiktari"] != null)
+                    gridView1.Columns["BagisMiktari"].Caption = "Bağış Miktarı";
+                if (gridView1.Columns["Aciklama"] != null)
+                    gridView1.Columns["Aciklama"].Caption = "Açıklama";
+                if (gridView1.Columns["Mail"] != null)
+                    gridView1.Columns["Mail"].Caption = "E-posta";
                     
                 gridView1.BestFitColumns();
-                
-                // Kayıt sayısını göster (debug için)
-                if (dt.Rows.Count == 0)
-                {
-                    System.Diagnostics.Debug.WriteLine("UYARI: BursVerenler tablosu boş!");
-                }
+                ApplyDarkGrid(gridView1);
             }
             catch (Exception ex)
             {
@@ -222,8 +280,9 @@ namespace bursoto1.Modules
                     {
                         using (SqlConnection conn = bgl.baglanti())
                         {
+                            // Mail kolonu kullan (DB şemasına uygun)
                             SqlCommand cmd = new SqlCommand(@"INSERT INTO BursVerenler 
-                                (AdSoyad, Telefon, Eposta, BagisMiktari, Aciklama, Durum, Tarih) 
+                                (AdSoyad, Telefon, Mail, BagisMiktari, Aciklama, Durum, Tarih) 
                                 VALUES (@p1, @p2, @p3, @p4, @p5, 'Beklemede', @p6)", conn);
                             cmd.Parameters.AddWithValue("@p1", txtAd.Text.Trim());
                             cmd.Parameters.AddWithValue("@p2", txtTel.Text.Trim());

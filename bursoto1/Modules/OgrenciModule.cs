@@ -86,6 +86,8 @@ namespace bursoto1.Modules
                 btnBursKabul.Click += BtnBursKabul_Click;
             if (btnBursReddet != null)
                 btnBursReddet.Click += BtnBursReddet_Click;
+            if (btnYedek != null)
+                btnYedek.Click += BtnYedek_Click;
         }
 
         private void CmbFiltre_SelectedIndexChanged(object sender, EventArgs e)
@@ -391,26 +393,58 @@ namespace bursoto1.Modules
             string gelir = dr["Hane Geliri"]?.ToString() ?? "0";
             string kardes = dr["Kardeş"]?.ToString() ?? "0";
 
-            // Öğrencinin motivasyon yazısını çek
+            // Öğrencinin ek bilgilerini çek (motivasyon, ihtiyaç cevapları vb.)
             string motivasyon = "";
+            string ihtiyac = "";
+            string hedefler = "";
+            string kullanim = "";
+            string fark = "";
+            
             try
             {
                 using (SqlConnection conn = bgl.baglanti())
                 {
-                    SqlCommand cmd = new SqlCommand("SELECT AINotu FROM Ogrenciler WHERE ID = @id", conn);
+                    // Tüm potansiyel sütunları çek
+                    SqlCommand cmd = new SqlCommand(@"SELECT 
+                        ISNULL(Motivasyon, '') as Motivasyon,
+                        ISNULL(Ihtiyac, '') as Ihtiyac,
+                        ISNULL(Hedefler, '') as Hedefler,
+                        ISNULL(BursKullanim, '') as Kullanim,
+                        ISNULL(FarkliOzellik, '') as Fark
+                        FROM Ogrenciler WHERE ID = @id", conn);
                     cmd.Parameters.AddWithValue("@id", ogrenciID);
-                    object result = cmd.ExecuteScalar();
-                    motivasyon = result?.ToString() ?? "";
+                    
+                    using (var reader = cmd.ExecuteReader())
+                    {
+                        if (reader.Read())
+                        {
+                            motivasyon = reader["Motivasyon"]?.ToString() ?? "";
+                            ihtiyac = reader["Ihtiyac"]?.ToString() ?? "";
+                            hedefler = reader["Hedefler"]?.ToString() ?? "";
+                            kullanim = reader["Kullanim"]?.ToString() ?? "";
+                            fark = reader["Fark"]?.ToString() ?? "";
+                        }
+                    }
                 }
             }
-            catch { }
+            catch (Exception ex)
+            {
+                // Sütunlar yoksa sessizce devam et
+                System.Diagnostics.Debug.WriteLine($"Motivasyon sütunları okunamadı: {ex.Message}");
+            }
 
+            // AI için detaylı veri hazırla
             string ogrenciVerisi = $"Ad Soyad: {ad} {soyad}\n" +
                                    $"Bölüm: {bolum}, Sınıf: {sinif}\n" +
                                    $"AGNO: {agno}\n" +
                                    $"Hane Geliri: {gelir} TL\n" +
-                                   $"Kardeş Sayısı: {kardes}\n" +
-                                   $"Motivasyon: {(string.IsNullOrWhiteSpace(motivasyon) ? "Açıklama yazılmamış" : motivasyon)}";
+                                   $"Kardeş Sayısı: {kardes}\n\n" +
+                                   $"[İHTİYAÇ] Neden bursa ihtiyacınız var?\n{(string.IsNullOrWhiteSpace(ihtiyac) ? (string.IsNullOrWhiteSpace(motivasyon) ? "Cevap verilmemiş" : motivasyon) : ihtiyac)}\n\n" +
+                                   $"[HEDEFLER] Kariyer hedefleriniz nelerdir?\n{(string.IsNullOrWhiteSpace(hedefler) ? "Cevap verilmemiş" : hedefler)}\n\n" +
+                                   $"[KULLANIM] Bursu nasıl kullanacaksınız?\n{(string.IsNullOrWhiteSpace(kullanim) ? "Cevap verilmemiş" : kullanim)}\n\n" +
+                                   $"[FARK] Sizi diğer adaylardan ayıran nedir?\n{(string.IsNullOrWhiteSpace(fark) ? "Cevap verilmemiş" : fark)}";
+            
+            System.Diagnostics.Debug.WriteLine($"AI Analiz için veri:\n{ogrenciVerisi}");
 
             if (lblAIsonuc != null)
             {
@@ -490,7 +524,7 @@ namespace bursoto1.Modules
             return sonuc;
         }
 
-        // Burs Kabul
+        // Burs Kabul - Burs seçimi dialogu ile
         private void BtnBursKabul_Click(object sender, EventArgs e)
         {
             DataRow dr = gridView1.GetDataRow(gridView1.FocusedRowHandle);
@@ -503,35 +537,169 @@ namespace bursoto1.Modules
             int ogrenciID = Convert.ToInt32(dr["ID"]);
             string adSoyad = $"{dr["AD"]} {dr["SOYAD"]}";
 
-            if (MessageHelper.ShowConfirm($"{adSoyad} öğrencisinin burs başvurusunu KABUL etmek istediğinize emin misiniz?", "Burs Kabul Onayı"))
+            // Mevcut bursları ve kontenjanları getir
+            DataTable burslar = GetAvailableBurslar();
+            if (burslar == null || burslar.Rows.Count == 0)
             {
-                try
-                {
-                    using (SqlConnection conn = bgl.baglanti())
-                    {
-                        SqlCommand cmd = new SqlCommand("UPDATE OgrenciBurslari SET Durum = 1, BaslangicTarihi = @tarih WHERE OgrenciID = @id", conn);
-                        cmd.Parameters.AddWithValue("@id", ogrenciID);
-                        cmd.Parameters.AddWithValue("@tarih", DateTime.Now);
-                        int affected = cmd.ExecuteNonQuery();
+                MessageHelper.ShowWarning("Kontenjanı olan aktif burs bulunamadı.", "Burs Yok");
+                return;
+            }
 
-                        if (affected == 0)
+            // Burs seçim dialogu
+            using (XtraForm frm = new XtraForm())
+            {
+                frm.Text = $"Burs Seç - {adSoyad}";
+                frm.Size = new System.Drawing.Size(450, 350);
+                frm.StartPosition = FormStartPosition.CenterParent;
+                frm.FormBorderStyle = FormBorderStyle.FixedDialog;
+                frm.MaximizeBox = false;
+                frm.MinimizeBox = false;
+
+                var lblInfo = new LabelControl()
+                {
+                    Text = $"{adSoyad} öğrencisine hangi bursu atamak istiyorsunuz?",
+                    Location = new System.Drawing.Point(20, 20),
+                    AutoSizeMode = LabelAutoSizeMode.None,
+                    Size = new System.Drawing.Size(400, 30)
+                };
+
+                var listBurs = new DevExpress.XtraEditors.ListBoxControl()
+                {
+                    Location = new System.Drawing.Point(20, 55),
+                    Size = new System.Drawing.Size(400, 200)
+                };
+
+                foreach (DataRow bursRow in burslar.Rows)
+                {
+                    string bursAdi = bursRow["BursAdı"]?.ToString() ?? "";
+                    int kontenjan = Convert.ToInt32(bursRow["Kontenjan"] ?? 0);
+                    int dolu = Convert.ToInt32(bursRow["Dolu"] ?? 0);
+                    int bos = kontenjan - dolu;
+                    decimal miktar = Convert.ToDecimal(bursRow["Miktar"] ?? 0);
+                    int bursID = Convert.ToInt32(bursRow["BursID"] ?? bursRow["ID"] ?? 0);
+
+                    listBurs.Items.Add(new BursItem(bursID, $"{bursAdi} - {miktar:C0}/ay ({dolu}/{kontenjan} dolu, {bos} boş)"));
+                }
+
+                if (listBurs.Items.Count > 0)
+                    listBurs.SelectedIndex = 0;
+
+                var btnAtama = new SimpleButton()
+                {
+                    Text = "✅ Bursu Ata",
+                    Location = new System.Drawing.Point(20, 265),
+                    Size = new System.Drawing.Size(190, 35)
+                };
+                btnAtama.Appearance.BackColor = Color.FromArgb(46, 204, 113);
+                btnAtama.Appearance.ForeColor = Color.White;
+                btnAtama.Appearance.Options.UseBackColor = true;
+                btnAtama.Appearance.Options.UseForeColor = true;
+
+                var btnIptal = new SimpleButton()
+                {
+                    Text = "❌ İptal",
+                    Location = new System.Drawing.Point(220, 265),
+                    Size = new System.Drawing.Size(190, 35)
+                };
+
+                btnIptal.Click += (s, ev) => frm.DialogResult = DialogResult.Cancel;
+                btnAtama.Click += (s, ev) =>
+                {
+                    if (listBurs.SelectedItem is BursItem selectedBurs)
+                    {
+                        try
                         {
-                            SqlCommand cmdInsert = new SqlCommand("INSERT INTO OgrenciBurslari (OgrenciID, BursID, BaslangicTarihi, Durum) VALUES (@id, 1, @tarih, 1)", conn);
-                            cmdInsert.Parameters.AddWithValue("@id", ogrenciID);
-                            cmdInsert.Parameters.AddWithValue("@tarih", DateTime.Now);
-                            cmdInsert.ExecuteNonQuery();
+                            using (SqlConnection conn = bgl.baglanti())
+                            {
+                                // Önce mevcut kaydı güncelle veya yeni ekle
+                                SqlCommand cmdCheck = new SqlCommand("SELECT COUNT(*) FROM OgrenciBurslari WHERE OgrenciID = @id", conn);
+                                cmdCheck.Parameters.AddWithValue("@id", ogrenciID);
+                                int exists = Convert.ToInt32(cmdCheck.ExecuteScalar());
+
+                                if (exists > 0)
+                                {
+                                    SqlCommand cmd = new SqlCommand("UPDATE OgrenciBurslari SET BursID = @bursID, Durum = 1, BaslangicTarihi = @tarih WHERE OgrenciID = @id", conn);
+                                    cmd.Parameters.AddWithValue("@bursID", selectedBurs.BursID);
+                                    cmd.Parameters.AddWithValue("@id", ogrenciID);
+                                    cmd.Parameters.AddWithValue("@tarih", DateTime.Now);
+                                    cmd.ExecuteNonQuery();
+                                }
+                                else
+                                {
+                                    SqlCommand cmd = new SqlCommand("INSERT INTO OgrenciBurslari (OgrenciID, BursID, BaslangicTarihi, Durum) VALUES (@id, @bursID, @tarih, 1)", conn);
+                                    cmd.Parameters.AddWithValue("@bursID", selectedBurs.BursID);
+                                    cmd.Parameters.AddWithValue("@id", ogrenciID);
+                                    cmd.Parameters.AddWithValue("@tarih", DateTime.Now);
+                                    cmd.ExecuteNonQuery();
+                                }
+                            }
+                            frm.DialogResult = DialogResult.OK;
+                        }
+                        catch (Exception ex)
+                        {
+                            MessageHelper.ShowException(ex, "Burs Atama Hatası");
                         }
                     }
+                };
 
-                    MessageHelper.ShowSuccess($"{adSoyad} öğrencisinin burs başvurusu KABUL EDİLDİ.", "İşlem Başarılı");
+                frm.Controls.AddRange(new Control[] { lblInfo, listBurs, btnAtama, btnIptal });
+
+                if (frm.ShowDialog() == DialogResult.OK)
+                {
+                    MessageHelper.ShowSuccess($"{adSoyad} öğrencisine burs başarıyla atandı.", "İşlem Başarılı");
                     DataChangedNotifier.NotifyOgrenciChanged();
                     DataChangedNotifier.NotifyBursChanged();
                     Listele(GetCurrentFilter());
                 }
-                catch (Exception ex)
+            }
+        }
+
+        // Burs listesi için yardımcı sınıf
+        private class BursItem
+        {
+            public int BursID { get; set; }
+            public string Display { get; set; }
+            public BursItem(int id, string display) { BursID = id; Display = display; }
+            public override string ToString() => Display;
+        }
+
+        // Kontenjanı boş olan bursları getir
+        private DataTable GetAvailableBurslar()
+        {
+            try
+            {
+                DataTable dt = new DataTable();
+                using (SqlConnection conn = bgl.baglanti())
                 {
-                    MessageHelper.ShowException(ex, "Kabul Hatası");
+                    // Her burs için doluluk sayısını hesapla
+                    string query = @"SELECT b.*, 
+                        ISNULL((SELECT COUNT(*) FROM OgrenciBurslari ob WHERE ob.BursID = b.BursID AND ob.Durum = 1), 0) as Dolu
+                        FROM Burslar b
+                        WHERE b.Kontenjan > ISNULL((SELECT COUNT(*) FROM OgrenciBurslari ob WHERE ob.BursID = b.BursID AND ob.Durum = 1), 0)";
+                    
+                    // BursID yoksa ID ile dene
+                    try
+                    {
+                        SqlDataAdapter da = new SqlDataAdapter(query, conn);
+                        da.Fill(dt);
+                    }
+                    catch
+                    {
+                        // BursID yerine ID kullan
+                        query = @"SELECT b.*, 
+                            ISNULL((SELECT COUNT(*) FROM OgrenciBurslari ob WHERE ob.BursID = b.ID AND ob.Durum = 1), 0) as Dolu
+                            FROM Burslar b
+                            WHERE b.Kontenjan > ISNULL((SELECT COUNT(*) FROM OgrenciBurslari ob WHERE ob.BursID = b.ID AND ob.Durum = 1), 0)";
+                        SqlDataAdapter da = new SqlDataAdapter(query, conn);
+                        da.Fill(dt);
+                    }
                 }
+                return dt;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"GetAvailableBurslar hatası: {ex.Message}");
+                return null;
             }
         }
 
@@ -567,6 +735,57 @@ namespace bursoto1.Modules
                 catch (Exception ex)
                 {
                     MessageHelper.ShowException(ex, "Reddetme Hatası");
+                }
+            }
+        }
+
+        // Yedek Listeye Al - Durum = 2
+        private void BtnYedek_Click(object sender, EventArgs e)
+        {
+            DataRow dr = gridView1.GetDataRow(gridView1.FocusedRowHandle);
+            if (dr == null)
+            {
+                MessageHelper.ShowWarning("Lütfen bir öğrenci seçiniz.", "Seçim Yapılmadı");
+                return;
+            }
+
+            int ogrenciID = Convert.ToInt32(dr["ID"]);
+            string adSoyad = $"{dr["AD"]} {dr["SOYAD"]}";
+
+            if (MessageHelper.ShowConfirm($"{adSoyad} öğrencisini YEDEK LİSTEYE almak istediğinize emin misiniz?\n\nKontenjan açıldığında bu öğrenci değerlendirilecektir.", "Yedek Listeye Al"))
+            {
+                try
+                {
+                    using (SqlConnection conn = bgl.baglanti())
+                    {
+                        // Durum = 2 (Yedek)
+                        SqlCommand cmdCheck = new SqlCommand("SELECT COUNT(*) FROM OgrenciBurslari WHERE OgrenciID = @id", conn);
+                        cmdCheck.Parameters.AddWithValue("@id", ogrenciID);
+                        int exists = Convert.ToInt32(cmdCheck.ExecuteScalar());
+
+                        if (exists > 0)
+                        {
+                            SqlCommand cmd = new SqlCommand("UPDATE OgrenciBurslari SET Durum = 2 WHERE OgrenciID = @id", conn);
+                            cmd.Parameters.AddWithValue("@id", ogrenciID);
+                            cmd.ExecuteNonQuery();
+                        }
+                        else
+                        {
+                            SqlCommand cmd = new SqlCommand("INSERT INTO OgrenciBurslari (OgrenciID, BursID, BaslangicTarihi, Durum) VALUES (@id, 1, @tarih, 2)", conn);
+                            cmd.Parameters.AddWithValue("@id", ogrenciID);
+                            cmd.Parameters.AddWithValue("@tarih", DateTime.Now);
+                            cmd.ExecuteNonQuery();
+                        }
+                    }
+
+                    MessageHelper.ShowSuccess($"{adSoyad} öğrencisi YEDEK LİSTEYE alındı.", "İşlem Başarılı");
+                    DataChangedNotifier.NotifyOgrenciChanged();
+                    DataChangedNotifier.NotifyBursChanged();
+                    Listele(GetCurrentFilter());
+                }
+                catch (Exception ex)
+                {
+                    MessageHelper.ShowException(ex, "Yedek Listesi Hatası");
                 }
             }
         }

@@ -51,6 +51,7 @@
             // ribbon
             // 
             this.ribbon.ExpandCollapseItem.Id = 0;
+            this.btnOdeme = new DevExpress.XtraBars.BarButtonItem();
             this.ribbon.Items.AddRange(new DevExpress.XtraBars.BarItem[] {
             this.ribbon.ExpandCollapseItem,
             this.btnAnaSayfa,
@@ -59,9 +60,10 @@
             this.btnBagiscilar,
             this.btnAra,
             this.btnEkle,
-            this.btnSil});
+            this.btnSil,
+            this.btnOdeme});
             this.ribbon.Location = new System.Drawing.Point(0, 0);
-            this.ribbon.MaxItemId = 8;
+            this.ribbon.MaxItemId = 9;
             this.ribbon.Name = "ribbon";
             this.ribbon.Pages.AddRange(new DevExpress.XtraBars.Ribbon.RibbonPage[] {
             this.ribbonPage1});
@@ -124,6 +126,12 @@
             this.btnSil.ImageOptions.LargeImage = ((System.Drawing.Image)(resources.GetObject("btnSil.ImageOptions.LargeImage")));
             this.btnSil.Name = "btnSil";
             // 
+            // btnOdeme
+            // 
+            this.btnOdeme.Caption = "💰 Ödeme Yap";
+            this.btnOdeme.Id = 8;
+            this.btnOdeme.Name = "btnOdeme";
+            // 
             // ribbonPage1
             // 
             this.ribbonPage1.Groups.AddRange(new DevExpress.XtraBars.Ribbon.RibbonPageGroup[] {
@@ -140,6 +148,7 @@
             this.ribbonPageGroup1.ItemLinks.Add(this.btnAra);
             this.ribbonPageGroup1.ItemLinks.Add(this.btnEkle);
             this.ribbonPageGroup1.ItemLinks.Add(this.btnSil);
+            this.ribbonPageGroup1.ItemLinks.Add(this.btnOdeme);
             this.ribbonPageGroup1.Name = "ribbonPageGroup1";
             this.ribbonPageGroup1.Text = "Menü";
             // 
@@ -208,5 +217,6 @@
         private DevExpress.XtraBars.BarButtonItem btnAra;
         private DevExpress.XtraBars.BarButtonItem btnEkle;
         private DevExpress.XtraBars.BarButtonItem btnSil;
+        private DevExpress.XtraBars.BarButtonItem btnOdeme;
     }
 }

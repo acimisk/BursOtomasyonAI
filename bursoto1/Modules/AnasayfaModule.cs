@@ -139,8 +139,13 @@ namespace bursoto1.Modules
             {
                 using (SqlConnection conn = bgl.baglanti())
                 {
-                    // Bölüm dağılımı grafiği
-                    SqlDataAdapter da = new SqlDataAdapter("SELECT BÖLÜMÜ, COUNT(*) as Sayi FROM Ogrenciler WHERE BÖLÜMÜ IS NOT NULL GROUP BY BÖLÜMÜ", conn);
+                    // Bölüm dağılımı grafiği - TRIM ile normalize et, UPPER ile tutarlılık sağla
+                    string query = @"SELECT UPPER(LTRIM(RTRIM(BÖLÜMÜ))) as Bolum, COUNT(*) as Sayi 
+                                    FROM Ogrenciler 
+                                    WHERE BÖLÜMÜ IS NOT NULL AND LTRIM(RTRIM(BÖLÜMÜ)) <> ''
+                                    GROUP BY UPPER(LTRIM(RTRIM(BÖLÜMÜ)))
+                                    ORDER BY Sayi DESC";
+                    SqlDataAdapter da = new SqlDataAdapter(query, conn);
                     DataTable dt = new DataTable();
                     da.Fill(dt);
 
@@ -148,20 +153,46 @@ namespace bursoto1.Modules
                     {
                         chartControl1.Series.Clear();
 
-                        // Seri oluştur
-                        Series seri = new Series("Öğrenci Dağılımı", ViewType.Doughnut);
-                        seri.Label.TextPattern = "{A}: {V}";
+                        // Seri oluştur - Doughnut
+                        Series seri = new Series("Bölüm Dağılımı", ViewType.Doughnut);
+                        
+                        // Label ayarları - sadece değer ve yüzde göster
+                        seri.Label.TextPattern = "{A}\n{VP:P0}";
                         seri.LabelsVisibility = DevExpress.Utils.DefaultBoolean.True;
+                        seri.Label.ResolveOverlappingMode = ResolveOverlappingMode.Default;
+
+                        // Doughnut view ayarları
+                        DoughnutSeriesView view = (DoughnutSeriesView)seri.View;
+                        view.ExplodeMode = PieExplodeMode.None;
+                        view.HoleRadiusPercent = 40;
+
+                        // Legend ayarları
+                        seri.LegendTextPattern = "{A}: {V}";
 
                         foreach (DataRow dr in dt.Rows)
                         {
-                            string bolum = dr["BÖLÜMÜ"].ToString();
+                            string bolum = dr["Bolum"]?.ToString()?.Trim() ?? "Belirtilmemiş";
                             if (string.IsNullOrEmpty(bolum)) bolum = "Belirtilmemiş";
+                            
                             double sayi = Convert.ToDouble(dr["Sayi"]);
-                            seri.Points.Add(new SeriesPoint(bolum, sayi));
+                            if (sayi > 0) // Sadece 0'dan büyük değerleri ekle
+                            {
+                                seri.Points.Add(new SeriesPoint(bolum, sayi));
+                            }
                         }
 
                         chartControl1.Series.Add(seri);
+
+                        // Chart başlığı
+                        chartControl1.Titles.Clear();
+                        ChartTitle title = new ChartTitle();
+                        title.Text = "Bölümlere Göre Öğrenci Dağılımı";
+                        title.Font = new Font("Segoe UI", 12, FontStyle.Bold);
+                        title.TextColor = Color.White;
+                        chartControl1.Titles.Add(title);
+
+                        // Dark mode için chart arkaplan
+                        chartControl1.BackColor = Color.FromArgb(32, 32, 32);
                     }
                 }
             }
@@ -204,6 +235,11 @@ namespace bursoto1.Modules
         }
 
         private void tileItemOgrenci_ItemClick(object sender, TileItemEventArgs e)
+        {
+
+        }
+
+        private void chartControl1_Click(object sender, EventArgs e)
         {
 
         }

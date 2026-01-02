@@ -83,6 +83,44 @@ namespace bursoto1
 
             // Bölüm Kutusundan Çıkış Kontrolü
             txtBolum.Leave += TxtBolum_Leave;
+
+            // Dark Mode: WinForms kontrolleri için manuel renk ayarı
+            ApplyDarkModeToControls();
+        }
+
+        // Dark Mode için WinForms kontrollerine renk uygula
+        private void ApplyDarkModeToControls()
+        {
+            // WXI/Dark tema aktifse kontrolleri koyu yap
+            var skinName = DevExpress.LookAndFeel.UserLookAndFeel.Default.ActiveSkinName;
+            bool isDarkMode = skinName.Contains("Dark") || skinName == "WXI" || skinName.Contains("Office 2019 Black");
+
+            if (isDarkMode)
+            {
+                Color darkBackground = Color.FromArgb(37, 37, 38);
+                Color lightForeground = Color.FromArgb(220, 220, 220);
+
+                // TextBox kontrolleri
+                txtOgrAd.BackColor = darkBackground;
+                txtOgrAd.ForeColor = lightForeground;
+                txtOgrSoyad.BackColor = darkBackground;
+                txtOgrSoyad.ForeColor = lightForeground;
+                txtHaneGeliri.BackColor = darkBackground;
+                txtHaneGeliri.ForeColor = lightForeground;
+
+                // ComboBox kontrolleri
+                txtSinif.BackColor = darkBackground;
+                txtSinif.ForeColor = lightForeground;
+                txtOgrKardesSayisi.BackColor = darkBackground;
+                txtOgrKardesSayisi.ForeColor = lightForeground;
+                txtBolum.BackColor = darkBackground;
+                txtBolum.ForeColor = lightForeground;
+
+                // FlatStyle for better dark look
+                txtSinif.FlatStyle = FlatStyle.Flat;
+                txtOgrKardesSayisi.FlatStyle = FlatStyle.Flat;
+                txtBolum.FlatStyle = FlatStyle.Flat;
+            }
         }
 
         // BÖLÜMLERİ GETİR

@@ -29,7 +29,6 @@
         private void InitializeComponent()
         {
             this.splitContainerControl1 = new DevExpress.XtraEditors.SplitContainerControl();
-            this.chartControl1 = new DevExpress.XtraCharts.ChartControl();
             this.tileControl2 = new DevExpress.XtraEditors.TileControl();
             this.tileGroup2 = new DevExpress.XtraEditors.TileGroup();
             this.tileItemOgrenci = new DevExpress.XtraEditors.TileItem();
@@ -38,6 +37,7 @@
             this.tileItemKasa = new DevExpress.XtraEditors.TileItem();
             this.tileItemGelir = new DevExpress.XtraEditors.TileItem();
             this.tileItemGider = new DevExpress.XtraEditors.TileItem();
+            this.chartControl1 = new DevExpress.XtraCharts.ChartControl();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainerControl1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainerControl1.Panel1)).BeginInit();
             this.splitContainerControl1.Panel1.SuspendLayout();
@@ -64,20 +64,8 @@
             this.splitContainerControl1.Panel2.Controls.Add(this.chartControl1);
             this.splitContainerControl1.Panel2.Text = "Panel2";
             this.splitContainerControl1.Size = new System.Drawing.Size(1200, 700);
-            this.splitContainerControl1.SplitterPosition = 320;
+            this.splitContainerControl1.SplitterPosition = 343;
             this.splitContainerControl1.TabIndex = 0;
-            // 
-            // chartControl1
-            // 
-            this.chartControl1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.chartControl1.Legend.AlignmentHorizontal = DevExpress.XtraCharts.LegendAlignmentHorizontal.Center;
-            this.chartControl1.Legend.AlignmentVertical = DevExpress.XtraCharts.LegendAlignmentVertical.Bottom;
-            this.chartControl1.Legend.Direction = DevExpress.XtraCharts.LegendDirection.LeftToRight;
-            this.chartControl1.Location = new System.Drawing.Point(0, 0);
-            this.chartControl1.Name = "chartControl1";
-            this.chartControl1.SeriesSerializable = new DevExpress.XtraCharts.Series[0];
-            this.chartControl1.Size = new System.Drawing.Size(1200, 375);
-            this.chartControl1.TabIndex = 0;
             // 
             // tileControl2
             // 
@@ -88,7 +76,7 @@
             this.tileControl2.MaxId = 6;
             this.tileControl2.Name = "tileControl2";
             this.tileControl2.Padding = new System.Windows.Forms.Padding(20);
-            this.tileControl2.Size = new System.Drawing.Size(1200, 320);
+            this.tileControl2.Size = new System.Drawing.Size(1200, 343);
             this.tileControl2.TabIndex = 0;
             this.tileControl2.Text = "tileControl2";
             this.tileControl2.Click += new System.EventHandler(this.tileControl2_Click);
@@ -139,6 +127,19 @@
             this.tileItemGider.Id = 5;
             this.tileItemGider.ItemSize = DevExpress.XtraEditors.TileItemSize.Wide;
             this.tileItemGider.Name = "tileItemGider";
+            // 
+            // chartControl1
+            // 
+            this.chartControl1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.chartControl1.Legend.AlignmentHorizontal = DevExpress.XtraCharts.LegendAlignmentHorizontal.Center;
+            this.chartControl1.Legend.AlignmentVertical = DevExpress.XtraCharts.LegendAlignmentVertical.Bottom;
+            this.chartControl1.Legend.Direction = DevExpress.XtraCharts.LegendDirection.LeftToRight;
+            this.chartControl1.Location = new System.Drawing.Point(0, 0);
+            this.chartControl1.Name = "chartControl1";
+            this.chartControl1.SeriesSerializable = new DevExpress.XtraCharts.Series[0];
+            this.chartControl1.Size = new System.Drawing.Size(1200, 345);
+            this.chartControl1.TabIndex = 0;
+            this.chartControl1.Click += new System.EventHandler(this.chartControl1_Click);
             // 
             // AnasayfaModule
             // 

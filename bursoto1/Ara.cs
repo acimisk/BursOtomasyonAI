@@ -15,7 +15,6 @@ namespace bursoto1
         
         // Debounce için Timer (donmayı önler)
         private System.Windows.Forms.Timer _searchTimer;
-        private const int SEARCH_DELAY_MS = 400; // 400ms bekle
 
         public Ara()
         {
@@ -23,7 +22,6 @@ namespace bursoto1
             
             // Timer'ı başlat
             _searchTimer = new System.Windows.Forms.Timer();
-            _searchTimer.Interval = SEARCH_DELAY_MS;
             _searchTimer.Tick += SearchTimer_Tick;
         }
 

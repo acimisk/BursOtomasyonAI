@@ -101,6 +101,7 @@
             this.panelAI.Appearance.Options.UseBackColor = true;
             this.panelAI.BorderStyle = DevExpress.XtraEditors.Controls.BorderStyles.Simple;
             this.panelAI.Controls.Add(this.btnBursKabul);
+            this.panelAI.Controls.Add(this.btnYedek);
             this.panelAI.Controls.Add(this.btnBursReddet);
             this.panelAI.Controls.Add(this.btnAIAnaliz);
             this.panelAI.Controls.Add(this.lblAIsonuc);
@@ -126,6 +127,23 @@
             this.btnBursKabul.TabIndex = 19;
             this.btnBursKabul.Text = "✓ Bursu Kabul Et";
             // 
+            // btnYedek
+            // 
+            this.btnYedek = new DevExpress.XtraEditors.SimpleButton();
+            this.btnYedek.Appearance.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(243)))), ((int)(((byte)(156)))), ((int)(((byte)(18)))));
+            this.btnYedek.Appearance.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
+            this.btnYedek.Appearance.ForeColor = System.Drawing.Color.White;
+            this.btnYedek.Appearance.Options.UseBackColor = true;
+            this.btnYedek.Appearance.Options.UseFont = true;
+            this.btnYedek.Appearance.Options.UseForeColor = true;
+            this.btnYedek.AppearancePressed.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(211)))), ((int)(((byte)(84)))), ((int)(((byte)(0)))));
+            this.btnYedek.AppearancePressed.Options.UseBackColor = true;
+            this.btnYedek.Location = new System.Drawing.Point(225, 548);
+            this.btnYedek.Name = "btnYedek";
+            this.btnYedek.Size = new System.Drawing.Size(160, 28);
+            this.btnYedek.TabIndex = 21;
+            this.btnYedek.Text = "⏳ Yedek Listesi";
+            // 
             // btnBursReddet
             // 
             this.btnBursReddet.Appearance.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(231)))), ((int)(((byte)(76)))), ((int)(((byte)(60)))));
@@ -136,7 +154,7 @@
             this.btnBursReddet.Appearance.Options.UseForeColor = true;
             this.btnBursReddet.AppearancePressed.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(57)))), ((int)(((byte)(43)))));
             this.btnBursReddet.AppearancePressed.Options.UseBackColor = true;
-            this.btnBursReddet.Location = new System.Drawing.Point(55, 591);
+            this.btnBursReddet.Location = new System.Drawing.Point(225, 591);
             this.btnBursReddet.Name = "btnBursReddet";
             this.btnBursReddet.Size = new System.Drawing.Size(163, 28);
             this.btnBursReddet.TabIndex = 20;
@@ -251,5 +269,6 @@
         private DevExpress.XtraEditors.SimpleButton btnBursReddet;
         private DevExpress.XtraEditors.SimpleButton btnBursKabul;
         private DevExpress.XtraEditors.SimpleButton btnAIAnaliz;
+        private DevExpress.XtraEditors.SimpleButton btnYedek;
     }
 }

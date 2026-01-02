@@ -3,6 +3,8 @@ using DevExpress.XtraBars.Ribbon;
 using DevExpress.XtraEditors;
 using System;
 using System.Collections.Generic;
+using System.Data;
+using System.Data.SqlClient;
 using System.Linq;
 using System.Windows.Forms;
 using bursoto1.Modules;
@@ -49,6 +51,9 @@ namespace bursoto1
             
             if (btnSil != null)
                 btnSil.ItemClick += (s, e) => HandleSil();
+            
+            if (btnOdeme != null)
+                btnOdeme.ItemClick += (s, e) => HandleOdeme();
         }
 
         void ShowAraForm()
@@ -285,7 +290,311 @@ namespace bursoto1
             }
         }
 
+        // Ödeme işlemi - Burs alıcılarına ödeme yap
+        void HandleOdeme()
+        {
+            SqlBaglanti bgl = new SqlBaglanti();
+            
+            using (XtraForm frm = new XtraForm())
+            {
+                frm.Text = "💰 Burs Ödemesi Yap";
+                frm.Size = new System.Drawing.Size(750, 550);
+                frm.StartPosition = FormStartPosition.CenterParent;
+                frm.FormBorderStyle = FormBorderStyle.FixedDialog;
+                frm.MaximizeBox = false;
+                frm.MinimizeBox = false;
 
+                // Burs seçimi
+                var lblBurs = new LabelControl()
+                {
+                    Text = "Burs Seçin:",
+                    Location = new System.Drawing.Point(20, 20),
+                    AutoSizeMode = LabelAutoSizeMode.None,
+                    Size = new System.Drawing.Size(100, 25)
+                };
+                lblBurs.Appearance.Font = new System.Drawing.Font("Segoe UI", 10, System.Drawing.FontStyle.Bold);
+
+                var cmbBurs = new ComboBoxEdit()
+                {
+                    Location = new System.Drawing.Point(130, 17),
+                    Size = new System.Drawing.Size(350, 24)
+                };
+                cmbBurs.Properties.TextEditStyle = DevExpress.XtraEditors.Controls.TextEditStyles.DisableTextEditor;
+
+                // Bursları yükle
+                DataTable dtBurslar = new DataTable();
+                try
+                {
+                    using (var conn = bgl.baglanti())
+                    {
+                        // BursGiderleri tablosunu kontrol et ve yoksa oluştur
+                        SqlCommand cmdCheck = new SqlCommand(@"IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'BursGiderleri')
+                            BEGIN
+                                CREATE TABLE BursGiderleri (
+                                    ID INT IDENTITY(1,1) PRIMARY KEY,
+                                    OgrenciID INT,
+                                    BursID INT,
+                                    Tutar DECIMAL(18,2),
+                                    Tarih DATETIME DEFAULT GETDATE(),
+                                    Aciklama NVARCHAR(500)
+                                )
+                            END", conn);
+                        cmdCheck.ExecuteNonQuery();
+
+                        string query = "SELECT * FROM Burslar WHERE Kontenjan > 0";
+                        var da = new SqlDataAdapter(query, conn);
+                        da.Fill(dtBurslar);
+                    }
+
+                    foreach (DataRow row in dtBurslar.Rows)
+                    {
+                        string bursAdi = row["BursAdı"]?.ToString() ?? "Bilinmeyen";
+                        decimal miktar = Convert.ToDecimal(row["Miktar"] ?? 0);
+                        int bursID = 0;
+                        if (dtBurslar.Columns.Contains("BursID"))
+                            bursID = Convert.ToInt32(row["BursID"]);
+                        else if (dtBurslar.Columns.Contains("ID"))
+                            bursID = Convert.ToInt32(row["ID"]);
+
+                        cmbBurs.Properties.Items.Add(new BursOdemeItem(bursID, bursAdi, miktar));
+                    }
+
+                    if (cmbBurs.Properties.Items.Count > 0)
+                        cmbBurs.SelectedIndex = 0;
+                }
+                catch (Exception ex)
+                {
+                    MessageHelper.ShowException(ex, "Burs Listesi Yükleme Hatası");
+                }
+
+                // Öğrenci listesi
+                var lblInfo = new LabelControl()
+                {
+                    Text = "Bu bursa hak kazanan öğrenciler:",
+                    Location = new System.Drawing.Point(20, 55),
+                    AutoSizeMode = LabelAutoSizeMode.None,
+                    Size = new System.Drawing.Size(300, 25)
+                };
+                lblInfo.Appearance.Font = new System.Drawing.Font("Segoe UI", 10, System.Drawing.FontStyle.Bold);
+
+                var gridOdeme = new DevExpress.XtraGrid.GridControl()
+                {
+                    Location = new System.Drawing.Point(20, 85),
+                    Size = new System.Drawing.Size(695, 300)
+                };
+                var gridViewOdeme = new DevExpress.XtraGrid.Views.Grid.GridView(gridOdeme);
+                gridOdeme.MainView = gridViewOdeme;
+                gridViewOdeme.OptionsSelection.MultiSelect = true;
+                gridViewOdeme.OptionsSelection.MultiSelectMode = DevExpress.XtraGrid.Views.Grid.GridMultiSelectMode.CheckBoxRowSelect;
+                gridViewOdeme.OptionsView.ShowGroupPanel = false;
+                gridViewOdeme.OptionsBehavior.Editable = false;
+
+                // Burs değiştiğinde öğrencileri yükle
+                Action loadStudents = () =>
+                {
+                    if (cmbBurs.SelectedItem is BursOdemeItem selectedBurs)
+                    {
+                        try
+                        {
+                            DataTable dt = new DataTable();
+                            using (var conn = bgl.baglanti())
+                            {
+                                string query = @"SELECT o.ID, o.AD, o.SOYAD, o.BÖLÜMÜ, o.TELEFON,
+                                    CASE WHEN EXISTS(SELECT 1 FROM BursGiderleri bg WHERE bg.OgrenciID = o.ID 
+                                        AND bg.BursID = @bursID
+                                        AND MONTH(bg.Tarih) = MONTH(GETDATE()) AND YEAR(bg.Tarih) = YEAR(GETDATE())) 
+                                        THEN 'Bu Ay Ödendi' ELSE 'Bekliyor' END as OdemeDurumu
+                                    FROM Ogrenciler o
+                                    INNER JOIN OgrenciBurslari ob ON o.ID = ob.OgrenciID
+                                    WHERE ob.BursID = @bursID AND ob.Durum = 1
+                                    ORDER BY o.AD, o.SOYAD";
+
+                                var cmd = new SqlCommand(query, conn);
+                                cmd.Parameters.AddWithValue("@bursID", selectedBurs.BursID);
+                                var da = new SqlDataAdapter(cmd);
+                                da.Fill(dt);
+                            }
+                            gridOdeme.DataSource = dt;
+
+                            // Kolon ayarları
+                            if (gridViewOdeme.Columns["ID"] != null)
+                                gridViewOdeme.Columns["ID"].Visible = false;
+                            if (gridViewOdeme.Columns["AD"] != null) gridViewOdeme.Columns["AD"].Caption = "Ad";
+                            if (gridViewOdeme.Columns["SOYAD"] != null) gridViewOdeme.Columns["SOYAD"].Caption = "Soyad";
+                            if (gridViewOdeme.Columns["BÖLÜMÜ"] != null) gridViewOdeme.Columns["BÖLÜMÜ"].Caption = "Bölüm";
+                            if (gridViewOdeme.Columns["TELEFON"] != null) gridViewOdeme.Columns["TELEFON"].Caption = "Telefon";
+                            if (gridViewOdeme.Columns["OdemeDurumu"] != null) gridViewOdeme.Columns["OdemeDurumu"].Caption = "Durum";
+
+                            gridViewOdeme.BestFitColumns();
+
+                            // Ödeme tutarını güncelle
+                            lblInfo.Text = $"Bu bursa hak kazanan öğrenciler ({dt.Rows.Count} kişi):";
+                        }
+                        catch (Exception ex)
+                        {
+                            System.Diagnostics.Debug.WriteLine($"Öğrenci listesi hatası: {ex.Message}");
+                        }
+                    }
+                };
+
+                cmbBurs.SelectedIndexChanged += (s, ev) => loadStudents();
+
+                // Ödeme tutarı
+                var lblTutar = new LabelControl() { Text = "Ödeme Tutarı (₺):", Location = new System.Drawing.Point(20, 400) };
+                var txtTutar = new SpinEdit() { Location = new System.Drawing.Point(150, 397), Size = new System.Drawing.Size(150, 24) };
+                txtTutar.Properties.MinValue = 0;
+                txtTutar.Properties.MaxValue = 999999;
+                
+                // Burs değiştiğinde tutarı güncelle
+                cmbBurs.SelectedIndexChanged += (s, ev) =>
+                {
+                    if (cmbBurs.SelectedItem is BursOdemeItem selectedBurs)
+                        txtTutar.EditValue = selectedBurs.Miktar;
+                };
+
+                // Tümünü Seç butonu
+                var btnTumunuSec = new SimpleButton()
+                {
+                    Text = "☑️ Tümünü Seç",
+                    Location = new System.Drawing.Point(500, 17),
+                    Size = new System.Drawing.Size(120, 28)
+                };
+                btnTumunuSec.Click += (s, ev) => gridViewOdeme.SelectAll();
+
+                // Seçimi Kaldır butonu
+                var btnSecimKaldir = new SimpleButton()
+                {
+                    Text = "☐ Seçimi Kaldır",
+                    Location = new System.Drawing.Point(500, 50),
+                    Size = new System.Drawing.Size(120, 28)
+                };
+                btnSecimKaldir.Click += (s, ev) => gridViewOdeme.ClearSelection();
+
+                // Butonlar
+                var btnOdemeYap = new SimpleButton()
+                {
+                    Text = "✅ Seçilenlere Ödeme Yap",
+                    Location = new System.Drawing.Point(20, 450),
+                    Size = new System.Drawing.Size(200, 40)
+                };
+                btnOdemeYap.Appearance.BackColor = System.Drawing.Color.FromArgb(46, 204, 113);
+                btnOdemeYap.Appearance.ForeColor = System.Drawing.Color.White;
+                btnOdemeYap.Appearance.Options.UseBackColor = true;
+                btnOdemeYap.Appearance.Options.UseForeColor = true;
+
+                var btnIptal = new SimpleButton()
+                {
+                    Text = "❌ Kapat",
+                    Location = new System.Drawing.Point(230, 450),
+                    Size = new System.Drawing.Size(120, 40)
+                };
+
+                btnIptal.Click += (s, ev) => frm.Close();
+                btnOdemeYap.Click += (s, ev) =>
+                {
+                    if (!(cmbBurs.SelectedItem is BursOdemeItem selectedBurs))
+                    {
+                        MessageHelper.ShowWarning("Lütfen bir burs seçin.", "Burs Seçilmedi");
+                        return;
+                    }
+
+                    int[] selectedRows = gridViewOdeme.GetSelectedRows();
+                    if (selectedRows.Length == 0)
+                    {
+                        MessageHelper.ShowWarning("Lütfen en az bir öğrenci seçin.", "Seçim Yapılmadı");
+                        return;
+                    }
+
+                    decimal tutar = Convert.ToDecimal(txtTutar.EditValue);
+                    if (tutar <= 0)
+                    {
+                        MessageHelper.ShowWarning("Ödeme tutarı 0'dan büyük olmalıdır.", "Geçersiz Tutar");
+                        return;
+                    }
+
+                    if (MessageHelper.ShowConfirm($"{selectedBurs.BursAdi} bursu için {selectedRows.Length} öğrenciye toplam {tutar * selectedRows.Length:C} ödeme yapmak istediğinize emin misiniz?", "Ödeme Onayı"))
+                    {
+                        int basarili = 0;
+                        int hatali = 0;
+
+                        try
+                        {
+                            using (var conn = bgl.baglanti())
+                            {
+                                foreach (int rowHandle in selectedRows)
+                                {
+                                    try
+                                    {
+                                        var ogrenciID = gridViewOdeme.GetRowCellValue(rowHandle, "ID");
+                                        if (ogrenciID != null && ogrenciID != DBNull.Value)
+                                        {
+                                            SqlCommand cmd = new SqlCommand(@"INSERT INTO BursGiderleri 
+                                                (OgrenciID, BursID, Tutar, Tarih, Aciklama) 
+                                                VALUES (@p1, @p2, @p3, @p4, @p5)", conn);
+                                            cmd.Parameters.AddWithValue("@p1", ogrenciID);
+                                            cmd.Parameters.AddWithValue("@p2", selectedBurs.BursID);
+                                            cmd.Parameters.AddWithValue("@p3", tutar);
+                                            cmd.Parameters.AddWithValue("@p4", DateTime.Now);
+                                            cmd.Parameters.AddWithValue("@p5", $"{selectedBurs.BursAdi} - {DateTime.Now:MMMM yyyy}");
+                                            cmd.ExecuteNonQuery();
+                                            basarili++;
+                                        }
+                                    }
+                                    catch (Exception rowEx)
+                                    {
+                                        System.Diagnostics.Debug.WriteLine($"Ödeme satır hatası: {rowEx.Message}");
+                                        hatali++;
+                                    }
+                                }
+                            }
+
+                            if (basarili > 0 && hatali == 0)
+                            {
+                                MessageHelper.ShowSuccess($"{basarili} öğrenciye toplam {tutar * basarili:C} ödeme başarıyla yapıldı.", "Ödeme Başarılı");
+                                DataChangedNotifier.NotifyBursChanged();
+                                loadStudents(); // Listeyi yenile
+                            }
+                            else if (basarili > 0 && hatali > 0)
+                            {
+                                MessageHelper.ShowWarning($"{basarili} öğrenciye ödeme yapıldı, {hatali} öğrenci için başarısız.", "Kısmi Başarı");
+                                loadStudents();
+                            }
+                            else
+                            {
+                                MessageHelper.ShowError("Ödeme yapılamadı.", "Hata");
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            MessageHelper.ShowException(ex, "Ödeme Hatası");
+                        }
+                    }
+                };
+
+                frm.Controls.AddRange(new Control[] { lblBurs, cmbBurs, lblInfo, gridOdeme, btnTumunuSec, btnSecimKaldir, lblTutar, txtTutar, btnOdemeYap, btnIptal });
+                
+                // İlk yükleme
+                if (cmbBurs.Properties.Items.Count > 0)
+                {
+                    cmbBurs.SelectedIndex = 0;
+                    if (cmbBurs.SelectedItem is BursOdemeItem firstBurs)
+                        txtTutar.EditValue = firstBurs.Miktar;
+                    loadStudents();
+                }
+
+                frm.ShowDialog(this);
+            }
+        }
+
+        // Burs ödeme için yardımcı sınıf
+        private class BursOdemeItem
+        {
+            public int BursID { get; set; }
+            public string BursAdi { get; set; }
+            public decimal Miktar { get; set; }
+            public BursOdemeItem(int id, string adi, decimal miktar) { BursID = id; BursAdi = adi; Miktar = miktar; }
+            public override string ToString() => $"{BursAdi} ({Miktar:C}/ay)";
+        }
 
     }
 }
