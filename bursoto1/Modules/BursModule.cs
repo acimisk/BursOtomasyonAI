@@ -61,6 +61,13 @@ namespace bursoto1.Modules
                     da.Fill(dt);
                     gridControl1.DataSource = dt;
                 }
+                
+                // ID veya BursID kolonunu gizle
+                if (gridView1.Columns["ID"] != null)
+                    gridView1.Columns["ID"].Visible = false;
+                if (gridView1.Columns["BursID"] != null)
+                    gridView1.Columns["BursID"].Visible = false;
+                    
                 gridView1.BestFitColumns();
             }
             catch (Exception ex)
@@ -81,8 +88,15 @@ namespace bursoto1.Modules
 
         public void btnSil_ItemClick(object sender, ItemClickEventArgs e)
         {
-            var id = gridView1.GetFocusedRowCellValue("ID");
-            if (id == null) return;
+            // Önce BursID dene, yoksa ID dene
+            var id = gridView1.GetFocusedRowCellValue("BursID");
+            if (id == null)
+                id = gridView1.GetFocusedRowCellValue("ID");
+            if (id == null)
+            {
+                MessageHelper.ShowWarning("Lütfen silinecek bir burs seçiniz.", "Seçim Yapılmadı");
+                return;
+            }
 
             if (MessageHelper.ShowConfirm("Seçili bursu silmek istiyor musunuz?", "Silme Onayı"))
             {
@@ -90,13 +104,15 @@ namespace bursoto1.Modules
                 {
                     using (SqlConnection conn = bgl.baglanti())
                     {
-                        SqlCommand cmd = new SqlCommand("DELETE FROM Burslar WHERE ID=@p1", conn);
+                        // Önce BursID ile dene, sonra ID ile dene
+                        SqlCommand cmd = new SqlCommand("DELETE FROM Burslar WHERE BursID=@p1 OR ID=@p1", conn);
                         cmd.Parameters.AddWithValue("@p1", id);
                         cmd.ExecuteNonQuery();
                     }
                     FormuTemizle();
                     _editingBursID = null;
                     Listele();
+                    MessageHelper.ShowSuccess("Burs başarıyla silindi.", "Silme Başarılı");
                 }
                 catch (Exception ex)
                 {
@@ -108,18 +124,37 @@ namespace bursoto1.Modules
         // --- PORTED FROM MASTER: Grid Focus Row Changed (for editing) ---
         private void gridView1_FocusedRowChanged(object sender, DevExpress.XtraGrid.Views.Base.FocusedRowChangedEventArgs e)
         {
-            DataRow dr = gridView1.GetDataRow(gridView1.FocusedRowHandle);
-            if (dr != null)
+            try
             {
-                // Populate form fields (ported from master FrmBurslar)
-                txtBursAd.Text = dr["BursAdı"]?.ToString() ?? "";
-                txtMiktar.EditValue = dr["Miktar"];
-                txtKontenjan.EditValue = dr["Kontenjan"];
-                txtAciklama.Text = dr["Aciklama"]?.ToString() ?? "";
+                DataRow dr = gridView1.GetDataRow(gridView1.FocusedRowHandle);
+                if (dr != null)
+                {
+                    // Populate form fields (ported from master FrmBurslar)
+                    // Güvenli kolon erişimi
+                    if (dr.Table.Columns.Contains("BursAdı"))
+                        txtBursAd.Text = dr["BursAdı"]?.ToString() ?? "";
+                    
+                    if (dr.Table.Columns.Contains("Miktar"))
+                        txtMiktar.EditValue = dr["Miktar"];
+                    
+                    if (dr.Table.Columns.Contains("Kontenjan"))
+                        txtKontenjan.EditValue = dr["Kontenjan"];
+                    
+                    if (dr.Table.Columns.Contains("Aciklama"))
+                        txtAciklama.Text = dr["Aciklama"]?.ToString() ?? "";
 
-                // Set edit mode
-                _editingBursID = Convert.ToInt32(dr["ID"]);
-                btnBursTanimla.Text = "Bursu Güncelle";
+                    // Set edit mode - BursID veya ID kolonunu dene
+                    if (dr.Table.Columns.Contains("BursID"))
+                        _editingBursID = Convert.ToInt32(dr["BursID"]);
+                    else if (dr.Table.Columns.Contains("ID"))
+                        _editingBursID = Convert.ToInt32(dr["ID"]);
+                    
+                    btnBursTanimla.Text = "Bursu Güncelle";
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine("FocusedRowChanged hatası: " + ex.Message);
             }
         }
 
@@ -140,12 +175,13 @@ namespace bursoto1.Modules
                     if (_editingBursID.HasValue)
                     {
                         // UPDATE mode (edit existing)
-                        string updateQuery = "UPDATE Burslar SET BursAdı=@p1, Miktar=@p2, Kontenjan=@p3, Aciklama=@p4 WHERE ID=@p5";
+                        // BursID veya ID kolonunu dene (veritabanı yapısına göre)
+                        string updateQuery = "UPDATE Burslar SET BursAdı=@p1, Miktar=@p2, Kontenjan=@p3, Aciklama=@p4 WHERE BursID=@p5 OR ID=@p5";
                         using (SqlCommand cmd = new SqlCommand(updateQuery, conn))
                         {
                             cmd.Parameters.AddWithValue("@p1", txtBursAd.Text);
-                            cmd.Parameters.AddWithValue("@p2", Convert.ToDecimal(txtMiktar.EditValue));
-                            cmd.Parameters.AddWithValue("@p3", Convert.ToInt32(txtKontenjan.EditValue));
+                            cmd.Parameters.AddWithValue("@p2", Convert.ToDecimal(txtMiktar.EditValue ?? 0));
+                            cmd.Parameters.AddWithValue("@p3", Convert.ToInt32(txtKontenjan.EditValue ?? 0));
                             cmd.Parameters.AddWithValue("@p4", txtAciklama.Text ?? "");
                             cmd.Parameters.AddWithValue("@p5", _editingBursID.Value);
                             cmd.ExecuteNonQuery();

@@ -5,6 +5,7 @@ using System;
 using System.Data;
 using System.Data.SqlClient;
 using System.Drawing;
+using System.Linq;
 using System.Windows.Forms;
 using bursoto1.Helpers;
 
@@ -135,17 +136,36 @@ namespace bursoto1.Modules
                 {
                     SqlDataAdapter da = new SqlDataAdapter("SELECT * FROM BursVerenler", conn);
                     da.Fill(dt);
+                    
+                    // Debug: Kaç kayıt geldi
+                    System.Diagnostics.Debug.WriteLine($"BursVerenler tablosundan {dt.Rows.Count} kayıt çekildi.");
+                    
+                    // Kolon isimlerini logla
+                    if (dt.Columns.Count > 0)
+                    {
+                        string kolonlar = string.Join(", ", dt.Columns.Cast<DataColumn>().Select(c => c.ColumnName));
+                        System.Diagnostics.Debug.WriteLine($"BursVerenler kolonları: {kolonlar}");
+                    }
+                    
                     gridControl1.DataSource = dt;
                 }
                 
+                // ID kolonunu gizle (varsa)
                 if (gridView1.Columns["ID"] != null)
                     gridView1.Columns["ID"].Visible = false;
                     
                 gridView1.BestFitColumns();
+                
+                // Kayıt sayısını göster (debug için)
+                if (dt.Rows.Count == 0)
+                {
+                    System.Diagnostics.Debug.WriteLine("UYARI: BursVerenler tablosu boş!");
+                }
             }
             catch (Exception ex)
             {
-                MessageHelper.ShowException(ex, "Listeleme Hatası");
+                MessageHelper.ShowException(ex, "Bağışçı Listeleme Hatası");
+                System.Diagnostics.Debug.WriteLine($"BagisModule Listele hatası: {ex.Message}");
             }
         }
 

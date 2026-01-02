@@ -12,16 +12,39 @@ namespace bursoto1
     public partial class Ara : XtraForm
     {
         SqlBaglanti bgl = new SqlBaglanti();
+        
+        // Debounce için Timer (donmayı önler)
+        private System.Windows.Forms.Timer _searchTimer;
+        private const int SEARCH_DELAY_MS = 400; // 400ms bekle
 
         public Ara()
         {
             InitializeComponent();
+            
+            // Timer'ı başlat
+            _searchTimer = new System.Windows.Forms.Timer();
+            _searchTimer.Interval = SEARCH_DELAY_MS;
+            _searchTimer.Tick += SearchTimer_Tick;
         }
 
         private void Ara_Load(object sender, EventArgs e)
         {
             // Grid dark mode ayarları
             ApplyDarkGrid();
+        }
+
+        // Timer tetiklendiğinde aramayı yap
+        private void SearchTimer_Tick(object sender, EventArgs e)
+        {
+            _searchTimer.Stop();
+            CanliAramaGerceklestir();
+        }
+
+        // Debounce mekanizması - her tuşa basıldığında timer sıfırlanır
+        private void AramayiPlanla()
+        {
+            _searchTimer.Stop();
+            _searchTimer.Start();
         }
 
         private void ApplyDarkGrid()
@@ -58,11 +81,30 @@ namespace bursoto1
         }
 
         // Kanka asıl motor burası. LIKE parametrelerini düzelttim.
-        void CanliArama()
+        // Debounce sonrası gerçek arama yapılır
+        void CanliAramaGerceklestir()
         {
+            // Hiç kriter yoksa arama yapma (gereksiz yükü engelle)
+            bool hasAnyFilter = !string.IsNullOrEmpty(txtAraAd.Text) ||
+                                !string.IsNullOrEmpty(txtAraSoyad.Text) ||
+                                !string.IsNullOrEmpty(txtAraBolum.Text) ||
+                                !string.IsNullOrEmpty(txtTelNo.Text) ||
+                                !string.IsNullOrEmpty(txtSınıf.Text);
+
+            if (!hasAnyFilter)
+            {
+                gridAraSonuc.DataSource = null;
+                this.Text = "Arama: Kriter giriniz";
+                return;
+            }
+
             try
             {
-                string sorgu = "SELECT * FROM Ogrenciler WHERE 1=1";
+                // UI güncellemesi
+                this.Text = "Arama yapılıyor...";
+                Application.DoEvents(); // UI'ı güncelle
+
+                string sorgu = "SELECT ID, AD, SOYAD, BÖLÜMÜ, SINIF, TELEFON, AGNO FROM Ogrenciler WHERE 1=1";
 
                 if (!string.IsNullOrEmpty(txtAraAd.Text)) sorgu += " AND AD LIKE @p1";
                 if (!string.IsNullOrEmpty(txtAraSoyad.Text)) sorgu += " AND SOYAD LIKE @p2";
@@ -71,42 +113,57 @@ namespace bursoto1
                 if (!string.IsNullOrEmpty(txtSınıf.Text)) sorgu += " AND SINIF LIKE @p5";
 
                 DataTable dt = new DataTable();
-                using (SqlConnection conn = bgl.baglanti())
+                
+                // Connection string ile direkt bağlantı aç (connection pooling kullan)
+                string connStr = @"Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=bursOtoDeneme1;Integrated Security=True";
+                using (SqlConnection conn = new SqlConnection(connStr))
                 {
-                    SqlDataAdapter da = new SqlDataAdapter(sorgu, conn);
+                    conn.Open();
+                    using (SqlCommand cmd = new SqlCommand(sorgu, conn))
+                    {
+                        // Parametreleri ekle
+                        if (!string.IsNullOrEmpty(txtAraAd.Text))
+                            cmd.Parameters.AddWithValue("@p1", txtAraAd.Text + "%");
+                        if (!string.IsNullOrEmpty(txtAraSoyad.Text))
+                            cmd.Parameters.AddWithValue("@p2", txtAraSoyad.Text + "%");
+                        if (!string.IsNullOrEmpty(txtAraBolum.Text))
+                            cmd.Parameters.AddWithValue("@p3", txtAraBolum.Text + "%");
+                        if (!string.IsNullOrEmpty(txtTelNo.Text))
+                            cmd.Parameters.AddWithValue("@p4", txtTelNo.Text + "%");
+                        if (!string.IsNullOrEmpty(txtSınıf.Text))
+                            cmd.Parameters.AddWithValue("@p5", txtSınıf.Text + "%");
 
-                    // KRİTİK NOKTA: Başındaki % işaretini kaldırdık! 
-                    // Artık sadece "s" yazınca "S" ile başlayanları getirir.
-                    if (!string.IsNullOrEmpty(txtAraAd.Text)) da.SelectCommand.Parameters.AddWithValue("@p1", txtAraAd.Text + "%");
-                    if (!string.IsNullOrEmpty(txtAraSoyad.Text)) da.SelectCommand.Parameters.AddWithValue("@p2", txtAraSoyad.Text + "%");
-                    if (!string.IsNullOrEmpty(txtAraBolum.Text)) da.SelectCommand.Parameters.AddWithValue("@p3", txtAraBolum.Text + "%");
-                    if (!string.IsNullOrEmpty(txtTelNo.Text)) da.SelectCommand.Parameters.AddWithValue("@p4", txtTelNo.Text + "%");
-                    if (!string.IsNullOrEmpty(txtSınıf.Text)) da.SelectCommand.Parameters.AddWithValue("@p5", txtSınıf.Text + "%");
-
-                    da.Fill(dt);
+                        using (SqlDataAdapter da = new SqlDataAdapter(cmd))
+                        {
+                            da.Fill(dt);
+                        }
+                    }
                 }
-                gridAraSonuc.DataSource = dt;
 
+                gridAraSonuc.DataSource = dt;
                 this.Text = "Arama: " + dt.Rows.Count + " Kayıt";
             }
             catch (Exception ex)
             {
+                this.Text = "Arama: Hata!";
                 MessageHelper.ShowException(ex, "Arama Hatası");
             }
         }
 
-        // Kanka butonun içini boşalttım, o da canlı aramayı çağırsın yeter.
+        // Buton tıklandığında anında arama yap (timer'ı beklemeden)
         private void btnSorgula_Click(object sender, EventArgs e)
         {
-            CanliArama();
+            _searchTimer.Stop();
+            CanliAramaGerceklestir();
         }
 
         // BU EVENTLERİ DESIGNER'DAN BAĞLAMAYI UNUTMA!
-        private void txtAraAd_EditValueChanged(object sender, EventArgs e) { CanliArama(); }
-        private void txtAraSoyad_EditValueChanged(object sender, EventArgs e) { CanliArama(); }
-        private void txtAraBolum_EditValueChanged(object sender, EventArgs e) { CanliArama(); }
-        private void txtTelNo_EditValueChanged(object sender, EventArgs e) { CanliArama(); }
-        private void txtSınıf_EditValueChanged(object sender, EventArgs e) { CanliArama(); }
+        // Her tuşa basıldığında timer sıfırlanır - donma önlenir
+        private void txtAraAd_EditValueChanged(object sender, EventArgs e) { AramayiPlanla(); }
+        private void txtAraSoyad_EditValueChanged(object sender, EventArgs e) { AramayiPlanla(); }
+        private void txtAraBolum_EditValueChanged(object sender, EventArgs e) { AramayiPlanla(); }
+        private void txtTelNo_EditValueChanged(object sender, EventArgs e) { AramayiPlanla(); }
+        private void txtSınıf_EditValueChanged(object sender, EventArgs e) { AramayiPlanla(); }
 
         private void btnOgrGoster_Click(object sender, EventArgs e)
         {
@@ -121,19 +178,15 @@ namespace bursoto1
             DataRow dr = gridView.GetDataRow(gridView.FocusedRowHandle);
             if (dr != null)
             {
+                // ID ile profil formunu aç - form kendi verilerini yükleyecek
+                int ogrenciID = Convert.ToInt32(dr["ID"]);
                 OgrenciProfili frm = new OgrenciProfili();
-                frm.MdiParent = this.MdiParent;
-                frm.secilenOgrenciID = Convert.ToInt32(dr["ID"]);
-                frm.ad = dr["AD"].ToString();
-                frm.soyad = dr["SOYAD"].ToString();
-                frm.haneGeliri = dr["TOPLAM HANE GELİRİ"].ToString();
-                frm.fotoYolu = dr["FOTO"].ToString();
-                frm.telNo = dr["TELEFON"].ToString();
-                frm.bolum = dr["BÖLÜMÜ"].ToString();
-                frm.sinif = dr["SINIF"].ToString();
-                frm.kardesSayisi = dr["KARDEŞ SAYISI"].ToString();
-                frm.agno = dr["AGNO"].ToString();
+                frm.secilenOgrenciID = ogrenciID;
                 frm.Show();
+            }
+            else
+            {
+                MessageHelper.ShowWarning("Lütfen bir öğrenci seçiniz.", "Seçim Yapılmadı");
             }
         }
     }
