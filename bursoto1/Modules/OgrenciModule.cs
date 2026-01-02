@@ -165,13 +165,13 @@ namespace bursoto1.Modules
                             break;
                         default: // "Tüm Öğrenciler"
                             sorgu = @"SELECT ID, AD, SOYAD, BÖLÜMÜ, SINIF, AGNO, 
-                                     [TOPLAM HANE GELİRİ] AS [Hane Geliri], [KARDEŞ SAYISI] AS [Kardeş], 
-                                     ISNULL(AISkor, 0) AS [AI Puanı]
+                                  [TOPLAM HANE GELİRİ] AS [Hane Geliri], [KARDEŞ SAYISI] AS [Kardeş], 
+                                  ISNULL(AISkor, 0) AS [AI Puanı]
                                      FROM Ogrenciler
                                      ORDER BY AD, SOYAD";
                             break;
                     }
-                    
+
                     SqlDataAdapter da = new SqlDataAdapter(sorgu, conn);
                     da.Fill(dt);
                     gridControl1.DataSource = dt;
@@ -294,7 +294,7 @@ namespace bursoto1.Modules
                     }
 
                     DataChangedNotifier.NotifyOgrenciChanged();
-                    Listele(cmbFiltre?.SelectedIndex >= 0 ? cmbFiltre.Properties.Items[cmbFiltre.SelectedIndex].ToString() : "Tüm Öğrenciler");
+                    Listele(GetCurrentFilter());
                 }
                 catch (Exception ex)
                 {
@@ -305,9 +305,16 @@ namespace bursoto1.Modules
 
         private void btnEkle_ItemClick(object sender, ItemClickEventArgs e)
         {
-            FrmOgrenciEkle frm = new FrmOgrenciEkle();
-            frm.ShowDialog();
-            Listele();
+            // btnYeni ile aynı işlevi yapar
+            btnYeni_ItemClick(sender, e);
+        }
+        
+        // Mevcut filtre değerini al
+        private string GetCurrentFilter()
+        {
+            return cmbFiltre?.SelectedIndex >= 0 
+                ? cmbFiltre.Properties.Items[cmbFiltre.SelectedIndex].ToString() 
+                : "Tüm Öğrenciler";
         }
 
         private void gridView1_DoubleClick(object sender, EventArgs e)
@@ -342,7 +349,7 @@ namespace bursoto1.Modules
                     {
                         if (reader.Read())
                         {
-                            OgrenciProfili frm = new OgrenciProfili();
+                OgrenciProfili frm = new OgrenciProfili();
                             frm.secilenOgrenciID = ogrenciID;
                             frm.ad = reader["AD"]?.ToString();
                             frm.soyad = reader["SOYAD"]?.ToString();
@@ -519,7 +526,7 @@ namespace bursoto1.Modules
                     MessageHelper.ShowSuccess($"{adSoyad} öğrencisinin burs başvurusu KABUL EDİLDİ.", "İşlem Başarılı");
                     DataChangedNotifier.NotifyOgrenciChanged();
                     DataChangedNotifier.NotifyBursChanged();
-                    Listele(cmbFiltre?.SelectedIndex >= 0 ? cmbFiltre.Properties.Items[cmbFiltre.SelectedIndex].ToString() : "Tüm Öğrenciler");
+                    Listele(GetCurrentFilter());
                 }
                 catch (Exception ex)
                 {
@@ -555,7 +562,7 @@ namespace bursoto1.Modules
                     MessageHelper.ShowInfo($"{adSoyad} öğrencisinin burs başvurusu REDDEDİLDİ.", "İşlem Tamamlandı");
                     DataChangedNotifier.NotifyOgrenciChanged();
                     DataChangedNotifier.NotifyBursChanged();
-                    Listele(cmbFiltre?.SelectedIndex >= 0 ? cmbFiltre.Properties.Items[cmbFiltre.SelectedIndex].ToString() : "Tüm Öğrenciler");
+                    Listele(GetCurrentFilter());
                 }
                 catch (Exception ex)
                 {

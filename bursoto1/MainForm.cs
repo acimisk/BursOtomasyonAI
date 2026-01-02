@@ -5,8 +5,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
-using bursoto1.Modules; // Modüllerin olduğu yer
-using DevExpress.XtraBars; // BarButtonItem için
+using bursoto1.Modules;
+using bursoto1.Helpers;
+using DevExpress.XtraBars;
 
 namespace bursoto1
 {
@@ -73,6 +74,78 @@ namespace bursoto1
             {
                 bagisModule.btnEkle_ItemClick(null, null);
             }
+            else
+            {
+                // Bu sayfada ekleme yapılamaz - kullanıcıya seçenek sun
+                ShowEkleSecenekleri();
+            }
+        }
+
+        void ShowEkleSecenekleri()
+        {
+            // Kullanıcıya ne eklemek istediğini sor
+            using (XtraForm frm = new XtraForm())
+            {
+                frm.Text = "Yeni Kayıt Ekle";
+                frm.Size = new System.Drawing.Size(350, 200);
+                frm.StartPosition = FormStartPosition.CenterParent;
+                frm.FormBorderStyle = FormBorderStyle.FixedDialog;
+                frm.MaximizeBox = false;
+                frm.MinimizeBox = false;
+
+                // Başlık etiketi
+                var lblBaslik = new LabelControl()
+                {
+                    Text = "Bu sayfada doğrudan ekleme yapılamaz.\nNe eklemek istiyorsunuz?",
+                    Location = new System.Drawing.Point(20, 20),
+                    AutoSizeMode = LabelAutoSizeMode.None,
+                    Size = new System.Drawing.Size(300, 50)
+                };
+                lblBaslik.Appearance.Font = new System.Drawing.Font("Segoe UI", 10);
+
+                // Öğrenci Ekle butonu
+                var btnOgrenci = new SimpleButton()
+                {
+                    Text = "👨‍🎓 Yeni Öğrenci Ekle",
+                    Location = new System.Drawing.Point(20, 80),
+                    Size = new System.Drawing.Size(145, 40)
+                };
+                btnOgrenci.Appearance.Font = new System.Drawing.Font("Segoe UI", 9, System.Drawing.FontStyle.Bold);
+
+                // Bağışçı Ekle butonu
+                var btnBagisci = new SimpleButton()
+                {
+                    Text = "💰 Yeni Bağışçı Ekle",
+                    Location = new System.Drawing.Point(175, 80),
+                    Size = new System.Drawing.Size(145, 40)
+                };
+                btnBagisci.Appearance.Font = new System.Drawing.Font("Segoe UI", 9, System.Drawing.FontStyle.Bold);
+
+                btnOgrenci.Click += (s, ev) =>
+                {
+                    frm.Close();
+                    FrmOgrenciEkle ogrForm = new FrmOgrenciEkle();
+                    if (ogrForm.ShowDialog() == DialogResult.OK)
+                    {
+                        // Öğrenci modülünü yenile
+                        if (modules.ContainsKey("Ogrenciler") && modules["Ogrenciler"] is Modules.OgrenciModule om)
+                            om.Listele();
+                        DataChangedNotifier.NotifyOgrenciChanged();
+                    }
+                };
+
+                btnBagisci.Click += (s, ev) =>
+                {
+                    frm.Close();
+                    // Bağışçılar modülüne git ve ekle
+                    ShowModule("Bagiscilar");
+                    if (modules.ContainsKey("Bagiscilar") && modules["Bagiscilar"] is Modules.BagisModule bm)
+                        bm.btnEkle_ItemClick(null, null);
+                };
+
+                frm.Controls.AddRange(new Control[] { lblBaslik, btnOgrenci, btnBagisci });
+                frm.ShowDialog(this);
+            }
         }
 
         void HandleSil()
@@ -90,6 +163,14 @@ namespace bursoto1
             else if (activeModule is Modules.BagisModule bagisModule)
             {
                 bagisModule.btnSil_ItemClick(null, null);
+            }
+            else
+            {
+                // Bu sayfada silme yapılamaz
+                MessageHelper.ShowInfo(
+                    "Bu sayfada silme işlemi yapılamaz.\n\n" +
+                    "Silme yapmak için Öğrenciler, Burslar veya Bağışçılar sayfasına gidin.",
+                    "Bilgi");
             }
         }
 

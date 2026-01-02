@@ -112,6 +112,7 @@ namespace bursoto1.Modules
                     FormuTemizle();
                     _editingBursID = null;
                     Listele();
+                    DataChangedNotifier.NotifyBursChanged();
                     MessageHelper.ShowSuccess("Burs başarıyla silindi.", "Silme Başarılı");
                 }
                 catch (Exception ex)
@@ -208,6 +209,7 @@ namespace bursoto1.Modules
                 _editingBursID = null;
                 btnBursTanimla.Text = "Burs Tanımla";
                 Listele();
+                DataChangedNotifier.NotifyBursChanged();
             }
             catch (Exception ex)
             {

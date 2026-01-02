@@ -31,6 +31,44 @@ namespace bursoto1
         {
             // Grid dark mode ayarları
             ApplyDarkGrid();
+            
+            // İlk açılışta tüm öğrencileri göster
+            TumOgrencileriGoster();
+        }
+
+        // Tüm öğrencileri listele
+        void TumOgrencileriGoster()
+        {
+            try
+            {
+                this.Text = "Arama: Yükleniyor...";
+                
+                DataTable dt = new DataTable();
+                string connStr = @"Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=bursOtoDeneme1;Integrated Security=True";
+                using (SqlConnection conn = new SqlConnection(connStr))
+                {
+                    conn.Open();
+                    string sorgu = "SELECT ID, AD, SOYAD, BÖLÜMÜ, SINIF, TELEFON, AGNO FROM Ogrenciler ORDER BY AD, SOYAD";
+                    using (SqlDataAdapter da = new SqlDataAdapter(sorgu, conn))
+                    {
+                        da.Fill(dt);
+                    }
+                }
+
+                gridAraSonuc.DataSource = dt;
+                
+                // ID kolonunu gizle
+                var gv = gridAraSonuc.MainView as GridView;
+                if (gv != null && gv.Columns["ID"] != null)
+                    gv.Columns["ID"].Visible = false;
+
+                this.Text = $"Arama: {dt.Rows.Count} Öğrenci (Filtrelemek için yazın)";
+            }
+            catch (Exception ex)
+            {
+                this.Text = "Arama: Hata!";
+                MessageHelper.ShowException(ex, "Listeleme Hatası");
+            }
         }
 
         // Timer tetiklendiğinde aramayı yap
@@ -84,7 +122,7 @@ namespace bursoto1
         // Debounce sonrası gerçek arama yapılır
         void CanliAramaGerceklestir()
         {
-            // Hiç kriter yoksa arama yapma (gereksiz yükü engelle)
+            // Hiç kriter yoksa tüm öğrencileri göster
             bool hasAnyFilter = !string.IsNullOrEmpty(txtAraAd.Text) ||
                                 !string.IsNullOrEmpty(txtAraSoyad.Text) ||
                                 !string.IsNullOrEmpty(txtAraBolum.Text) ||
@@ -93,8 +131,7 @@ namespace bursoto1
 
             if (!hasAnyFilter)
             {
-                gridAraSonuc.DataSource = null;
-                this.Text = "Arama: Kriter giriniz";
+                TumOgrencileriGoster();
                 return;
             }
 

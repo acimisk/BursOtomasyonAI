@@ -223,7 +223,7 @@ namespace bursoto1.Modules
                         using (SqlConnection conn = bgl.baglanti())
                         {
                             SqlCommand cmd = new SqlCommand(@"INSERT INTO BursVerenler 
-                                (AdSoyad, Telefon, Mail, BagisMiktari, Aciklama, Durum, Tarih) 
+                                (AdSoyad, Telefon, Eposta, BagisMiktari, Aciklama, Durum, Tarih) 
                                 VALUES (@p1, @p2, @p3, @p4, @p5, 'Beklemede', @p6)", conn);
                             cmd.Parameters.AddWithValue("@p1", txtAd.Text.Trim());
                             cmd.Parameters.AddWithValue("@p2", txtTel.Text.Trim());
