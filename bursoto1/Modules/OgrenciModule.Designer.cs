@@ -30,7 +30,6 @@
         {
             this.components = new System.ComponentModel.Container();
             DevExpress.XtraGrid.GridLevelNode gridLevelNode1 = new DevExpress.XtraGrid.GridLevelNode();
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(OgrenciModule));
             this.gridControl1 = new DevExpress.XtraGrid.GridControl();
             this.gridView1 = new DevExpress.XtraGrid.Views.Grid.GridView();
             this.btnGoster = new DevExpress.XtraEditors.SimpleButton();
@@ -43,17 +42,11 @@
             this.btnBursReddet = new DevExpress.XtraEditors.SimpleButton();
             this.btnBursKabul = new DevExpress.XtraEditors.SimpleButton();
             this.btnAIAnaliz = new DevExpress.XtraEditors.SimpleButton();
-            this.ribbonControl1 = new DevExpress.XtraBars.Ribbon.RibbonControl();
-            this.btnEkle = new DevExpress.XtraBars.BarButtonItem();
-            this.btnSil = new DevExpress.XtraBars.BarButtonItem();
-            this.ribbonPage1 = new DevExpress.XtraBars.Ribbon.RibbonPage();
-            this.ribbonPageGroup1 = new DevExpress.XtraBars.Ribbon.RibbonPageGroup();
             ((System.ComponentModel.ISupportInitialize)(this.gridControl1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridView1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.panelAI)).BeginInit();
             this.panelAI.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.cmbFiltre.Properties)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.ribbonControl1)).BeginInit();
             this.SuspendLayout();
             // 
             // gridControl1
@@ -61,10 +54,10 @@
             gridLevelNode1.RelationName = "Level1";
             this.gridControl1.LevelTree.Nodes.AddRange(new DevExpress.XtraGrid.GridLevelNode[] {
             gridLevelNode1});
-            this.gridControl1.Location = new System.Drawing.Point(33, 264);
+            this.gridControl1.Location = new System.Drawing.Point(23, 125);
             this.gridControl1.MainView = this.gridView1;
             this.gridControl1.Name = "gridControl1";
-            this.gridControl1.Size = new System.Drawing.Size(824, 410);
+            this.gridControl1.Size = new System.Drawing.Size(789, 429);
             this.gridControl1.TabIndex = 13;
             this.gridControl1.ViewCollection.AddRange(new DevExpress.XtraGrid.Views.Base.BaseView[] {
             this.gridView1});
@@ -92,7 +85,7 @@
             this.btnGoster.Appearance.Options.UseForeColor = true;
             this.btnGoster.AppearancePressed.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(73)))), ((int)(((byte)(80)))), ((int)(((byte)(87)))));
             this.btnGoster.AppearancePressed.Options.UseBackColor = true;
-            this.btnGoster.Location = new System.Drawing.Point(33, 680);
+            this.btnGoster.Location = new System.Drawing.Point(-356, 16);
             this.btnGoster.Name = "btnGoster";
             this.btnGoster.Size = new System.Drawing.Size(126, 39);
             this.btnGoster.TabIndex = 14;
@@ -107,11 +100,14 @@
             this.panelAI.Appearance.BackColor = System.Drawing.Color.White;
             this.panelAI.Appearance.Options.UseBackColor = true;
             this.panelAI.BorderStyle = DevExpress.XtraEditors.Controls.BorderStyles.Simple;
+            this.panelAI.Controls.Add(this.btnBursKabul);
+            this.panelAI.Controls.Add(this.btnBursReddet);
+            this.panelAI.Controls.Add(this.btnAIAnaliz);
             this.panelAI.Controls.Add(this.lblAIsonuc);
             this.panelAI.Controls.Add(this.lblAIbaslik);
-            this.panelAI.Location = new System.Drawing.Point(896, 264);
+            this.panelAI.Location = new System.Drawing.Point(818, -10);
             this.panelAI.Name = "panelAI";
-            this.panelAI.Size = new System.Drawing.Size(439, 290);
+            this.panelAI.Size = new System.Drawing.Size(429, 621);
             this.panelAI.TabIndex = 17;
             // 
             // lblAIsonuc
@@ -123,7 +119,7 @@
             this.lblAIsonuc.Appearance.Options.UseTextOptions = true;
             this.lblAIsonuc.Appearance.TextOptions.WordWrap = DevExpress.Utils.WordWrap.Wrap;
             this.lblAIsonuc.AutoSizeMode = DevExpress.XtraEditors.LabelAutoSizeMode.None;
-            this.lblAIsonuc.Location = new System.Drawing.Point(15, 55);
+            this.lblAIsonuc.Location = new System.Drawing.Point(15, 93);
             this.lblAIsonuc.Name = "lblAIsonuc";
             this.lblAIsonuc.Size = new System.Drawing.Size(290, 330);
             this.lblAIsonuc.TabIndex = 1;
@@ -148,7 +144,7 @@
             this.lblFiltre.Appearance.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(44)))), ((int)(((byte)(62)))), ((int)(((byte)(80)))));
             this.lblFiltre.Appearance.Options.UseFont = true;
             this.lblFiltre.Appearance.Options.UseForeColor = true;
-            this.lblFiltre.Location = new System.Drawing.Point(27, 221);
+            this.lblFiltre.Location = new System.Drawing.Point(242, 23);
             this.lblFiltre.Name = "lblFiltre";
             this.lblFiltre.Size = new System.Drawing.Size(86, 23);
             this.lblFiltre.TabIndex = 16;
@@ -156,9 +152,9 @@
             // 
             // cmbFiltre
             // 
-            this.cmbFiltre.Location = new System.Drawing.Point(154, 218);
+            this.cmbFiltre.Location = new System.Drawing.Point(-265, -18);
             this.cmbFiltre.Name = "cmbFiltre";
-            this.cmbFiltre.Properties.Appearance.BackColor = System.Drawing.Color.White;
+            this.cmbFiltre.Properties.Appearance.BackColor = System.Drawing.Color.Transparent;
             this.cmbFiltre.Properties.Appearance.Font = new System.Drawing.Font("Segoe UI", 9.5F);
             this.cmbFiltre.Properties.Appearance.Options.UseBackColor = true;
             this.cmbFiltre.Properties.Appearance.Options.UseFont = true;
@@ -182,9 +178,9 @@
             this.btnBursReddet.Appearance.Options.UseForeColor = true;
             this.btnBursReddet.AppearancePressed.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(57)))), ((int)(((byte)(43)))));
             this.btnBursReddet.AppearancePressed.Options.UseBackColor = true;
-            this.btnBursReddet.Location = new System.Drawing.Point(1072, 636);
+            this.btnBursReddet.Location = new System.Drawing.Point(55, 591);
             this.btnBursReddet.Name = "btnBursReddet";
-            this.btnBursReddet.Size = new System.Drawing.Size(160, 28);
+            this.btnBursReddet.Size = new System.Drawing.Size(163, 28);
             this.btnBursReddet.TabIndex = 20;
             this.btnBursReddet.Text = "✗ Bursu Reddet";
             // 
@@ -198,7 +194,7 @@
             this.btnBursKabul.Appearance.Options.UseForeColor = true;
             this.btnBursKabul.AppearancePressed.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(34)))), ((int)(((byte)(153)))), ((int)(((byte)(84)))));
             this.btnBursKabul.AppearancePressed.Options.UseBackColor = true;
-            this.btnBursKabul.Location = new System.Drawing.Point(907, 636);
+            this.btnBursKabul.Location = new System.Drawing.Point(55, 548);
             this.btnBursKabul.Name = "btnBursKabul";
             this.btnBursKabul.Size = new System.Drawing.Size(160, 28);
             this.btnBursKabul.TabIndex = 19;
@@ -214,71 +210,19 @@
             this.btnAIAnaliz.Appearance.Options.UseForeColor = true;
             this.btnAIAnaliz.AppearancePressed.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(41)))), ((int)(((byte)(128)))), ((int)(((byte)(185)))));
             this.btnAIAnaliz.AppearancePressed.Options.UseBackColor = true;
-            this.btnAIAnaliz.Location = new System.Drawing.Point(907, 577);
+            this.btnAIAnaliz.Location = new System.Drawing.Point(55, 504);
             this.btnAIAnaliz.Name = "btnAIAnaliz";
-            this.btnAIAnaliz.Size = new System.Drawing.Size(325, 28);
+            this.btnAIAnaliz.Size = new System.Drawing.Size(182, 28);
             this.btnAIAnaliz.TabIndex = 18;
             this.btnAIAnaliz.Text = "🤖 AI Analiz Yap";
             // 
-            // ribbonControl1
-            // 
-            this.ribbonControl1.ExpandCollapseItem.Id = 0;
-            this.ribbonControl1.Items.AddRange(new DevExpress.XtraBars.BarItem[] {
-            this.ribbonControl1.ExpandCollapseItem,
-            this.btnEkle,
-            this.btnSil});
-            this.ribbonControl1.Location = new System.Drawing.Point(0, 0);
-            this.ribbonControl1.MaxItemId = 4;
-            this.ribbonControl1.Name = "ribbonControl1";
-            this.ribbonControl1.Pages.AddRange(new DevExpress.XtraBars.Ribbon.RibbonPage[] {
-            this.ribbonPage1});
-            this.ribbonControl1.Size = new System.Drawing.Size(1434, 183);
-            this.ribbonControl1.Click += new System.EventHandler(this.ribbonControl1_Click);
-            // 
-            // btnEkle
-            // 
-            this.btnEkle.Caption = "Ekle";
-            this.btnEkle.Id = 2;
-            this.btnEkle.ImageOptions.Image = ((System.Drawing.Image)(resources.GetObject("btnEkle.ImageOptions.Image")));
-            this.btnEkle.ImageOptions.LargeImage = ((System.Drawing.Image)(resources.GetObject("btnEkle.ImageOptions.LargeImage")));
-            this.btnEkle.Name = "btnEkle";
-            this.btnEkle.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnEkle_ItemClick);
-            // 
-            // btnSil
-            // 
-            this.btnSil.Caption = "Sil";
-            this.btnSil.Id = 3;
-            this.btnSil.ImageOptions.Image = ((System.Drawing.Image)(resources.GetObject("btnSil.ImageOptions.Image")));
-            this.btnSil.ImageOptions.LargeImage = ((System.Drawing.Image)(resources.GetObject("btnSil.ImageOptions.LargeImage")));
-            this.btnSil.Name = "btnSil";
-            // 
-            // ribbonPage1
-            // 
-            this.ribbonPage1.Groups.AddRange(new DevExpress.XtraBars.Ribbon.RibbonPageGroup[] {
-            this.ribbonPageGroup1});
-            this.ribbonPage1.Name = "ribbonPage1";
-            this.ribbonPage1.Text = "ribbonPage1";
-            // 
-            // ribbonPageGroup1
-            // 
-            this.ribbonPageGroup1.ItemLinks.Add(this.btnEkle);
-            this.ribbonPageGroup1.ItemLinks.Add(this.btnSil);
-            this.ribbonPageGroup1.Name = "ribbonPageGroup1";
-            this.ribbonPageGroup1.Text = "ribbonPageGroup1";
-            // 
             // OgrenciModule
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 16F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.Controls.Add(this.ribbonControl1);
+            this.Controls.Add(this.cmbFiltre);
             this.Controls.Add(this.gridControl1);
             this.Controls.Add(this.btnGoster);
             this.Controls.Add(this.panelAI);
             this.Controls.Add(this.lblFiltre);
-            this.Controls.Add(this.cmbFiltre);
-            this.Controls.Add(this.btnBursReddet);
-            this.Controls.Add(this.btnBursKabul);
-            this.Controls.Add(this.btnAIAnaliz);
             this.Name = "OgrenciModule";
             this.Size = new System.Drawing.Size(1434, 741);
             this.Load += new System.EventHandler(this.OgrenciModule_Load);
@@ -288,7 +232,6 @@
             this.panelAI.ResumeLayout(false);
             this.panelAI.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.cmbFiltre.Properties)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.ribbonControl1)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -308,10 +251,5 @@
         private DevExpress.XtraEditors.SimpleButton btnBursReddet;
         private DevExpress.XtraEditors.SimpleButton btnBursKabul;
         private DevExpress.XtraEditors.SimpleButton btnAIAnaliz;
-        private DevExpress.XtraBars.Ribbon.RibbonControl ribbonControl1;
-        private DevExpress.XtraBars.Ribbon.RibbonPage ribbonPage1;
-        private DevExpress.XtraBars.Ribbon.RibbonPageGroup ribbonPageGroup1;
-        private DevExpress.XtraBars.BarButtonItem btnEkle;
-        private DevExpress.XtraBars.BarButtonItem btnSil;
     }
 }

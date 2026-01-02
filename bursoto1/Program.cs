@@ -1,12 +1,14 @@
 ﻿using DevExpress.LookAndFeel;
-using DevExpress.Skins;
-using DevExpress.UserSkins;
+using DevExpress.Utils;
 using DevExpress.XtraEditors;
 using System;
 using System.Drawing;
 using System.Globalization;
 using System.Threading;
 using System.Windows.Forms;
+using DevExpress.Skins;
+using DevExpress.UserSkins;
+
 
 namespace bursoto1
 {
@@ -15,55 +17,43 @@ namespace bursoto1
         [STAThread]
         static void Main()
         {
-            // 1. KÜLTÜR AYARI (Mevcut kodunu koruyoruz - Türkçe karakter sorunu için)
+            // 🔴 SKIN REGISTER (ŞART)
+            BonusSkins.Register();
+            SkinManager.EnableFormSkins();
+
             CultureInfo culture = new CultureInfo("tr-TR");
             Thread.CurrentThread.CurrentCulture = culture;
             Thread.CurrentThread.CurrentUICulture = culture;
 
-            // 2. MODERN DEVEXPRESS AYARLARI (Demodan Entegre Edildi)
-
-            // DPI Ayarları (Yüksek çözünürlüklü ekranlarda bulanıklığı önler)
-            if (!System.Windows.Forms.SystemInformation.TerminalServerSession && Screen.AllScreens.Length > 1)
-                WindowsFormsSettings.SetPerMonitorDpiAware();
-            else
+            if (!SystemInformation.TerminalServerSession)
                 WindowsFormsSettings.SetDPIAware();
 
-            // Form Skin (Tema) Ayarları
             WindowsFormsSettings.EnableFormSkins();
-            WindowsFormsSettings.ForceDirectXPaint(); // Çizimleri hızlandırır (GPU kullanır)
-            WindowsFormsSettings.TrackWindowsAppMode = DevExpress.Utils.DefaultBoolean.True; // Windows Koyu/Açık moduna uyum sağlar
+            WindowsFormsSettings.TrackWindowsAppMode = DefaultBoolean.False;
 
-            // En Yeni WXI (Windows 11) Temasını Aktif Et (Demodaki görünüm)
-            WindowsFormsSettings.DefaultLookAndFeel.SetSkinStyle(SkinStyle.WXI);
+            // ✅ WXI DARK
+            UserLookAndFeel.Default.SetSkinStyle("WXI", "Darkness");
 
-            // Ribbon Stilini Office 365 Yap
+
             WindowsFormsSettings.DefaultRibbonStyle = DefaultRibbonControlStyle.Office365;
+            AppearanceObject.DefaultFont = new Font("Segoe UI", 9F);
 
-            // Font Ayarı (Modern ve okunaklı Segoe UI)
-            DevExpress.Utils.AppearanceObject.DefaultFont = new Font("Segoe UI", 9.25f);
-
-            // Grid ve Liste Ayarları (Excel tarzı filtreleme vb.)
             WindowsFormsSettings.ColumnFilterPopupMode = ColumnFilterPopupMode.Excel;
-            WindowsFormsSettings.AllowPixelScrolling = DevExpress.Utils.DefaultBoolean.True;
+            WindowsFormsSettings.AllowPixelScrolling = DefaultBoolean.True;
             WindowsFormsSettings.ScrollUIMode = ScrollUIMode.Touch;
-
-            // 3. GLOBAL HATA YAKALAMA (Mevcut kodunu koruyoruz)
-            Application.ThreadException += new ThreadExceptionEventHandler(GlobalHataYakala);
-            AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(GlobalKritikHataYakala);
 
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-
-            // 4. BAŞLANGIÇ FORMU
-            // Eski 'Menu' formunu değil, yeni tasarladığımız modern 'MainForm'u açıyoruz.
             Application.Run(new MainForm());
+
         }
+
 
         static void GlobalHataYakala(object sender, ThreadExceptionEventArgs e)
         {
             XtraMessageBox.Show(
-                $"Beklenmedik bir uygulama hatası oluştu:\n\n{e.Exception.Message}\n\nDetay: {e.Exception.GetType().Name}",
-                "Sistem Hatası",
+                $"Beklenmedik hata:\n\n{e.Exception.Message}",
+                "Uygulama Hatası",
                 MessageBoxButtons.OK,
                 MessageBoxIcon.Error
             );
@@ -71,10 +61,10 @@ namespace bursoto1
 
         static void GlobalKritikHataYakala(object sender, UnhandledExceptionEventArgs e)
         {
-            Exception ex = (Exception)e.ExceptionObject;
+            Exception ex = e.ExceptionObject as Exception;
             XtraMessageBox.Show(
-                $"Kritik sistem hatası oluştu:\n\n{ex.Message}\n\nUygulama kapatılabilir.",
-                "Kritik Hata",
+                $"Kritik hata:\n\n{ex?.Message}",
+                "Kritik Sistem Hatası",
                 MessageBoxButtons.OK,
                 MessageBoxIcon.Stop
             );

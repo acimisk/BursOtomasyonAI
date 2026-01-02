@@ -59,9 +59,9 @@ namespace bursoto1.Modules
 
         public void btnYeni_ItemClick(object sender, ItemClickEventArgs e)
         {
-            // Yeni burs tanımlama ekranı (Varsa FrmBursEkle, yoksa inputbox veya grid üzerinden)
-            XtraMessageBox.Show("Yeni burs ekleme penceresi buraya bağlanacak.");
-            // İşlem bitince: Listele();
+            // Yeni burs tanımlama ekranı
+            // TODO: FrmBursEkle formu oluşturulduğunda buraya bağlanacak
+            MessageHelper.ShowInfo("Yeni burs ekleme özelliği yakında eklenecek.", "Bilgi");
         }
 
         public void btnSil_ItemClick(object sender, ItemClickEventArgs e)

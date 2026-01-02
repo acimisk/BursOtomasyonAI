@@ -1,4 +1,5 @@
 ﻿using DevExpress.XtraEditors;
+using DevExpress.XtraGrid.Views.Grid;
 using System;
 using System.Data;
 using System.Data.SqlClient;
@@ -54,7 +55,7 @@ namespace bursoto1
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Hata: " + ex.Message);
+                MessageHelper.ShowException(ex, "Arama Hatası");
             }
         }
 
@@ -73,7 +74,15 @@ namespace bursoto1
 
         private void btnOgrGoster_Click(object sender, EventArgs e)
         {
-            DataRow dr = gridView1.GetDataRow(gridView1.FocusedRowHandle);
+            // gridAraSonuc'un MainView'ını kullan
+            var gridView = gridAraSonuc.MainView as GridView;
+            if (gridView == null)
+            {
+                MessageHelper.ShowWarning("Lütfen bir öğrenci seçiniz.", "Seçim Yapılmadı");
+                return;
+            }
+            
+            DataRow dr = gridView.GetDataRow(gridView.FocusedRowHandle);
             if (dr != null)
             {
                 OgrenciProfili frm = new OgrenciProfili();

@@ -11,6 +11,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using bursoto1.Helpers; // MessageHelper ve ImageHelper için
+using DevExpress.XtraEditors;
 
 namespace bursoto1
 {
@@ -18,7 +19,7 @@ namespace bursoto1
     {
         public string ad, soyad, maas,fotoYolu,agno,haneGeliri,bolum,kardesSayisi,sinif,telNo;
         public int secilenOgrenciID;
-        SqlConnection baglanti = new SqlConnection(@"Data Source=(localdb)\MSSQLLocalDB; initial catalog=bursOtoDeneme1; Integrated Security=TRUE");
+        SqlBaglanti bgl = new SqlBaglanti();
         
         private async void btnAIAnaliz_Click(object sender, EventArgs e)
         {
@@ -46,30 +47,27 @@ namespace bursoto1
                     int puan = int.Parse(match.Groups[1].Value);
                     txtAISkor.Text = puan.ToString();
 
-                    if (baglanti.State == ConnectionState.Closed) baglanti.Open();
-
-                    int etkilenenSatir = 0;
-                    using (SqlCommand cmd = new SqlCommand("UPDATE Ogrenciler SET AISkor=@p1 WHERE ID=@p2", baglanti))
+                    using (SqlConnection conn = bgl.baglanti())
                     {
+                        SqlCommand cmd = new SqlCommand("UPDATE Ogrenciler SET AISkor=@p1 WHERE ID=@p2", conn);
                         cmd.Parameters.AddWithValue("@p1", puan);
-                        cmd.Parameters.AddWithValue("@p2", secilenOgrenciID); // Dışarıdan gelen ID
-                        etkilenenSatir = cmd.ExecuteNonQuery();
-                    }
-                    baglanti.Close();
+                        cmd.Parameters.AddWithValue("@p2", secilenOgrenciID);
+                        int etkilenenSatir = cmd.ExecuteNonQuery();
 
-                    if (etkilenenSatir > 0)
-                    {
-                        MessageHelper.ShowSuccess($"AI Skoru ({puan}) başarıyla veritabanına kaydedildi.", "Kayıt Başarılı");
-                    }
-                    else
-                    {
-                        MessageHelper.ShowWarning("Kayıt güncellenemedi (ID bulunamadı).", "Güncelleme Hatası");
+                        if (etkilenenSatir > 0)
+                        {
+                            MessageHelper.ShowSuccess($"AI Skoru ({puan}) başarıyla veritabanına kaydedildi.", "Kayıt Başarılı");
+                            DataChangedNotifier.NotifyOgrenciChanged();
+                        }
+                        else
+                        {
+                            MessageHelper.ShowWarning("Kayıt güncellenemedi (ID bulunamadı).", "Güncelleme Hatası");
+                        }
                     }
                 }
             }
             catch (Exception ex)
             {
-                if (baglanti.State == ConnectionState.Open) baglanti.Close();
                 MessageHelper.ShowException(ex, "AI Analiz Hatası");
             }
         }
@@ -130,9 +128,5 @@ namespace bursoto1
             InitializeComponent();
         }
 
-        public void txtOgrAd_EditValueChanged(object sender, EventArgs e)
-        {
-
-        }
     }
 }

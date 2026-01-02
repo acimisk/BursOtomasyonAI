@@ -44,7 +44,6 @@ namespace bursoto1
 
             // Dashboard'u yenile
             DashboardVerileriniGetir();
-            BolumGrafiginiCiz();
         }
 
         protected override void OnFormClosed(FormClosedEventArgs e)
@@ -59,7 +58,6 @@ namespace bursoto1
         private void Anasayfa_Load(object sender, EventArgs e)
         {
             DashboardVerileriniGetir();
-            BolumGrafiginiCiz();
         }
 
         void DashboardVerileriniGetir()
@@ -183,40 +181,6 @@ namespace bursoto1
             item.Elements.Add(elDeger);
         }
 
-        void BolumGrafiginiCiz()
-        {
-            try
-            {
-                using (SqlConnection aktifBaglanti = bgl.baglanti())
-                {
-
-                SqlDataAdapter da = new SqlDataAdapter("SELECT BÖLÜMÜ, COUNT(*) as Sayi FROM Ogrenciler WHERE BÖLÜMÜ IS NOT NULL GROUP BY BÖLÜMÜ", aktifBaglanti);
-                DataTable dt = new DataTable();
-                da.Fill(dt);
-
-                if (dt.Rows.Count == 0) return;
-
-                chartControl1.Series.Clear();
-                Series seri = new Series("Öğrenci Dağılımı", ViewType.Pie);
-
-                foreach (DataRow dr in dt.Rows)
-                {
-                    string bolum = dr["BÖLÜMÜ"].ToString();
-                    if (string.IsNullOrEmpty(bolum)) bolum = "Belirtilmemiş";
-                    double adet = Convert.ToDouble(dr["Sayi"]);
-                    seri.Points.Add(new SeriesPoint(bolum, adet));
-                }
-
-                    chartControl1.Series.Add(seri);
-                    seri.Label.TextPattern = "{A}: {V}";
-                    seri.LabelsVisibility = DevExpress.Utils.DefaultBoolean.True;
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageHelper.ShowException(ex, "Grafik Çizim Hatası");
-            }
-        }
 
         private void tileItemBurs_ItemClick(object sender, TileItemEventArgs e)
         {

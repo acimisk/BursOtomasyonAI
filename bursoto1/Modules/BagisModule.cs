@@ -56,10 +56,9 @@ namespace bursoto1.Modules
         // --- BUTONLAR ---
         public void btnEkle_ItemClick(object sender, ItemClickEventArgs e)
         {
-            // FrmBagisEkle gibi bir formun varsa:
-            // FrmBagisEkle frm = new FrmBagisEkle();
-            // if(frm.ShowDialog() == DialogResult.OK) Listele();
-            XtraMessageBox.Show("Bağışçı ekleme formu buraya.");
+            // Yeni bağışçı ekleme ekranı
+            // TODO: FrmBagisEkle formu oluşturulduğunda buraya bağlanacak
+            MessageHelper.ShowInfo("Yeni bağışçı ekleme özelliği yakında eklenecek.", "Bilgi");
         }
 
         public void btnSil_ItemClick(object sender, ItemClickEventArgs e)

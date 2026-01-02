@@ -214,7 +214,7 @@ namespace bursoto1
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(233)))), ((int)(((byte)(236)))), ((int)(((byte)(239)))));
-            this.ClientSize = new System.Drawing.Size(1434, 531);
+            this.ClientSize = new System.Drawing.Size(1434, 604);
             this.Controls.Add(this.btnBursReddet);
             this.Controls.Add(this.btnBursKabul);
             this.Controls.Add(this.btnAIAnaliz);

@@ -101,25 +101,15 @@ namespace bursoto1
         {
             string hedefModul = e.Element.Tag?.ToString();
 
-            // --- BU SATIRI EKLE VE DENE ---
-            MessageBox.Show($"Tıklanan Element: {e.Element.Text}, Okunan Tag: '{hedefModul}'");
-            // -----------------------------
-
             if (!string.IsNullOrEmpty(hedefModul))
             {
                 ShowModule(hedefModul);
             }
         }
 
-        private void accordionControlElement6_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void accordionControlElement5_Click(object sender, EventArgs e)
-        {
-
-        }
+        // Designer'da bağlı event handler'lar (boş bırakıldı)
+        private void accordionControlElement5_Click(object sender, EventArgs e) { }
+        private void accordionControlElement6_Click(object sender, EventArgs e) { }
 
 
     }

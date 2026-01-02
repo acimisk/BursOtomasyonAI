@@ -46,10 +46,13 @@
             this.accordionControlElement10 = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             this.accordionControlElement11 = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             this.navigationFrame1 = new DevExpress.XtraBars.Navigation.NavigationFrame();
+            this.navigationPage2 = new DevExpress.XtraBars.Navigation.NavigationPage();
+            this.navigationPage1 = new DevExpress.XtraBars.Navigation.NavigationPage();
             ((System.ComponentModel.ISupportInitialize)(this.ribbon)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.accordionControl1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.accordionControl2)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.navigationFrame1)).BeginInit();
+            this.navigationFrame1.SuspendLayout();
             this.SuspendLayout();
             // 
             // ribbon
@@ -168,20 +171,32 @@
             // 
             // navigationFrame1
             // 
-            this.navigationFrame1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.navigationFrame1.Location = new System.Drawing.Point(242, 193);
+            this.navigationFrame1.Controls.Add(this.navigationPage1);
+            this.navigationFrame1.Controls.Add(this.navigationPage2);
+            this.navigationFrame1.Dock = System.Windows.Forms.DockStyle.Right;
+            this.navigationFrame1.Location = new System.Drawing.Point(244, 193);
             this.navigationFrame1.Name = "navigationFrame1";
-            this.navigationFrame1.Size = new System.Drawing.Size(931, 526);
+            this.navigationFrame1.Size = new System.Drawing.Size(929, 526);
             this.navigationFrame1.TabIndex = 7;
             this.navigationFrame1.Text = "navigationFrame1";
+            // 
+            // navigationPage2
+            // 
+            this.navigationPage2.Name = "navigationPage2";
+            this.navigationPage2.Size = new System.Drawing.Size(482, 293);
+            // 
+            // navigationPage1
+            // 
+            this.navigationPage1.Name = "navigationPage1";
+            this.navigationPage1.Size = new System.Drawing.Size(482, 293);
             // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1173, 749);
-            this.Controls.Add(this.navigationFrame1);
             this.Controls.Add(this.accordionControl2);
+            this.Controls.Add(this.navigationFrame1);
             this.Controls.Add(this.ribbonStatusBar);
             this.Controls.Add(this.ribbon);
             this.Name = "MainForm";
@@ -193,6 +208,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.accordionControl1)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.accordionControl2)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.navigationFrame1)).EndInit();
+            this.navigationFrame1.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -218,5 +234,7 @@
         private DevExpress.XtraBars.Navigation.AccordionControlElement accordionControlElement10;
         private DevExpress.XtraBars.Navigation.AccordionControlElement accordionControlElement11;
         private DevExpress.XtraBars.Navigation.NavigationFrame navigationFrame1;
+        private DevExpress.XtraBars.Navigation.NavigationPage navigationPage1;
+        private DevExpress.XtraBars.Navigation.NavigationPage navigationPage2;
     }
 }

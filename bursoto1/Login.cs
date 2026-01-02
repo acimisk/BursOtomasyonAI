@@ -66,39 +66,18 @@ namespace bursoto1
             }
         }
 
-        private void svgPerson_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void svgKey_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void labelKullaniciAdi_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void txtKullaniciAdi_EditValueChanged(object sender, EventArgs e)
-        {
-
-        }
-
-        private void txtSifre_EditValueChanged(object sender, EventArgs e)
-        {
-
-        }
-
-        private void labelSifre_Click(object sender, EventArgs e)
-        {
-
-        }
-
         private void Login_Load(object sender, EventArgs e)
         {
-
+            // Form yüklendiğinde kullanıcı adı alanına odaklan
+            txtKullaniciAdi.Focus();
         }
+
+        // Designer'da bağlı event handler'lar (boş bırakıldı)
+        private void txtKullaniciAdi_EditValueChanged(object sender, EventArgs e) { }
+        private void txtSifre_EditValueChanged(object sender, EventArgs e) { }
+        private void labelKullaniciAdi_Click(object sender, EventArgs e) { }
+        private void labelSifre_Click(object sender, EventArgs e) { }
+        private void svgPerson_Click(object sender, EventArgs e) { }
+        private void svgKey_Click(object sender, EventArgs e) { }
     }
 }

@@ -48,17 +48,15 @@ namespace bursoto1.Modules
                     tileItemBurs.Elements[1].Text = bursiyerSayisi;
                     tileItemBurs.AppearanceItem.Normal.BackColor = Color.FromArgb(39, 174, 96); // Yeşil
 
-                    // 3. TILE 3: Bağışçılar
-                    SqlCommand cmd3 = new SqlCommand("SELECT COUNT(*) FROM BursVerenler", conn);
-                    string bagisciSayisi = cmd3.ExecuteScalar().ToString();
-
-                    
+                    // 3. TILE 3: Bağışçılar (Not: tileItemBagisci Designer'da tanımlı değil, bu yüzden yorum satırına alındı)
+                    // SqlCommand cmd3 = new SqlCommand("SELECT COUNT(*) FROM BursVerenler", conn);
+                    // string bagisciSayisi = cmd3.ExecuteScalar().ToString();
+                    // Eğer ileride tileItemBagisci eklersen, yukarıdaki kodu kullanabilirsin
                 }
             }
             catch (Exception ex)
             {
-                // Hata olursa boş geçmesin
-                System.Diagnostics.Debug.WriteLine(ex.Message);
+                MessageHelper.ShowException(ex, "Dashboard Yükleme Hatası");
             }
         }
 
@@ -89,7 +87,10 @@ namespace bursoto1.Modules
                     }
                 }
             }
-            catch { }
+            catch (Exception ex)
+            {
+                MessageHelper.ShowException(ex, "Grafik Çizme Hatası");
+            }
         }
     }
 }

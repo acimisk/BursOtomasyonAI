@@ -165,6 +165,10 @@ namespace bursoto1
 
                 MessageHelper.ShowSuccess("Öğrenci sisteme başarıyla kaydedildi.\nDurum: Beklemede", "Kayıt Başarılı");
                 Temizle();
+                
+                // Dialog sonucunu OK olarak işaretle
+                this.DialogResult = DialogResult.OK;
+                this.Close();
             }
             catch (Exception ex)
             {
@@ -208,6 +212,7 @@ namespace bursoto1
 
         private void btnIptal_Click(object sender, EventArgs e)
         {
+            this.DialogResult = DialogResult.Cancel;
             this.Close();
         }
     }
