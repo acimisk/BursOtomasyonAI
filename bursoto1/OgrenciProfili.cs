@@ -12,10 +12,11 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using bursoto1.Helpers; // MessageHelper ve ImageHelper için
 using DevExpress.XtraEditors;
+using DevExpress.LookAndFeel;
 
 namespace bursoto1
 {
-    public partial class OgrenciProfili : Form
+    public partial class OgrenciProfili : XtraForm
     {
         public string ad, soyad, maas,fotoYolu,agno,haneGeliri,bolum,kardesSayisi,sinif,telNo;
         public int secilenOgrenciID;
@@ -37,9 +38,9 @@ namespace bursoto1
                 GeminiAI ai = new GeminiAI();
                 string veri = $"AD: {txtOgrAd.Text}, AGNO: {txtAgno.Text}, GELIR: {txtHaneGeliri.Text}, KARDES: {txtOgrKardesSayisi.Text}";
 
-                rtbAnalizSonuc.Text = "Gemini analiz ediyor...";
+                rtbAnalizSonuc.EditValue = "Gemini analiz ediyor...";
                 string sonuc = await ai.BursAnaliziYap(veri);
-                rtbAnalizSonuc.Text = sonuc;
+                rtbAnalizSonuc.EditValue = sonuc;
 
                 var match = Regex.Match(sonuc, @"SKOR:\s*(\d+)");
                 if (match.Success)
@@ -89,6 +90,7 @@ namespace bursoto1
             if (secilenOgrenciID > 0)
             {
                 LoadOgrenciFromDB();
+                LoadBursBilgileri(); // Burs bilgilerini yükle
             }
             else
             {
@@ -103,7 +105,7 @@ namespace bursoto1
                 txtTelNo.Text = telNo;
             }
 
-            this.Text = (ad ?? "") + " " + (soyad ?? "") + " - Profil";
+            this.Text = (ad ?? "") + " " + (soyad ?? "") + " - Öğrenci Profili";
 
             if (!string.IsNullOrEmpty(fotoYolu))
             {
@@ -123,16 +125,70 @@ namespace bursoto1
                     }
 
                     // Resmin kutuya tam sığması için
-                    pictureEdit1.Properties.SizeMode = DevExpress.XtraEditors.Controls.PictureSizeMode.Squeeze;
+                    pictureEdit1.Properties.SizeMode = DevExpress.XtraEditors.Controls.PictureSizeMode.Zoom;
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine("Resim yükleme hatası: " + ex.Message);
+                    System.Diagnostics.Debug.WriteLine("Resim yükleme hatası: " + ex.Message);
                 }
             }
 
             // AI Skorunu yükle
             LoadAISkor();
+        }
+
+        void LoadBursBilgileri()
+        {
+            try
+            {
+                using (SqlConnection conn = bgl.baglanti())
+                {
+                    SqlCommand cmd = new SqlCommand(@"
+                        SELECT ob.Durum, ob.BaslangicTarihi, b.BursAdı, b.Miktar 
+                        FROM OgrenciBurslari ob 
+                        LEFT JOIN Burslar b ON ob.BursID = b.BursID 
+                        WHERE ob.OgrenciID = @id", conn);
+                    cmd.Parameters.AddWithValue("@id", secilenOgrenciID);
+
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        if (reader.Read())
+                        {
+                            int durum = reader["Durum"] != DBNull.Value ? Convert.ToInt32(reader["Durum"]) : 0;
+                            string durumText = durum == 1 ? "✅ Aktif Burslu" : "⏳ Beklemede";
+                            Color durumRenk = durum == 1 ? Color.FromArgb(39, 174, 96) : Color.FromArgb(243, 156, 18);
+                            
+                            lblBursDurum.Text = "Burs Durumu: " + durumText;
+                            lblBursDurum.ForeColor = durumRenk;
+
+                            string bursAdi = reader["BursAdı"]?.ToString() ?? "Belirtilmemiş";
+                            decimal miktar = reader["Miktar"] != DBNull.Value ? Convert.ToDecimal(reader["Miktar"]) : 0;
+                            lblBursMiktar.Text = $"Burs: {bursAdi} - {miktar:C}";
+
+                            if (reader["BaslangicTarihi"] != DBNull.Value)
+                            {
+                                DateTime tarih = Convert.ToDateTime(reader["BaslangicTarihi"]);
+                                lblBaslangicTarihi.Text = "Başlangıç: " + tarih.ToString("dd.MM.yyyy");
+                            }
+                            else
+                            {
+                                lblBaslangicTarihi.Text = "Başlangıç: Henüz belirlenmedi";
+                            }
+                        }
+                        else
+                        {
+                            lblBursDurum.Text = "Burs Durumu: ❌ Burs kaydı yok";
+                            lblBursDurum.ForeColor = Color.FromArgb(231, 76, 60);
+                            lblBursMiktar.Text = "Burs: -";
+                            lblBaslangicTarihi.Text = "Başlangıç: -";
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageHelper.ShowException(ex, "Burs Bilgisi Yükleme Hatası");
+            }
         }
 
         void LoadOgrenciFromDB()

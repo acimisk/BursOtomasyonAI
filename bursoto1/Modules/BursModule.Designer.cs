@@ -67,7 +67,7 @@
             this.layoutControl1.Controls.Add(this.txtKontenjan);
             this.layoutControl1.Controls.Add(this.btnBursTanimla);
             this.layoutControl1.Controls.Add(this.txtBursAd);
-            this.layoutControl1.Location = new System.Drawing.Point(-1, -1);
+            this.layoutControl1.Location = new System.Drawing.Point(-9, -11);
             this.layoutControl1.Name = "layoutControl1";
             this.layoutControl1.OptionsCustomizationForm.DesignTimeCustomizationFormPositionAndSize = new System.Drawing.Rectangle(456, 27, 812, 500);
             this.layoutControl1.Root = this.Root;
@@ -209,7 +209,7 @@
             // 
             // gridControl1
             // 
-            this.gridControl1.Location = new System.Drawing.Point(398, 10);
+            this.gridControl1.Location = new System.Drawing.Point(390, 0);
             this.gridControl1.MainView = this.gridView1;
             this.gridControl1.Name = "gridControl1";
             this.gridControl1.Size = new System.Drawing.Size(968, 322);
@@ -228,7 +228,7 @@
             this.Controls.Add(this.gridControl1);
             this.Controls.Add(this.layoutControl1);
             this.Name = "BursModule";
-            this.Size = new System.Drawing.Size(1569, 347);
+            this.Size = new System.Drawing.Size(1569, 465);
             ((System.ComponentModel.ISupportInitialize)(this.layoutControl1)).EndInit();
             this.layoutControl1.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.txtAciklama.Properties)).EndInit();

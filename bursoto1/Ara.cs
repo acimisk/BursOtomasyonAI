@@ -3,12 +3,13 @@ using DevExpress.XtraGrid.Views.Grid;
 using System;
 using System.Data;
 using System.Data.SqlClient;
+using System.Drawing;
 using System.Windows.Forms;
 using bursoto1.Helpers; // MessageHelper için
 
 namespace bursoto1
 {
-    public partial class Ara : Form
+    public partial class Ara : XtraForm
     {
         SqlBaglanti bgl = new SqlBaglanti();
 
@@ -16,9 +17,44 @@ namespace bursoto1
         {
             InitializeComponent();
         }
+
         private void Ara_Load(object sender, EventArgs e)
         {
+            // Grid dark mode ayarları
+            ApplyDarkGrid();
+        }
 
+        private void ApplyDarkGrid()
+        {
+            if (gridAraSonuc == null) return;
+            
+            var gv = gridAraSonuc.MainView as GridView;
+            if (gv == null) return;
+
+            // SATIRLAR
+            gv.Appearance.Row.BackColor = Color.FromArgb(32, 32, 32);
+            gv.Appearance.Row.ForeColor = Color.White;
+            gv.Appearance.Row.Options.UseBackColor = true;
+            gv.Appearance.Row.Options.UseForeColor = true;
+
+            // BAŞLIK
+            gv.Appearance.HeaderPanel.BackColor = Color.FromArgb(45, 45, 48);
+            gv.Appearance.HeaderPanel.ForeColor = Color.White;
+            gv.Appearance.HeaderPanel.Options.UseBackColor = true;
+            gv.Appearance.HeaderPanel.Options.UseForeColor = true;
+
+            // SEÇİLİ SATIR
+            gv.Appearance.FocusedRow.BackColor = Color.FromArgb(70, 70, 70);
+            gv.Appearance.FocusedRow.ForeColor = Color.White;
+            gv.Appearance.FocusedRow.Options.UseBackColor = true;
+            gv.Appearance.FocusedRow.Options.UseForeColor = true;
+
+            // BOŞ ALAN
+            gv.Appearance.Empty.BackColor = Color.FromArgb(32, 32, 32);
+            gv.Appearance.Empty.Options.UseBackColor = true;
+
+            // Grid arka planı
+            gridAraSonuc.BackColor = Color.FromArgb(32, 32, 32);
         }
 
         // Kanka asıl motor burası. LIKE parametrelerini düzelttim.

@@ -33,6 +33,40 @@ namespace bursoto1.Modules
         {
             Listele();
             WireEvents();
+            ApplyDarkModeToUI();
+        }
+
+        // Dark Mode UI Ayarları
+        private void ApplyDarkModeToUI()
+        {
+            // AI Panel dark mode
+            if (panelAI != null)
+            {
+                panelAI.Appearance.BackColor = Color.FromArgb(35, 35, 38);
+                panelAI.Appearance.Options.UseBackColor = true;
+            }
+
+            // AI Label'lar dark mode
+            if (lblAIbaslik != null)
+            {
+                lblAIbaslik.Appearance.ForeColor = Color.FromArgb(200, 200, 200);
+            }
+            if (lblAIsonuc != null)
+            {
+                lblAIsonuc.Appearance.ForeColor = Color.FromArgb(180, 180, 180);
+            }
+
+            // Filtre label dark mode
+            if (lblFiltre != null)
+            {
+                lblFiltre.Appearance.ForeColor = Color.FromArgb(200, 200, 200);
+            }
+
+            // Filtre varsayılan değer
+            if (cmbFiltre != null && cmbFiltre.Properties.Items.Count > 0)
+            {
+                cmbFiltre.SelectedIndex = 0;
+            }
         }
 
         void WireEvents()
@@ -189,10 +223,22 @@ namespace bursoto1.Modules
                 return;
             }
 
+            // Seçilen öğrencilerin isimlerini topla
+            string ogrenciListesi = "";
+            foreach (int rowHandle in seciliSatirlar)
+            {
+                string ad = gridView1.GetRowCellValue(rowHandle, "AD")?.ToString() ?? "";
+                string soyad = gridView1.GetRowCellValue(rowHandle, "SOYAD")?.ToString() ?? "";
+                ogrenciListesi += $"• {ad} {soyad}\n";
+            }
+
             if (MessageHelper.ShowConfirm(
-                $"{seciliSatirlar.Length} adet kaydı silmek istediğinize emin misiniz?",
+                $"{seciliSatirlar.Length} adet öğrenciyi silmek istediğinize emin misiniz?\n\n{ogrenciListesi}\n⚠️ Bu işlem geri alınamaz!\n\nÖğrenciye ait tüm burs ve gider kayıtları da silinecektir.",
                 "Silme Onayı"))
             {
+                int silinenSayisi = 0;
+                int hataluSayisi = 0;
+
                 try
                 {
                     using (SqlConnection conn = bgl.baglanti())
@@ -202,33 +248,51 @@ namespace bursoto1.Modules
                             var id = gridView1.GetRowCellValue(rowHandle, "ID");
                             if (id != null)
                             {
-                                // FK constraint hatası için önce ilişkili tablolardan sil
-                                // Önce BursGiderleri'nden sil
+                                // Transaction ile güvenli silme
+                                SqlTransaction transaction = conn.BeginTransaction();
                                 try
                                 {
-                                    SqlCommand cmdGider = new SqlCommand("DELETE FROM BursGiderleri WHERE OgrenciID=@p1", conn);
+                                    // 1. BursGiderleri'nden sil (FK constraint)
+                                    SqlCommand cmdGider = new SqlCommand("DELETE FROM BursGiderleri WHERE OgrenciID=@p1", conn, transaction);
                                     cmdGider.Parameters.AddWithValue("@p1", id);
                                     cmdGider.ExecuteNonQuery();
-                                }
-                                catch { }
 
-                                // Sonra OgrenciBurslari'ndan sil
-                                try
-                                {
-                                    SqlCommand cmdBurs = new SqlCommand("DELETE FROM OgrenciBurslari WHERE OgrenciID=@p1", conn);
+                                    // 2. OgrenciBurslari'ndan sil (FK constraint)
+                                    SqlCommand cmdBurs = new SqlCommand("DELETE FROM OgrenciBurslari WHERE OgrenciID=@p1", conn, transaction);
                                     cmdBurs.Parameters.AddWithValue("@p1", id);
                                     cmdBurs.ExecuteNonQuery();
-                                }
-                                catch { }
 
-                                // Son olarak öğrenciyi sil
-                                SqlCommand cmd = new SqlCommand("DELETE FROM Ogrenciler WHERE ID=@p1", conn);
-                                cmd.Parameters.AddWithValue("@p1", id);
-                                cmd.ExecuteNonQuery();
+                                    // 3. Son olarak öğrenciyi sil
+                                    SqlCommand cmdOgr = new SqlCommand("DELETE FROM Ogrenciler WHERE ID=@p1", conn, transaction);
+                                    cmdOgr.Parameters.AddWithValue("@p1", id);
+                                    cmdOgr.ExecuteNonQuery();
+
+                                    transaction.Commit();
+                                    silinenSayisi++;
+                                }
+                                catch (Exception txEx)
+                                {
+                                    transaction.Rollback();
+                                    hataluSayisi++;
+                                    System.Diagnostics.Debug.WriteLine($"Öğrenci silme hatası (ID: {id}): {txEx.Message}");
+                                }
                             }
                         }
                     }
-                    MessageHelper.ShowSuccess("Seçilen kayıtlar başarıyla silindi.", "Silme Başarılı");
+
+                    if (silinenSayisi > 0 && hataluSayisi == 0)
+                    {
+                        MessageHelper.ShowSuccess($"{silinenSayisi} öğrenci başarıyla silindi.", "Silme Başarılı");
+                    }
+                    else if (silinenSayisi > 0 && hataluSayisi > 0)
+                    {
+                        MessageHelper.ShowWarning($"{silinenSayisi} öğrenci silindi, {hataluSayisi} öğrenci silinemedi.", "Kısmi Başarı");
+                    }
+                    else
+                    {
+                        MessageHelper.ShowError("Hiçbir öğrenci silinemedi.", "Silme Başarısız");
+                    }
+
                     DataChangedNotifier.NotifyOgrenciChanged();
                     Listele(cmbFiltre?.SelectedIndex >= 0 ? cmbFiltre.Properties.Items[cmbFiltre.SelectedIndex].ToString() : "Tüm Öğrenciler");
                 }

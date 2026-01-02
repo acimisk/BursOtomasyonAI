@@ -13,7 +13,7 @@ using bursoto1.Helpers; // MessageHelper için
 
 namespace bursoto1
 {
-    public partial class Login : Form
+    public partial class Login : XtraForm
     {
         // Kanka bağlantı sınıfımızı çağırdık
         public SqlBaglanti bgl = new SqlBaglanti();
@@ -21,9 +21,8 @@ namespace bursoto1
         public Login()
         {
             InitializeComponent();
-            // Modern UI ayarları
-            this.BackColor = Color.FromArgb(240, 240, 240);
-            this.Padding = new Padding(20);
+            // Dark mode: XtraForm ve WXI skin otomatik uygulanacak
+            // Arka plan rengini manuel ayarlamaya gerek yok - skin bunu yapacak
         }
 
         private void btnCikis_Click(object sender, EventArgs e)

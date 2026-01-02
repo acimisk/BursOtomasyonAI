@@ -28,16 +28,8 @@
         /// </summary>
         private void InitializeComponent()
         {
-            DevExpress.XtraEditors.TileItemElement tileItemElement1 = new DevExpress.XtraEditors.TileItemElement();
-            DevExpress.XtraEditors.TileItemElement tileItemElement2 = new DevExpress.XtraEditors.TileItemElement();
-            DevExpress.XtraEditors.TileItemElement tileItemElement3 = new DevExpress.XtraEditors.TileItemElement();
-            DevExpress.XtraEditors.TileItemElement tileItemElement4 = new DevExpress.XtraEditors.TileItemElement();
-            DevExpress.XtraEditors.TileItemElement tileItemElement5 = new DevExpress.XtraEditors.TileItemElement();
-            DevExpress.XtraEditors.TileItemElement tileItemElement6 = new DevExpress.XtraEditors.TileItemElement();
-            DevExpress.XtraEditors.TileItemElement tileItemElement7 = new DevExpress.XtraEditors.TileItemElement();
-            DevExpress.XtraEditors.TileItemElement tileItemElement8 = new DevExpress.XtraEditors.TileItemElement();
+            this.splitContainerControl1 = new DevExpress.XtraEditors.SplitContainerControl();
             this.chartControl1 = new DevExpress.XtraCharts.ChartControl();
-            this.tileControl1 = new DevExpress.XtraEditors.TileControl();
             this.tileControl2 = new DevExpress.XtraEditors.TileControl();
             this.tileGroup2 = new DevExpress.XtraEditors.TileGroup();
             this.tileItemOgrenci = new DevExpress.XtraEditors.TileItem();
@@ -46,23 +38,46 @@
             this.tileItemKasa = new DevExpress.XtraEditors.TileItem();
             this.tileItemGelir = new DevExpress.XtraEditors.TileItem();
             this.tileItemGider = new DevExpress.XtraEditors.TileItem();
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainerControl1)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainerControl1.Panel1)).BeginInit();
+            this.splitContainerControl1.Panel1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainerControl1.Panel2)).BeginInit();
+            this.splitContainerControl1.Panel2.SuspendLayout();
+            this.splitContainerControl1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.chartControl1)).BeginInit();
             this.SuspendLayout();
             // 
+            // splitContainerControl1
+            // 
+            this.splitContainerControl1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.splitContainerControl1.Horizontal = false;
+            this.splitContainerControl1.Location = new System.Drawing.Point(0, 0);
+            this.splitContainerControl1.Name = "splitContainerControl1";
+            // 
+            // splitContainerControl1.Panel1
+            // 
+            this.splitContainerControl1.Panel1.Controls.Add(this.tileControl2);
+            this.splitContainerControl1.Panel1.Text = "Panel1";
+            // 
+            // splitContainerControl1.Panel2
+            // 
+            this.splitContainerControl1.Panel2.Controls.Add(this.chartControl1);
+            this.splitContainerControl1.Panel2.Text = "Panel2";
+            this.splitContainerControl1.Size = new System.Drawing.Size(1200, 700);
+            this.splitContainerControl1.SplitterPosition = 320;
+            this.splitContainerControl1.TabIndex = 0;
+            // 
             // chartControl1
             // 
-            this.chartControl1.Location = new System.Drawing.Point(0, 105);
+            this.chartControl1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.chartControl1.Legend.AlignmentHorizontal = DevExpress.XtraCharts.LegendAlignmentHorizontal.Center;
+            this.chartControl1.Legend.AlignmentVertical = DevExpress.XtraCharts.LegendAlignmentVertical.Bottom;
+            this.chartControl1.Legend.Direction = DevExpress.XtraCharts.LegendDirection.LeftToRight;
+            this.chartControl1.Location = new System.Drawing.Point(0, 0);
             this.chartControl1.Name = "chartControl1";
             this.chartControl1.SeriesSerializable = new DevExpress.XtraCharts.Series[0];
-            this.chartControl1.Size = new System.Drawing.Size(600, 400);
-            this.chartControl1.TabIndex = 6;
-            // 
-            // tileControl1
-            // 
-            this.tileControl1.Location = new System.Drawing.Point(0, 0);
-            this.tileControl1.Name = "tileControl1";
-            this.tileControl1.Size = new System.Drawing.Size(240, 150);
-            this.tileControl1.TabIndex = 0;
+            this.chartControl1.Size = new System.Drawing.Size(1200, 375);
+            this.chartControl1.TabIndex = 0;
             // 
             // tileControl2
             // 
@@ -70,10 +85,11 @@
             this.tileControl2.Groups.Add(this.tileGroup2);
             this.tileControl2.ItemContentAnimation = DevExpress.XtraEditors.TileItemContentAnimationType.RandomSegmentedFade;
             this.tileControl2.Location = new System.Drawing.Point(0, 0);
-            this.tileControl2.MaxId = 5;
+            this.tileControl2.MaxId = 6;
             this.tileControl2.Name = "tileControl2";
-            this.tileControl2.Size = new System.Drawing.Size(1826, 699);
-            this.tileControl2.TabIndex = 5;
+            this.tileControl2.Padding = new System.Windows.Forms.Padding(20);
+            this.tileControl2.Size = new System.Drawing.Size(1200, 320);
+            this.tileControl2.TabIndex = 0;
             this.tileControl2.Text = "tileControl2";
             this.tileControl2.Click += new System.EventHandler(this.tileControl2_Click);
             // 
@@ -89,66 +105,55 @@
             // 
             // tileItemOgrenci
             // 
-            tileItemElement1.Text = "tileItemogrenci";
-            tileItemElement2.Text = "element1";
-            this.tileItemOgrenci.Elements.Add(tileItemElement1);
-            this.tileItemOgrenci.Elements.Add(tileItemElement2);
             this.tileItemOgrenci.Id = 0;
-            this.tileItemOgrenci.ItemSize = DevExpress.XtraEditors.TileItemSize.Large;
+            this.tileItemOgrenci.ItemSize = DevExpress.XtraEditors.TileItemSize.Wide;
             this.tileItemOgrenci.Name = "tileItemOgrenci";
             this.tileItemOgrenci.ItemClick += new DevExpress.XtraEditors.TileItemClickEventHandler(this.tileItemOgrenci_ItemClick);
             // 
             // tileItemBasari
             // 
-            tileItemElement3.Text = "tileItem1";
-            tileItemElement4.Text = "element1";
-            this.tileItemBasari.Elements.Add(tileItemElement3);
-            this.tileItemBasari.Elements.Add(tileItemElement4);
-            this.tileItemBasari.Id = 2;
-            this.tileItemBasari.ItemSize = DevExpress.XtraEditors.TileItemSize.Large;
+            this.tileItemBasari.Id = 1;
+            this.tileItemBasari.ItemSize = DevExpress.XtraEditors.TileItemSize.Wide;
             this.tileItemBasari.Name = "tileItemBasari";
             // 
             // tileItemBurs
             // 
-            tileItemElement5.Text = "tileItemBurs";
-            tileItemElement6.Text = "element1";
-            this.tileItemBurs.Elements.Add(tileItemElement5);
-            this.tileItemBurs.Elements.Add(tileItemElement6);
-            this.tileItemBurs.Id = 1;
-            this.tileItemBurs.ItemSize = DevExpress.XtraEditors.TileItemSize.Large;
+            this.tileItemBurs.Id = 2;
+            this.tileItemBurs.ItemSize = DevExpress.XtraEditors.TileItemSize.Wide;
             this.tileItemBurs.Name = "tileItemBurs";
             // 
             // tileItemKasa
             // 
-            tileItemElement7.Text = "tileItemKasa";
-            tileItemElement8.Text = "element1";
-            this.tileItemKasa.Elements.Add(tileItemElement7);
-            this.tileItemKasa.Elements.Add(tileItemElement8);
             this.tileItemKasa.Id = 3;
-            this.tileItemKasa.ItemSize = DevExpress.XtraEditors.TileItemSize.Large;
+            this.tileItemKasa.ItemSize = DevExpress.XtraEditors.TileItemSize.Wide;
             this.tileItemKasa.Name = "tileItemKasa";
             // 
             // tileItemGelir
             // 
             this.tileItemGelir.Id = 4;
-            this.tileItemGelir.ItemSize = DevExpress.XtraEditors.TileItemSize.Large;
+            this.tileItemGelir.ItemSize = DevExpress.XtraEditors.TileItemSize.Wide;
             this.tileItemGelir.Name = "tileItemGelir";
             // 
             // tileItemGider
             // 
             this.tileItemGider.Id = 5;
-            this.tileItemGider.ItemSize = DevExpress.XtraEditors.TileItemSize.Large;
+            this.tileItemGider.ItemSize = DevExpress.XtraEditors.TileItemSize.Wide;
             this.tileItemGider.Name = "tileItemGider";
             // 
             // AnasayfaModule
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.Controls.Add(this.chartControl1);
-            this.Controls.Add(this.tileControl2);
+            this.Controls.Add(this.splitContainerControl1);
             this.Name = "AnasayfaModule";
-            this.Size = new System.Drawing.Size(1826, 699);
+            this.Size = new System.Drawing.Size(1200, 700);
             this.Load += new System.EventHandler(this.AnasayfaModule_Load);
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainerControl1.Panel1)).EndInit();
+            this.splitContainerControl1.Panel1.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainerControl1.Panel2)).EndInit();
+            this.splitContainerControl1.Panel2.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainerControl1)).EndInit();
+            this.splitContainerControl1.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.chartControl1)).EndInit();
             this.ResumeLayout(false);
 
@@ -156,8 +161,8 @@
 
         #endregion
 
+        private DevExpress.XtraEditors.SplitContainerControl splitContainerControl1;
         private DevExpress.XtraCharts.ChartControl chartControl1;
-        private DevExpress.XtraEditors.TileControl tileControl1;
         private DevExpress.XtraEditors.TileControl tileControl2;
         private DevExpress.XtraEditors.TileGroup tileGroup2;
         private DevExpress.XtraEditors.TileItem tileItemOgrenci;
