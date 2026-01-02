@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
 using bursoto1.Modules; // Modüllerin olduğu yer
+using DevExpress.XtraBars; // BarButtonItem için
 
 namespace bursoto1
 {
@@ -21,8 +22,85 @@ namespace bursoto1
             // Navigasyon animasyonunu kapat (Kayma sorununu önler)
             navigationFrame1.AllowTransitionAnimation = DevExpress.Utils.DefaultBoolean.False;
 
-            // Navigasyon olayını bağla
-            accordionControl2.ElementClick += AccordionControl2_ElementClick;
+            // Ribbon butonlarını bağla
+            WireRibbonButtons();
+        }
+
+        void WireRibbonButtons()
+        {
+            if (btnAnaSayfa != null)
+                btnAnaSayfa.ItemClick += (s, e) => ShowModule("Anasayfa");
+            
+            if (btnOgrenciler != null)
+                btnOgrenciler.ItemClick += (s, e) => ShowModule("Ogrenciler");
+            
+            if (btnBurs != null)
+                btnBurs.ItemClick += (s, e) => ShowModule("Burslar");
+            
+            if (btnBagiscilar != null)
+                btnBagiscilar.ItemClick += (s, e) => ShowModule("Bagiscilar");
+            
+            if (btnAra != null)
+                btnAra.ItemClick += (s, e) => ShowAraForm();
+            
+            if (btnEkle != null)
+                btnEkle.ItemClick += (s, e) => HandleEkle();
+            
+            if (btnSil != null)
+                btnSil.ItemClick += (s, e) => HandleSil();
+        }
+
+        void ShowAraForm()
+        {
+            // Ara formunu göster
+            Ara araForm = new Ara();
+            araForm.Show();
+        }
+
+        void HandleEkle()
+        {
+            // Aktif modüle göre ekleme işlemi
+            var activeModule = GetActiveModule();
+            if (activeModule is Modules.OgrenciModule ogrenciModule)
+            {
+                ogrenciModule.btnYeni_ItemClick(null, null);
+            }
+            else if (activeModule is Modules.BursModule bursModule)
+            {
+                bursModule.btnYeni_ItemClick(null, null);
+            }
+            else if (activeModule is Modules.BagisModule bagisModule)
+            {
+                bagisModule.btnEkle_ItemClick(null, null);
+            }
+        }
+
+        void HandleSil()
+        {
+            // Aktif modüle göre silme işlemi
+            var activeModule = GetActiveModule();
+            if (activeModule is Modules.OgrenciModule ogrenciModule)
+            {
+                ogrenciModule.btnSil_ItemClick(null, null);
+            }
+            else if (activeModule is Modules.BursModule bursModule)
+            {
+                bursModule.btnSil_ItemClick(null, null);
+            }
+            else if (activeModule is Modules.BagisModule bagisModule)
+            {
+                bagisModule.btnSil_ItemClick(null, null);
+            }
+        }
+
+        XtraUserControl GetActiveModule()
+        {
+            var selectedPage = navigationFrame1.SelectedPage as NavigationPage;
+            if (selectedPage != null && selectedPage.Controls.Count > 0)
+            {
+                return selectedPage.Controls[0] as XtraUserControl;
+            }
+            return null;
         }
 
         // Modülleri hafızada tutmak için sözlük
@@ -96,20 +174,6 @@ namespace bursoto1
             }
         }
 
-        // Sol Menüye Tıklayınca
-        private void AccordionControl2_ElementClick(object sender, ElementClickEventArgs e)
-        {
-            string hedefModul = e.Element.Tag?.ToString();
-
-            if (!string.IsNullOrEmpty(hedefModul))
-            {
-                ShowModule(hedefModul);
-            }
-        }
-
-        // Designer'da bağlı event handler'lar (boş bırakıldı)
-        private void accordionControlElement5_Click(object sender, EventArgs e) { }
-        private void accordionControlElement6_Click(object sender, EventArgs e) { }
 
 
     }
