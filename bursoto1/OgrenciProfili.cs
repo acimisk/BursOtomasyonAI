@@ -85,15 +85,25 @@ namespace bursoto1
         // Base64ToImage metodu ImageHelper'a taşındı (DRY prensibi)
         private void OgrenciProfili_Load(object sender, EventArgs e)
         {
-            txtOgrAd.Text = ad;
-            txtOgrSoyad.Text = soyad;
-            txtHaneGeliri.Text = haneGeliri;
-            txtAgno.Text = agno;
-            txtBolum.Text = bolum;
-            txtOgrKardesSayisi.Text = kardesSayisi;
-            txtSinif.Text = sinif;
-            txtTelNo.Text = telNo;
-            this.Text = ad + " " + soyad + " - Profil";
+            // Eğer secilenOgrenciID varsa veritabanından çek
+            if (secilenOgrenciID > 0)
+            {
+                LoadOgrenciFromDB();
+            }
+            else
+            {
+                // Manuel atanan değerleri kullan
+                txtOgrAd.Text = ad;
+                txtOgrSoyad.Text = soyad;
+                txtHaneGeliri.Text = haneGeliri;
+                txtAgno.Text = agno;
+                txtBolum.Text = bolum;
+                txtOgrKardesSayisi.Text = kardesSayisi;
+                txtSinif.Text = sinif;
+                txtTelNo.Text = telNo;
+            }
+
+            this.Text = (ad ?? "") + " " + (soyad ?? "") + " - Profil";
 
             if (!string.IsNullOrEmpty(fotoYolu))
             {
@@ -112,14 +122,91 @@ namespace bursoto1
                         pictureEdit1.Image = Image.FromFile(fotoYolu);
                     }
 
-                    // Resmin kutuya tam sığması için (Boyutu ne olursa olsun)
+                    // Resmin kutuya tam sığması için
                     pictureEdit1.Properties.SizeMode = DevExpress.XtraEditors.Controls.PictureSizeMode.Squeeze;
                 }
                 catch (Exception ex)
                 {
-                    // Hata varsa bile program çökmesin diye boş bırakıyoruz
                     Console.WriteLine("Resim yükleme hatası: " + ex.Message);
                 }
+            }
+
+            // AI Skorunu yükle
+            LoadAISkor();
+        }
+
+        void LoadOgrenciFromDB()
+        {
+            try
+            {
+                using (SqlConnection conn = bgl.baglanti())
+                {
+                    SqlCommand cmd = new SqlCommand(@"SELECT AD, SOYAD, [TOPLAM HANE GELİRİ], FOTO, TELEFON, 
+                                                      BÖLÜMÜ, SINIF, [KARDEŞ SAYISI], AGNO, AISkor, AINotu
+                                                      FROM Ogrenciler WHERE ID = @id", conn);
+                    cmd.Parameters.AddWithValue("@id", secilenOgrenciID);
+
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        if (reader.Read())
+                        {
+                            ad = reader["AD"]?.ToString();
+                            soyad = reader["SOYAD"]?.ToString();
+                            haneGeliri = reader["TOPLAM HANE GELİRİ"]?.ToString();
+                            fotoYolu = reader["FOTO"]?.ToString();
+                            telNo = reader["TELEFON"]?.ToString();
+                            bolum = reader["BÖLÜMÜ"]?.ToString();
+                            sinif = reader["SINIF"]?.ToString();
+                            kardesSayisi = reader["KARDEŞ SAYISI"]?.ToString();
+                            agno = reader["AGNO"]?.ToString();
+
+                            txtOgrAd.Text = ad;
+                            txtOgrSoyad.Text = soyad;
+                            txtHaneGeliri.Text = haneGeliri;
+                            txtAgno.Text = agno;
+                            txtBolum.Text = bolum;
+                            txtOgrKardesSayisi.Text = kardesSayisi;
+                            txtSinif.Text = sinif;
+                            txtTelNo.Text = telNo;
+
+                            // Fotoğrafı yükle
+                            if (!string.IsNullOrEmpty(fotoYolu))
+                            {
+                                Image resim = ImageHelper.Base64ToImage(fotoYolu);
+                                if (resim != null)
+                                    pictureEdit1.EditValue = resim;
+                            }
+
+                            // AI Skorunu yükle
+                            object aiSkor = reader["AISkor"];
+                            if (aiSkor != DBNull.Value && aiSkor != null)
+                                txtAISkor.Text = aiSkor.ToString();
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageHelper.ShowException(ex, "Öğrenci Verisi Yükleme Hatası");
+            }
+        }
+
+        void LoadAISkor()
+        {
+            if (secilenOgrenciID > 0)
+            {
+                try
+                {
+                    using (SqlConnection conn = bgl.baglanti())
+                    {
+                        SqlCommand cmd = new SqlCommand("SELECT AISkor FROM Ogrenciler WHERE ID = @id", conn);
+                        cmd.Parameters.AddWithValue("@id", secilenOgrenciID);
+                        object result = cmd.ExecuteScalar();
+                        if (result != DBNull.Value && result != null)
+                            txtAISkor.Text = result.ToString();
+                    }
+                }
+                catch { }
             }
         }
 

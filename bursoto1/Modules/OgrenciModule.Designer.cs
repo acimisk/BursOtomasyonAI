@@ -35,13 +35,13 @@
             this.btnGoster = new DevExpress.XtraEditors.SimpleButton();
             this.sqlDataSource1 = new DevExpress.DataAccess.Sql.SqlDataSource(this.components);
             this.panelAI = new DevExpress.XtraEditors.PanelControl();
+            this.btnBursKabul = new DevExpress.XtraEditors.SimpleButton();
+            this.btnBursReddet = new DevExpress.XtraEditors.SimpleButton();
+            this.btnAIAnaliz = new DevExpress.XtraEditors.SimpleButton();
             this.lblAIsonuc = new DevExpress.XtraEditors.LabelControl();
             this.lblAIbaslik = new DevExpress.XtraEditors.LabelControl();
             this.lblFiltre = new DevExpress.XtraEditors.LabelControl();
             this.cmbFiltre = new DevExpress.XtraEditors.ComboBoxEdit();
-            this.btnBursReddet = new DevExpress.XtraEditors.SimpleButton();
-            this.btnBursKabul = new DevExpress.XtraEditors.SimpleButton();
-            this.btnAIAnaliz = new DevExpress.XtraEditors.SimpleButton();
             ((System.ComponentModel.ISupportInitialize)(this.gridControl1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridView1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.panelAI)).BeginInit();
@@ -85,7 +85,7 @@
             this.btnGoster.Appearance.Options.UseForeColor = true;
             this.btnGoster.AppearancePressed.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(73)))), ((int)(((byte)(80)))), ((int)(((byte)(87)))));
             this.btnGoster.AppearancePressed.Options.UseBackColor = true;
-            this.btnGoster.Location = new System.Drawing.Point(-356, 16);
+            this.btnGoster.Location = new System.Drawing.Point(354, 580);
             this.btnGoster.Name = "btnGoster";
             this.btnGoster.Size = new System.Drawing.Size(126, 39);
             this.btnGoster.TabIndex = 14;
@@ -105,10 +105,58 @@
             this.panelAI.Controls.Add(this.btnAIAnaliz);
             this.panelAI.Controls.Add(this.lblAIsonuc);
             this.panelAI.Controls.Add(this.lblAIbaslik);
-            this.panelAI.Location = new System.Drawing.Point(818, -10);
+            this.panelAI.Location = new System.Drawing.Point(932, 0);
             this.panelAI.Name = "panelAI";
-            this.panelAI.Size = new System.Drawing.Size(429, 621);
+            this.panelAI.Size = new System.Drawing.Size(499, 621);
             this.panelAI.TabIndex = 17;
+            // 
+            // btnBursKabul
+            // 
+            this.btnBursKabul.Appearance.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(39)))), ((int)(((byte)(174)))), ((int)(((byte)(96)))));
+            this.btnBursKabul.Appearance.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
+            this.btnBursKabul.Appearance.ForeColor = System.Drawing.Color.White;
+            this.btnBursKabul.Appearance.Options.UseBackColor = true;
+            this.btnBursKabul.Appearance.Options.UseFont = true;
+            this.btnBursKabul.Appearance.Options.UseForeColor = true;
+            this.btnBursKabul.AppearancePressed.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(34)))), ((int)(((byte)(153)))), ((int)(((byte)(84)))));
+            this.btnBursKabul.AppearancePressed.Options.UseBackColor = true;
+            this.btnBursKabul.Location = new System.Drawing.Point(55, 548);
+            this.btnBursKabul.Name = "btnBursKabul";
+            this.btnBursKabul.Size = new System.Drawing.Size(160, 28);
+            this.btnBursKabul.TabIndex = 19;
+            this.btnBursKabul.Text = "✓ Bursu Kabul Et";
+            // 
+            // btnBursReddet
+            // 
+            this.btnBursReddet.Appearance.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(231)))), ((int)(((byte)(76)))), ((int)(((byte)(60)))));
+            this.btnBursReddet.Appearance.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
+            this.btnBursReddet.Appearance.ForeColor = System.Drawing.Color.White;
+            this.btnBursReddet.Appearance.Options.UseBackColor = true;
+            this.btnBursReddet.Appearance.Options.UseFont = true;
+            this.btnBursReddet.Appearance.Options.UseForeColor = true;
+            this.btnBursReddet.AppearancePressed.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(57)))), ((int)(((byte)(43)))));
+            this.btnBursReddet.AppearancePressed.Options.UseBackColor = true;
+            this.btnBursReddet.Location = new System.Drawing.Point(55, 591);
+            this.btnBursReddet.Name = "btnBursReddet";
+            this.btnBursReddet.Size = new System.Drawing.Size(163, 28);
+            this.btnBursReddet.TabIndex = 20;
+            this.btnBursReddet.Text = "✗ Bursu Reddet";
+            // 
+            // btnAIAnaliz
+            // 
+            this.btnAIAnaliz.Appearance.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(52)))), ((int)(((byte)(152)))), ((int)(((byte)(219)))));
+            this.btnAIAnaliz.Appearance.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
+            this.btnAIAnaliz.Appearance.ForeColor = System.Drawing.Color.White;
+            this.btnAIAnaliz.Appearance.Options.UseBackColor = true;
+            this.btnAIAnaliz.Appearance.Options.UseFont = true;
+            this.btnAIAnaliz.Appearance.Options.UseForeColor = true;
+            this.btnAIAnaliz.AppearancePressed.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(41)))), ((int)(((byte)(128)))), ((int)(((byte)(185)))));
+            this.btnAIAnaliz.AppearancePressed.Options.UseBackColor = true;
+            this.btnAIAnaliz.Location = new System.Drawing.Point(55, 504);
+            this.btnAIAnaliz.Name = "btnAIAnaliz";
+            this.btnAIAnaliz.Size = new System.Drawing.Size(182, 28);
+            this.btnAIAnaliz.TabIndex = 18;
+            this.btnAIAnaliz.Text = "🤖 AI Analiz Yap";
             // 
             // lblAIsonuc
             // 
@@ -144,7 +192,7 @@
             this.lblFiltre.Appearance.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(44)))), ((int)(((byte)(62)))), ((int)(((byte)(80)))));
             this.lblFiltre.Appearance.Options.UseFont = true;
             this.lblFiltre.Appearance.Options.UseForeColor = true;
-            this.lblFiltre.Location = new System.Drawing.Point(242, 23);
+            this.lblFiltre.Location = new System.Drawing.Point(116, 66);
             this.lblFiltre.Name = "lblFiltre";
             this.lblFiltre.Size = new System.Drawing.Size(86, 23);
             this.lblFiltre.TabIndex = 16;
@@ -152,7 +200,7 @@
             // 
             // cmbFiltre
             // 
-            this.cmbFiltre.Location = new System.Drawing.Point(-265, -18);
+            this.cmbFiltre.Location = new System.Drawing.Point(208, 64);
             this.cmbFiltre.Name = "cmbFiltre";
             this.cmbFiltre.Properties.Appearance.BackColor = System.Drawing.Color.Transparent;
             this.cmbFiltre.Properties.Appearance.Font = new System.Drawing.Font("Segoe UI", 9.5F);
@@ -168,59 +216,11 @@
             this.cmbFiltre.Size = new System.Drawing.Size(194, 28);
             this.cmbFiltre.TabIndex = 15;
             // 
-            // btnBursReddet
-            // 
-            this.btnBursReddet.Appearance.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(231)))), ((int)(((byte)(76)))), ((int)(((byte)(60)))));
-            this.btnBursReddet.Appearance.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
-            this.btnBursReddet.Appearance.ForeColor = System.Drawing.Color.White;
-            this.btnBursReddet.Appearance.Options.UseBackColor = true;
-            this.btnBursReddet.Appearance.Options.UseFont = true;
-            this.btnBursReddet.Appearance.Options.UseForeColor = true;
-            this.btnBursReddet.AppearancePressed.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(57)))), ((int)(((byte)(43)))));
-            this.btnBursReddet.AppearancePressed.Options.UseBackColor = true;
-            this.btnBursReddet.Location = new System.Drawing.Point(55, 591);
-            this.btnBursReddet.Name = "btnBursReddet";
-            this.btnBursReddet.Size = new System.Drawing.Size(163, 28);
-            this.btnBursReddet.TabIndex = 20;
-            this.btnBursReddet.Text = "✗ Bursu Reddet";
-            // 
-            // btnBursKabul
-            // 
-            this.btnBursKabul.Appearance.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(39)))), ((int)(((byte)(174)))), ((int)(((byte)(96)))));
-            this.btnBursKabul.Appearance.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
-            this.btnBursKabul.Appearance.ForeColor = System.Drawing.Color.White;
-            this.btnBursKabul.Appearance.Options.UseBackColor = true;
-            this.btnBursKabul.Appearance.Options.UseFont = true;
-            this.btnBursKabul.Appearance.Options.UseForeColor = true;
-            this.btnBursKabul.AppearancePressed.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(34)))), ((int)(((byte)(153)))), ((int)(((byte)(84)))));
-            this.btnBursKabul.AppearancePressed.Options.UseBackColor = true;
-            this.btnBursKabul.Location = new System.Drawing.Point(55, 548);
-            this.btnBursKabul.Name = "btnBursKabul";
-            this.btnBursKabul.Size = new System.Drawing.Size(160, 28);
-            this.btnBursKabul.TabIndex = 19;
-            this.btnBursKabul.Text = "✓ Bursu Kabul Et";
-            // 
-            // btnAIAnaliz
-            // 
-            this.btnAIAnaliz.Appearance.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(52)))), ((int)(((byte)(152)))), ((int)(((byte)(219)))));
-            this.btnAIAnaliz.Appearance.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
-            this.btnAIAnaliz.Appearance.ForeColor = System.Drawing.Color.White;
-            this.btnAIAnaliz.Appearance.Options.UseBackColor = true;
-            this.btnAIAnaliz.Appearance.Options.UseFont = true;
-            this.btnAIAnaliz.Appearance.Options.UseForeColor = true;
-            this.btnAIAnaliz.AppearancePressed.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(41)))), ((int)(((byte)(128)))), ((int)(((byte)(185)))));
-            this.btnAIAnaliz.AppearancePressed.Options.UseBackColor = true;
-            this.btnAIAnaliz.Location = new System.Drawing.Point(55, 504);
-            this.btnAIAnaliz.Name = "btnAIAnaliz";
-            this.btnAIAnaliz.Size = new System.Drawing.Size(182, 28);
-            this.btnAIAnaliz.TabIndex = 18;
-            this.btnAIAnaliz.Text = "🤖 AI Analiz Yap";
-            // 
             // OgrenciModule
             // 
             this.Controls.Add(this.cmbFiltre);
-            this.Controls.Add(this.gridControl1);
             this.Controls.Add(this.btnGoster);
+            this.Controls.Add(this.gridControl1);
             this.Controls.Add(this.panelAI);
             this.Controls.Add(this.lblFiltre);
             this.Name = "OgrenciModule";

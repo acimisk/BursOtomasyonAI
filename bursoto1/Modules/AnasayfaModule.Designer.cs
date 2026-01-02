@@ -28,21 +28,21 @@
         /// </summary>
         private void InitializeComponent()
         {
-            DevExpress.XtraEditors.TileItemElement tileItemElement25 = new DevExpress.XtraEditors.TileItemElement();
-            DevExpress.XtraEditors.TileItemElement tileItemElement26 = new DevExpress.XtraEditors.TileItemElement();
-            DevExpress.XtraEditors.TileItemElement tileItemElement29 = new DevExpress.XtraEditors.TileItemElement();
-            DevExpress.XtraEditors.TileItemElement tileItemElement30 = new DevExpress.XtraEditors.TileItemElement();
-            DevExpress.XtraEditors.TileItemElement tileItemElement27 = new DevExpress.XtraEditors.TileItemElement();
-            DevExpress.XtraEditors.TileItemElement tileItemElement28 = new DevExpress.XtraEditors.TileItemElement();
-            DevExpress.XtraEditors.TileItemElement tileItemElement31 = new DevExpress.XtraEditors.TileItemElement();
-            DevExpress.XtraEditors.TileItemElement tileItemElement32 = new DevExpress.XtraEditors.TileItemElement();
+            DevExpress.XtraEditors.TileItemElement tileItemElement1 = new DevExpress.XtraEditors.TileItemElement();
+            DevExpress.XtraEditors.TileItemElement tileItemElement2 = new DevExpress.XtraEditors.TileItemElement();
+            DevExpress.XtraEditors.TileItemElement tileItemElement3 = new DevExpress.XtraEditors.TileItemElement();
+            DevExpress.XtraEditors.TileItemElement tileItemElement4 = new DevExpress.XtraEditors.TileItemElement();
+            DevExpress.XtraEditors.TileItemElement tileItemElement5 = new DevExpress.XtraEditors.TileItemElement();
+            DevExpress.XtraEditors.TileItemElement tileItemElement6 = new DevExpress.XtraEditors.TileItemElement();
+            DevExpress.XtraEditors.TileItemElement tileItemElement7 = new DevExpress.XtraEditors.TileItemElement();
+            DevExpress.XtraEditors.TileItemElement tileItemElement8 = new DevExpress.XtraEditors.TileItemElement();
             this.chartControl1 = new DevExpress.XtraCharts.ChartControl();
             this.tileControl1 = new DevExpress.XtraEditors.TileControl();
             this.tileControl2 = new DevExpress.XtraEditors.TileControl();
             this.tileGroup2 = new DevExpress.XtraEditors.TileGroup();
             this.tileItemOgrenci = new DevExpress.XtraEditors.TileItem();
-            this.tileItemBurs = new DevExpress.XtraEditors.TileItem();
             this.tileItemBasari = new DevExpress.XtraEditors.TileItem();
+            this.tileItemBurs = new DevExpress.XtraEditors.TileItem();
             this.tileItemKasa = new DevExpress.XtraEditors.TileItem();
             this.tileItemGelir = new DevExpress.XtraEditors.TileItem();
             this.tileItemGider = new DevExpress.XtraEditors.TileItem();
@@ -51,10 +51,10 @@
             // 
             // chartControl1
             // 
-            this.chartControl1.Location = new System.Drawing.Point(-246, 10);
+            this.chartControl1.Location = new System.Drawing.Point(0, 105);
             this.chartControl1.Name = "chartControl1";
             this.chartControl1.SeriesSerializable = new DevExpress.XtraCharts.Series[0];
-            this.chartControl1.Size = new System.Drawing.Size(592, 507);
+            this.chartControl1.Size = new System.Drawing.Size(600, 400);
             this.chartControl1.TabIndex = 6;
             // 
             // tileControl1
@@ -75,6 +75,7 @@
             this.tileControl2.Size = new System.Drawing.Size(1826, 699);
             this.tileControl2.TabIndex = 5;
             this.tileControl2.Text = "tileControl2";
+            this.tileControl2.Click += new System.EventHandler(this.tileControl2_Click);
             // 
             // tileGroup2
             // 
@@ -88,40 +89,41 @@
             // 
             // tileItemOgrenci
             // 
-            tileItemElement25.Text = "tileItemogrenci";
-            tileItemElement26.Text = "element1";
-            this.tileItemOgrenci.Elements.Add(tileItemElement25);
-            this.tileItemOgrenci.Elements.Add(tileItemElement26);
+            tileItemElement1.Text = "tileItemogrenci";
+            tileItemElement2.Text = "element1";
+            this.tileItemOgrenci.Elements.Add(tileItemElement1);
+            this.tileItemOgrenci.Elements.Add(tileItemElement2);
             this.tileItemOgrenci.Id = 0;
             this.tileItemOgrenci.ItemSize = DevExpress.XtraEditors.TileItemSize.Large;
             this.tileItemOgrenci.Name = "tileItemOgrenci";
-            // 
-            // tileItemBurs
-            // 
-            tileItemElement29.Text = "tileItemBurs";
-            tileItemElement30.Text = "element1";
-            this.tileItemBurs.Elements.Add(tileItemElement29);
-            this.tileItemBurs.Elements.Add(tileItemElement30);
-            this.tileItemBurs.Id = 1;
-            this.tileItemBurs.ItemSize = DevExpress.XtraEditors.TileItemSize.Large;
-            this.tileItemBurs.Name = "tileItemBurs";
+            this.tileItemOgrenci.ItemClick += new DevExpress.XtraEditors.TileItemClickEventHandler(this.tileItemOgrenci_ItemClick);
             // 
             // tileItemBasari
             // 
-            tileItemElement27.Text = "tileItem1";
-            tileItemElement28.Text = "element1";
-            this.tileItemBasari.Elements.Add(tileItemElement27);
-            this.tileItemBasari.Elements.Add(tileItemElement28);
+            tileItemElement3.Text = "tileItem1";
+            tileItemElement4.Text = "element1";
+            this.tileItemBasari.Elements.Add(tileItemElement3);
+            this.tileItemBasari.Elements.Add(tileItemElement4);
             this.tileItemBasari.Id = 2;
             this.tileItemBasari.ItemSize = DevExpress.XtraEditors.TileItemSize.Large;
             this.tileItemBasari.Name = "tileItemBasari";
             // 
+            // tileItemBurs
+            // 
+            tileItemElement5.Text = "tileItemBurs";
+            tileItemElement6.Text = "element1";
+            this.tileItemBurs.Elements.Add(tileItemElement5);
+            this.tileItemBurs.Elements.Add(tileItemElement6);
+            this.tileItemBurs.Id = 1;
+            this.tileItemBurs.ItemSize = DevExpress.XtraEditors.TileItemSize.Large;
+            this.tileItemBurs.Name = "tileItemBurs";
+            // 
             // tileItemKasa
             // 
-            tileItemElement31.Text = "tileItemKasa";
-            tileItemElement32.Text = "element1";
-            this.tileItemKasa.Elements.Add(tileItemElement31);
-            this.tileItemKasa.Elements.Add(tileItemElement32);
+            tileItemElement7.Text = "tileItemKasa";
+            tileItemElement8.Text = "element1";
+            this.tileItemKasa.Elements.Add(tileItemElement7);
+            this.tileItemKasa.Elements.Add(tileItemElement8);
             this.tileItemKasa.Id = 3;
             this.tileItemKasa.ItemSize = DevExpress.XtraEditors.TileItemSize.Large;
             this.tileItemKasa.Name = "tileItemKasa";
@@ -142,6 +144,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.Controls.Add(this.chartControl1);
             this.Controls.Add(this.tileControl2);
             this.Name = "AnasayfaModule";
             this.Size = new System.Drawing.Size(1826, 699);
