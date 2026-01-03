@@ -3,6 +3,7 @@ using DevExpress.XtraBars;
 using DevExpress.XtraEditors;
 using DevExpress.XtraGrid.Views.Grid;
 using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using System.Drawing;
@@ -404,47 +405,96 @@ namespace bursoto1.Modules
             {
                 using (SqlConnection conn = bgl.baglanti())
                 {
-                    // Tüm potansiyel sütunları çek
-                    SqlCommand cmd = new SqlCommand(@"SELECT 
-                        ISNULL(Motivasyon, '') as Motivasyon,
-                        ISNULL(Ihtiyac, '') as Ihtiyac,
-                        ISNULL(Hedefler, '') as Hedefler,
-                        ISNULL(BursKullanim, '') as Kullanim,
-                        ISNULL(FarkliOzellik, '') as Fark
-                        FROM Ogrenciler WHERE ID = @id", conn);
+                    // Önce kolonları kontrol et
+                    SqlCommand cmdCheck = new SqlCommand(@"SELECT COLUMN_NAME 
+                        FROM INFORMATION_SCHEMA.COLUMNS 
+                        WHERE TABLE_NAME = 'Ogrenciler' 
+                        AND COLUMN_NAME IN ('Motivasyon', 'Ihtiyac', 'Hedefler', 'BursKullanim', 'FarkliOzellik', 'AINotu')", conn);
+                    var kolonlar = new List<string>();
+                    using (var reader = cmdCheck.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            kolonlar.Add(reader[0].ToString());
+                        }
+                    }
+
+                    // Mevcut kolonları kullanarak sorgu oluştur
+                    string selectColumns = "ID";
+                    if (kolonlar.Contains("Motivasyon")) selectColumns += ", ISNULL(Motivasyon, '') as Motivasyon";
+                    if (kolonlar.Contains("Ihtiyac")) selectColumns += ", ISNULL(Ihtiyac, '') as Ihtiyac";
+                    if (kolonlar.Contains("Hedefler")) selectColumns += ", ISNULL(Hedefler, '') as Hedefler";
+                    if (kolonlar.Contains("BursKullanim")) selectColumns += ", ISNULL(BursKullanim, '') as Kullanim";
+                    if (kolonlar.Contains("FarkliOzellik")) selectColumns += ", ISNULL(FarkliOzellik, '') as Fark";
+                    if (kolonlar.Contains("AINotu")) selectColumns += ", ISNULL(AINotu, '') as AINotu";
+
+                    SqlCommand cmd = new SqlCommand($"SELECT {selectColumns} FROM Ogrenciler WHERE ID = @id", conn);
                     cmd.Parameters.AddWithValue("@id", ogrenciID);
                     
                     using (var reader = cmd.ExecuteReader())
                     {
                         if (reader.Read())
                         {
-                            motivasyon = reader["Motivasyon"]?.ToString() ?? "";
-                            ihtiyac = reader["Ihtiyac"]?.ToString() ?? "";
-                            hedefler = reader["Hedefler"]?.ToString() ?? "";
-                            kullanim = reader["Kullanim"]?.ToString() ?? "";
-                            fark = reader["Fark"]?.ToString() ?? "";
+                            if (kolonlar.Contains("Motivasyon"))
+                                motivasyon = reader["Motivasyon"]?.ToString() ?? "";
+                            if (kolonlar.Contains("Ihtiyac"))
+                                ihtiyac = reader["Ihtiyac"]?.ToString() ?? "";
+                            if (kolonlar.Contains("Hedefler"))
+                                hedefler = reader["Hedefler"]?.ToString() ?? "";
+                            if (kolonlar.Contains("BursKullanim"))
+                                kullanim = reader["Kullanim"]?.ToString() ?? "";
+                            if (kolonlar.Contains("FarkliOzellik"))
+                                fark = reader["Fark"]?.ToString() ?? "";
+                            
+                            // AINotu varsa ve diğerleri boşsa onu kullan
+                            if (kolonlar.Contains("AINotu"))
+                            {
+                                string aiNotu = reader["AINotu"]?.ToString() ?? "";
+                                if (string.IsNullOrWhiteSpace(ihtiyac) && string.IsNullOrWhiteSpace(motivasyon) && !string.IsNullOrWhiteSpace(aiNotu))
+                                {
+                                    motivasyon = aiNotu; // Fallback olarak kullan
+                                }
+                            }
                         }
                     }
                 }
             }
             catch (Exception ex)
             {
-                // Sütunlar yoksa sessizce devam et
                 System.Diagnostics.Debug.WriteLine($"Motivasyon sütunları okunamadı: {ex.Message}");
             }
 
-            // AI için detaylı veri hazırla
+            // AI için detaylı veri hazırla - boş değilse gönder
             string ogrenciVerisi = $"Ad Soyad: {ad} {soyad}\n" +
                                    $"Bölüm: {bolum}, Sınıf: {sinif}\n" +
                                    $"AGNO: {agno}\n" +
                                    $"Hane Geliri: {gelir} TL\n" +
-                                   $"Kardeş Sayısı: {kardes}\n\n" +
-                                   $"[İHTİYAÇ] Neden bursa ihtiyacınız var?\n{(string.IsNullOrWhiteSpace(ihtiyac) ? (string.IsNullOrWhiteSpace(motivasyon) ? "Cevap verilmemiş" : motivasyon) : ihtiyac)}\n\n" +
-                                   $"[HEDEFLER] Kariyer hedefleriniz nelerdir?\n{(string.IsNullOrWhiteSpace(hedefler) ? "Cevap verilmemiş" : hedefler)}\n\n" +
-                                   $"[KULLANIM] Bursu nasıl kullanacaksınız?\n{(string.IsNullOrWhiteSpace(kullanim) ? "Cevap verilmemiş" : kullanim)}\n\n" +
-                                   $"[FARK] Sizi diğer adaylardan ayıran nedir?\n{(string.IsNullOrWhiteSpace(fark) ? "Cevap verilmemiş" : fark)}";
+                                   $"Kardeş Sayısı: {kardes}\n\n";
+
+            // Sadece dolu olan cevapları ekle
+            if (!string.IsNullOrWhiteSpace(ihtiyac))
+                ogrenciVerisi += $"[İHTİYAÇ] Neden bursa ihtiyacınız var?\n{ihtiyac}\n\n";
+            else if (!string.IsNullOrWhiteSpace(motivasyon))
+                ogrenciVerisi += $"[İHTİYAÇ/MOTİVASYON] Neden bursa ihtiyacınız var?\n{motivasyon}\n\n";
+            else
+                ogrenciVerisi += $"[İHTİYAÇ] Neden bursa ihtiyacınız var?\nCevap verilmemiş\n\n";
+
+            if (!string.IsNullOrWhiteSpace(hedefler))
+                ogrenciVerisi += $"[HEDEFLER] Kariyer hedefleriniz nelerdir?\n{hedefler}\n\n";
+            else
+                ogrenciVerisi += $"[HEDEFLER] Kariyer hedefleriniz nelerdir?\nCevap verilmemiş\n\n";
+
+            if (!string.IsNullOrWhiteSpace(kullanim))
+                ogrenciVerisi += $"[KULLANIM] Bursu nasıl kullanacaksınız?\n{kullanim}\n\n";
+            else
+                ogrenciVerisi += $"[KULLANIM] Bursu nasıl kullanacaksınız?\nCevap verilmemiş\n\n";
+
+            if (!string.IsNullOrWhiteSpace(fark))
+                ogrenciVerisi += $"[FARK] Sizi diğer adaylardan ayıran nedir?\n{fark}\n\n";
+            else
+                ogrenciVerisi += $"[FARK] Sizi diğer adaylardan ayıran nedir?\nCevap verilmemiş\n\n";
             
-            System.Diagnostics.Debug.WriteLine($"AI Analiz için veri:\n{ogrenciVerisi}");
+            System.Diagnostics.Debug.WriteLine($"AI Analiz için veri (uzunluk: {ogrenciVerisi.Length}):\n{ogrenciVerisi}");
 
             if (lblAIsonuc != null)
             {
@@ -569,6 +619,13 @@ namespace bursoto1.Modules
                     Size = new System.Drawing.Size(400, 200)
                 };
 
+                // Burslar tablosundaki ID kolonunu tespit et
+                string bursIDKolonu = "BursID";
+                if (burslar.Columns.Contains("BursID"))
+                    bursIDKolonu = "BursID";
+                else if (burslar.Columns.Contains("ID"))
+                    bursIDKolonu = "ID";
+
                 foreach (DataRow bursRow in burslar.Rows)
                 {
                     string bursAdi = bursRow["BursAdı"]?.ToString() ?? "";
@@ -576,7 +633,7 @@ namespace bursoto1.Modules
                     int dolu = Convert.ToInt32(bursRow["Dolu"] ?? 0);
                     int bos = kontenjan - dolu;
                     decimal miktar = Convert.ToDecimal(bursRow["Miktar"] ?? 0);
-                    int bursID = Convert.ToInt32(bursRow["BursID"] ?? bursRow["ID"] ?? 0);
+                    int bursID = Convert.ToInt32(bursRow[bursIDKolonu] ?? 0);
 
                     listBurs.Items.Add(new BursItem(bursID, $"{bursAdi} - {miktar:C0}/ay ({dolu}/{kontenjan} dolu, {bos} boş)"));
                 }
@@ -671,28 +728,32 @@ namespace bursoto1.Modules
                 DataTable dt = new DataTable();
                 using (SqlConnection conn = bgl.baglanti())
                 {
-                    // Her burs için doluluk sayısını hesapla
-                    string query = @"SELECT b.*, 
-                        ISNULL((SELECT COUNT(*) FROM OgrenciBurslari ob WHERE ob.BursID = b.BursID AND ob.Durum = 1), 0) as Dolu
-                        FROM Burslar b
-                        WHERE b.Kontenjan > ISNULL((SELECT COUNT(*) FROM OgrenciBurslari ob WHERE ob.BursID = b.BursID AND ob.Durum = 1), 0)";
-                    
-                    // BursID yoksa ID ile dene
+                    // Burslar tablosundaki ID kolonunu dinamik tespit et
+                    string bursIDKolonu = "BursID";
                     try
                     {
-                        SqlDataAdapter da = new SqlDataAdapter(query, conn);
-                        da.Fill(dt);
+                        SqlCommand cmdKolon = new SqlCommand(@"SELECT TOP 1 COLUMN_NAME 
+                            FROM INFORMATION_SCHEMA.COLUMNS 
+                            WHERE TABLE_NAME = 'Burslar' 
+                            AND COLUMN_NAME IN ('BursID', 'ID')
+                            ORDER BY CASE COLUMN_NAME 
+                                WHEN 'BursID' THEN 1 
+                                WHEN 'ID' THEN 2 
+                                ELSE 3 END", conn);
+                        var kolonResult = cmdKolon.ExecuteScalar();
+                        if (kolonResult != null && kolonResult != DBNull.Value)
+                            bursIDKolonu = kolonResult.ToString();
                     }
-                    catch
-                    {
-                        // BursID yerine ID kullan
-                        query = @"SELECT b.*, 
-                            ISNULL((SELECT COUNT(*) FROM OgrenciBurslari ob WHERE ob.BursID = b.ID AND ob.Durum = 1), 0) as Dolu
-                            FROM Burslar b
-                            WHERE b.Kontenjan > ISNULL((SELECT COUNT(*) FROM OgrenciBurslari ob WHERE ob.BursID = b.ID AND ob.Durum = 1), 0)";
-                        SqlDataAdapter da = new SqlDataAdapter(query, conn);
-                        da.Fill(dt);
-                    }
+                    catch { }
+
+                    // Her burs için doluluk sayısını hesapla
+                    string query = $@"SELECT b.*, 
+                        ISNULL((SELECT COUNT(*) FROM OgrenciBurslari ob WHERE ob.BursID = b.{bursIDKolonu} AND ob.Durum = 1), 0) as Dolu
+                        FROM Burslar b
+                        WHERE b.Kontenjan > ISNULL((SELECT COUNT(*) FROM OgrenciBurslari ob WHERE ob.BursID = b.{bursIDKolonu} AND ob.Durum = 1), 0)";
+                    
+                    SqlDataAdapter da = new SqlDataAdapter(query, conn);
+                    da.Fill(dt);
                 }
                 return dt;
             }

@@ -321,6 +321,9 @@ namespace bursoto1
                 };
                 cmbBurs.Properties.TextEditStyle = DevExpress.XtraEditors.Controls.TextEditStyles.DisableTextEditor;
 
+                // "Tümü" seçeneğini ekle
+                cmbBurs.Properties.Items.Add(new BursOdemeItem(0, "Tümü", 0));
+
                 // Bursları yükle
                 DataTable dtBurslar = new DataTable();
                 try
@@ -340,6 +343,18 @@ namespace bursoto1
                                 )
                             END", conn);
                         cmdCheck.ExecuteNonQuery();
+                        
+                        // Tablo varsa ama Tarih kolonu yoksa ekle
+                        try
+                        {
+                            SqlCommand cmdTarihCheck = new SqlCommand(@"IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.COLUMNS 
+                                WHERE TABLE_NAME = 'BursGiderleri' AND COLUMN_NAME = 'Tarih')
+                                BEGIN
+                                    ALTER TABLE BursGiderleri ADD Tarih DATETIME DEFAULT GETDATE()
+                                END", conn);
+                            cmdTarihCheck.ExecuteNonQuery();
+                        }
+                        catch { }
 
                         string query = "SELECT * FROM Burslar WHERE Kontenjan > 0";
                         var da = new SqlDataAdapter(query, conn);
@@ -359,8 +374,8 @@ namespace bursoto1
                         cmbBurs.Properties.Items.Add(new BursOdemeItem(bursID, bursAdi, miktar));
                     }
 
-                    if (cmbBurs.Properties.Items.Count > 0)
-                        cmbBurs.SelectedIndex = 0;
+                    // İlk seçenek "Tümü" olsun
+                    cmbBurs.SelectedIndex = 0;
                 }
                 catch (Exception ex)
                 {
@@ -370,7 +385,7 @@ namespace bursoto1
                 // Öğrenci listesi
                 var lblInfo = new LabelControl()
                 {
-                    Text = "Bu bursa hak kazanan öğrenciler:",
+                    Text = "Tüm burs alıcıları:",
                     Location = new System.Drawing.Point(20, 55),
                     AutoSizeMode = LabelAutoSizeMode.None,
                     Size = new System.Drawing.Size(300, 25)
@@ -389,51 +404,122 @@ namespace bursoto1
                 gridViewOdeme.OptionsView.ShowGroupPanel = false;
                 gridViewOdeme.OptionsBehavior.Editable = false;
 
-                // Burs değiştiğinde öğrencileri yükle
+                // Öğrencileri yükle (tümü veya filtreli)
                 Action loadStudents = () =>
                 {
-                    if (cmbBurs.SelectedItem is BursOdemeItem selectedBurs)
+                    try
                     {
-                        try
+                        var selectedBurs = cmbBurs.SelectedItem as BursOdemeItem;
+                        DataTable dt = new DataTable();
+                        using (var conn = bgl.baglanti())
                         {
-                            DataTable dt = new DataTable();
-                            using (var conn = bgl.baglanti())
+                            string query = "";
+                            
+                            // BursGiderleri tablosundaki tarih kolonunu kontrol et
+                            string tarihKolonu = "Tarih";
+                            try
                             {
-                                string query = @"SELECT o.ID, o.AD, o.SOYAD, o.BÖLÜMÜ, o.TELEFON,
-                                    CASE WHEN EXISTS(SELECT 1 FROM BursGiderleri bg WHERE bg.OgrenciID = o.ID 
+                                SqlCommand cmdTarih = new SqlCommand(@"SELECT TOP 1 COLUMN_NAME 
+                                    FROM INFORMATION_SCHEMA.COLUMNS 
+                                    WHERE TABLE_NAME = 'BursGiderleri' 
+                                    AND COLUMN_NAME IN ('Tarih', 'OdemeTarihi', 'KayitTarihi')
+                                    ORDER BY CASE COLUMN_NAME 
+                                        WHEN 'Tarih' THEN 1 
+                                        WHEN 'OdemeTarihi' THEN 2 
+                                        WHEN 'KayitTarihi' THEN 3 
+                                        ELSE 4 END", conn);
+                                var tarihResult = cmdTarih.ExecuteScalar();
+                                if (tarihResult != null && tarihResult != DBNull.Value)
+                                    tarihKolonu = tarihResult.ToString();
+                            }
+                            catch { }
+
+                            // Burslar tablosundaki ID kolonunu dinamik tespit et
+                            string bursIDKolonu = "BursID";
+                            try
+                            {
+                                SqlCommand cmdBursKolon = new SqlCommand(@"SELECT TOP 1 COLUMN_NAME 
+                                    FROM INFORMATION_SCHEMA.COLUMNS 
+                                    WHERE TABLE_NAME = 'Burslar' 
+                                    AND COLUMN_NAME IN ('BursID', 'ID')
+                                    ORDER BY CASE COLUMN_NAME 
+                                        WHEN 'BursID' THEN 1 
+                                        WHEN 'ID' THEN 2 
+                                        ELSE 3 END", conn);
+                                var bursKolonResult = cmdBursKolon.ExecuteScalar();
+                                if (bursKolonResult != null && bursKolonResult != DBNull.Value)
+                                    bursIDKolonu = bursKolonResult.ToString();
+                            }
+                            catch { }
+
+                            if (selectedBurs != null && selectedBurs.BursID > 0)
+                            {
+                                // Belirli bir burs seçildi - o bursa hak kazananları göster
+                                query = $@"SELECT DISTINCT o.ID, o.AD, o.SOYAD, o.BÖLÜMÜ, o.TELEFON, 
+                                    b.BursAdı as BursAdi, b.Miktar,
+                                    CASE WHEN EXISTS(SELECT 1 FROM BursGiderleri bg 
+                                        WHERE bg.OgrenciID = o.ID 
                                         AND bg.BursID = @bursID
-                                        AND MONTH(bg.Tarih) = MONTH(GETDATE()) AND YEAR(bg.Tarih) = YEAR(GETDATE())) 
+                                        AND MONTH(bg.{tarihKolonu}) = MONTH(GETDATE()) AND YEAR(bg.{tarihKolonu}) = YEAR(GETDATE())) 
                                         THEN 'Bu Ay Ödendi' ELSE 'Bekliyor' END as OdemeDurumu
                                     FROM Ogrenciler o
                                     INNER JOIN OgrenciBurslari ob ON o.ID = ob.OgrenciID
-                                    WHERE ob.BursID = @bursID AND ob.Durum = 1
+                                    LEFT JOIN Burslar b ON ob.BursID = b.{bursIDKolonu}
+                                    WHERE ob.Durum = 1 
+                                    AND ob.BursID = @bursID
                                     ORDER BY o.AD, o.SOYAD";
-
-                                var cmd = new SqlCommand(query, conn);
-                                cmd.Parameters.AddWithValue("@bursID", selectedBurs.BursID);
-                                var da = new SqlDataAdapter(cmd);
-                                da.Fill(dt);
                             }
-                            gridOdeme.DataSource = dt;
+                            else
+                            {
+                                // Tümü seçildi - tüm onaylanmış öğrencileri göster
+                                query = $@"SELECT DISTINCT o.ID, o.AD, o.SOYAD, o.BÖLÜMÜ, o.TELEFON,
+                                    ISNULL(b.BursAdı, 'Burs Tanımlı Değil') as BursAdi,
+                                    ISNULL(b.Miktar, 0) as Miktar,
+                                    CASE WHEN EXISTS(SELECT 1 FROM BursGiderleri bg 
+                                        WHERE bg.OgrenciID = o.ID 
+                                        AND MONTH(bg.{tarihKolonu}) = MONTH(GETDATE()) AND YEAR(bg.{tarihKolonu}) = YEAR(GETDATE())) 
+                                        THEN 'Bu Ay Ödendi' ELSE 'Bekliyor' END as OdemeDurumu
+                                    FROM Ogrenciler o
+                                    INNER JOIN OgrenciBurslari ob ON o.ID = ob.OgrenciID
+                                    LEFT JOIN Burslar b ON ob.BursID = b.{bursIDKolonu}
+                                    WHERE ob.Durum = 1
+                                    ORDER BY o.AD, o.SOYAD";
+                            }
 
-                            // Kolon ayarları
-                            if (gridViewOdeme.Columns["ID"] != null)
-                                gridViewOdeme.Columns["ID"].Visible = false;
-                            if (gridViewOdeme.Columns["AD"] != null) gridViewOdeme.Columns["AD"].Caption = "Ad";
-                            if (gridViewOdeme.Columns["SOYAD"] != null) gridViewOdeme.Columns["SOYAD"].Caption = "Soyad";
-                            if (gridViewOdeme.Columns["BÖLÜMÜ"] != null) gridViewOdeme.Columns["BÖLÜMÜ"].Caption = "Bölüm";
-                            if (gridViewOdeme.Columns["TELEFON"] != null) gridViewOdeme.Columns["TELEFON"].Caption = "Telefon";
-                            if (gridViewOdeme.Columns["OdemeDurumu"] != null) gridViewOdeme.Columns["OdemeDurumu"].Caption = "Durum";
-
-                            gridViewOdeme.BestFitColumns();
-
-                            // Ödeme tutarını güncelle
-                            lblInfo.Text = $"Bu bursa hak kazanan öğrenciler ({dt.Rows.Count} kişi):";
+                            var cmd = new SqlCommand(query, conn);
+                            if (selectedBurs != null && selectedBurs.BursID > 0)
+                            {
+                                cmd.Parameters.AddWithValue("@bursID", selectedBurs.BursID);
+                            }
+                            
+                            var da = new SqlDataAdapter(cmd);
+                            da.Fill(dt);
                         }
-                        catch (Exception ex)
-                        {
-                            System.Diagnostics.Debug.WriteLine($"Öğrenci listesi hatası: {ex.Message}");
-                        }
+                        gridOdeme.DataSource = dt;
+
+                        // Kolon ayarları
+                        if (gridViewOdeme.Columns["ID"] != null)
+                            gridViewOdeme.Columns["ID"].Visible = false;
+                        if (gridViewOdeme.Columns["AD"] != null) gridViewOdeme.Columns["AD"].Caption = "Ad";
+                        if (gridViewOdeme.Columns["SOYAD"] != null) gridViewOdeme.Columns["SOYAD"].Caption = "Soyad";
+                        if (gridViewOdeme.Columns["BÖLÜMÜ"] != null) gridViewOdeme.Columns["BÖLÜMÜ"].Caption = "Bölüm";
+                        if (gridViewOdeme.Columns["TELEFON"] != null) gridViewOdeme.Columns["TELEFON"].Caption = "Telefon";
+                        if (gridViewOdeme.Columns["BursAdi"] != null) gridViewOdeme.Columns["BursAdi"].Caption = "Burs";
+                        if (gridViewOdeme.Columns["Miktar"] != null) gridViewOdeme.Columns["Miktar"].Caption = "Miktar";
+                        if (gridViewOdeme.Columns["OdemeDurumu"] != null) gridViewOdeme.Columns["OdemeDurumu"].Caption = "Bu Ay";
+
+                        gridViewOdeme.BestFitColumns();
+
+                        // Bilgi metnini güncelle
+                        if (selectedBurs != null && selectedBurs.BursID > 0)
+                            lblInfo.Text = $"{selectedBurs.BursAdi} bursuna hak kazanan öğrenciler ({dt.Rows.Count} kişi):";
+                        else
+                            lblInfo.Text = $"Tüm burs alıcıları ({dt.Rows.Count} kişi):";
+                    }
+                    catch (Exception ex)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"Öğrenci listesi hatası: {ex.Message}");
+                        MessageHelper.ShowException(ex, "Öğrenci Listesi Yükleme Hatası");
                     }
                 };
 
@@ -448,8 +534,9 @@ namespace bursoto1
                 // Burs değiştiğinde tutarı güncelle
                 cmbBurs.SelectedIndexChanged += (s, ev) =>
                 {
-                    if (cmbBurs.SelectedItem is BursOdemeItem selectedBurs)
-                        txtTutar.EditValue = selectedBurs.Miktar;
+                    var selectedBursForTutar = cmbBurs.SelectedItem as BursOdemeItem;
+                    if (selectedBursForTutar != null && selectedBursForTutar.BursID > 0)
+                        txtTutar.EditValue = selectedBursForTutar.Miktar;
                 };
 
                 // Tümünü Seç butonu
@@ -492,7 +579,8 @@ namespace bursoto1
                 btnIptal.Click += (s, ev) => frm.Close();
                 btnOdemeYap.Click += (s, ev) =>
                 {
-                    if (!(cmbBurs.SelectedItem is BursOdemeItem selectedBurs))
+                    var selectedBurs = cmbBurs.SelectedItem as BursOdemeItem;
+                    if (selectedBurs == null)
                     {
                         MessageHelper.ShowWarning("Lütfen bir burs seçin.", "Burs Seçilmedi");
                         return;
@@ -512,7 +600,16 @@ namespace bursoto1
                         return;
                     }
 
-                    if (MessageHelper.ShowConfirm($"{selectedBurs.BursAdi} bursu için {selectedRows.Length} öğrenciye toplam {tutar * selectedRows.Length:C} ödeme yapmak istediğinize emin misiniz?", "Ödeme Onayı"))
+                    // Burs bilgisini al
+                    string bursAdi = "Burs Ödemesi";
+                    int bursID = 0;
+                    if (selectedBurs.BursID > 0)
+                    {
+                        bursAdi = selectedBurs.BursAdi;
+                        bursID = selectedBurs.BursID;
+                    }
+
+                    if (MessageHelper.ShowConfirm($"{bursAdi} için {selectedRows.Length} öğrenciye toplam {tutar * selectedRows.Length:C} ödeme yapmak istediğinize emin misiniz?", "Ödeme Onayı"))
                     {
                         int basarili = 0;
                         int hatali = 0;
@@ -528,14 +625,47 @@ namespace bursoto1
                                         var ogrenciID = gridViewOdeme.GetRowCellValue(rowHandle, "ID");
                                         if (ogrenciID != null && ogrenciID != DBNull.Value)
                                         {
-                                            SqlCommand cmd = new SqlCommand(@"INSERT INTO BursGiderleri 
-                                                (OgrenciID, BursID, Tutar, Tarih, Aciklama) 
+                                            // Öğrencinin burs ID'sini bul
+                                            int ogrenciBursID = bursID;
+                                            if (bursID == 0)
+                                            {
+                                                // Tümü seçildiyse, öğrencinin bursunu bul
+                                                SqlCommand cmdFindBurs = new SqlCommand(@"SELECT TOP 1 ISNULL(ob.BursID, 0) 
+                                                    FROM OgrenciBurslari ob 
+                                                    WHERE ob.OgrenciID = @ogrenciID AND ob.Durum = 1", conn);
+                                                cmdFindBurs.Parameters.AddWithValue("@ogrenciID", ogrenciID);
+                                                var result = cmdFindBurs.ExecuteScalar();
+                                                if (result != null && result != DBNull.Value)
+                                                    ogrenciBursID = Convert.ToInt32(result);
+                                            }
+
+                                            // BursGiderleri tablosundaki tarih kolonunu kontrol et
+                                            string tarihKolonu = "Tarih";
+                                            try
+                                            {
+                                                SqlCommand cmdTarih = new SqlCommand(@"SELECT TOP 1 COLUMN_NAME 
+                                                    FROM INFORMATION_SCHEMA.COLUMNS 
+                                                    WHERE TABLE_NAME = 'BursGiderleri' 
+                                                    AND COLUMN_NAME IN ('Tarih', 'OdemeTarihi', 'KayitTarihi')
+                                                    ORDER BY CASE COLUMN_NAME 
+                                                        WHEN 'Tarih' THEN 1 
+                                                        WHEN 'OdemeTarihi' THEN 2 
+                                                        WHEN 'KayitTarihi' THEN 3 
+                                                        ELSE 4 END", conn);
+                                                var tarihResult = cmdTarih.ExecuteScalar();
+                                                if (tarihResult != null && tarihResult != DBNull.Value)
+                                                    tarihKolonu = tarihResult.ToString();
+                                            }
+                                            catch { }
+
+                                            SqlCommand cmd = new SqlCommand($@"INSERT INTO BursGiderleri 
+                                                (OgrenciID, BursID, Tutar, {tarihKolonu}, Aciklama) 
                                                 VALUES (@p1, @p2, @p3, @p4, @p5)", conn);
                                             cmd.Parameters.AddWithValue("@p1", ogrenciID);
-                                            cmd.Parameters.AddWithValue("@p2", selectedBurs.BursID);
+                                            cmd.Parameters.AddWithValue("@p2", ogrenciBursID);
                                             cmd.Parameters.AddWithValue("@p3", tutar);
                                             cmd.Parameters.AddWithValue("@p4", DateTime.Now);
-                                            cmd.Parameters.AddWithValue("@p5", $"{selectedBurs.BursAdi} - {DateTime.Now:MMMM yyyy}");
+                                            cmd.Parameters.AddWithValue("@p5", $"{bursAdi} - {DateTime.Now:MMMM yyyy}");
                                             cmd.ExecuteNonQuery();
                                             basarili++;
                                         }
@@ -573,14 +703,8 @@ namespace bursoto1
 
                 frm.Controls.AddRange(new Control[] { lblBurs, cmbBurs, lblInfo, gridOdeme, btnTumunuSec, btnSecimKaldir, lblTutar, txtTutar, btnOdemeYap, btnIptal });
                 
-                // İlk yükleme
-                if (cmbBurs.Properties.Items.Count > 0)
-                {
-                    cmbBurs.SelectedIndex = 0;
-                    if (cmbBurs.SelectedItem is BursOdemeItem firstBurs)
-                        txtTutar.EditValue = firstBurs.Miktar;
-                    loadStudents();
-                }
+                // İlk yükleme - Tüm öğrencileri göster
+                loadStudents();
 
                 frm.ShowDialog(this);
             }

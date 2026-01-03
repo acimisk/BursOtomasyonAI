@@ -37,6 +37,7 @@
             this.btnAra = new DevExpress.XtraBars.BarButtonItem();
             this.btnEkle = new DevExpress.XtraBars.BarButtonItem();
             this.btnSil = new DevExpress.XtraBars.BarButtonItem();
+            this.btnOdeme = new DevExpress.XtraBars.BarButtonItem();
             this.ribbonPage1 = new DevExpress.XtraBars.Ribbon.RibbonPage();
             this.ribbonPageGroup1 = new DevExpress.XtraBars.Ribbon.RibbonPageGroup();
             this.ribbonStatusBar = new DevExpress.XtraBars.Ribbon.RibbonStatusBar();
@@ -51,7 +52,6 @@
             // ribbon
             // 
             this.ribbon.ExpandCollapseItem.Id = 0;
-            this.btnOdeme = new DevExpress.XtraBars.BarButtonItem();
             this.ribbon.Items.AddRange(new DevExpress.XtraBars.BarItem[] {
             this.ribbon.ExpandCollapseItem,
             this.btnAnaSayfa,
@@ -74,62 +74,56 @@
             // 
             this.btnAnaSayfa.Caption = "Ana Sayfa";
             this.btnAnaSayfa.Id = 1;
-            this.btnAnaSayfa.ImageOptions.Image = ((System.Drawing.Image)(resources.GetObject("btnAnaSayfa.ImageOptions.Image")));
-            this.btnAnaSayfa.ImageOptions.LargeImage = ((System.Drawing.Image)(resources.GetObject("btnAnaSayfa.ImageOptions.LargeImage")));
+            this.btnAnaSayfa.ImageOptions.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("btnAnaSayfa.ImageOptions.SvgImage")));
             this.btnAnaSayfa.Name = "btnAnaSayfa";
             // 
             // btnOgrenciler
             // 
             this.btnOgrenciler.Caption = "Öğrenciler";
             this.btnOgrenciler.Id = 2;
-            this.btnOgrenciler.ImageOptions.Image = ((System.Drawing.Image)(resources.GetObject("btnOgrenciler.ImageOptions.Image")));
-            this.btnOgrenciler.ImageOptions.LargeImage = ((System.Drawing.Image)(resources.GetObject("btnOgrenciler.ImageOptions.LargeImage")));
+            this.btnOgrenciler.ImageOptions.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("btnOgrenciler.ImageOptions.SvgImage")));
             this.btnOgrenciler.Name = "btnOgrenciler";
             // 
             // btnBurs
             // 
             this.btnBurs.Caption = "Burslar";
             this.btnBurs.Id = 3;
-            this.btnBurs.ImageOptions.Image = ((System.Drawing.Image)(resources.GetObject("btnBurs.ImageOptions.Image")));
-            this.btnBurs.ImageOptions.LargeImage = ((System.Drawing.Image)(resources.GetObject("btnBurs.ImageOptions.LargeImage")));
+            this.btnBurs.ImageOptions.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("btnBurs.ImageOptions.SvgImage")));
             this.btnBurs.Name = "btnBurs";
             // 
             // btnBagiscilar
             // 
             this.btnBagiscilar.Caption = "Bağışçılar";
             this.btnBagiscilar.Id = 4;
-            this.btnBagiscilar.ImageOptions.Image = ((System.Drawing.Image)(resources.GetObject("btnBagiscilar.ImageOptions.Image")));
-            this.btnBagiscilar.ImageOptions.LargeImage = ((System.Drawing.Image)(resources.GetObject("btnBagiscilar.ImageOptions.LargeImage")));
+            this.btnBagiscilar.ImageOptions.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("btnBagiscilar.ImageOptions.SvgImage")));
             this.btnBagiscilar.Name = "btnBagiscilar";
             // 
             // btnAra
             // 
             this.btnAra.Caption = "Ara";
             this.btnAra.Id = 5;
-            this.btnAra.ImageOptions.Image = ((System.Drawing.Image)(resources.GetObject("btnAra.ImageOptions.Image")));
-            this.btnAra.ImageOptions.LargeImage = ((System.Drawing.Image)(resources.GetObject("btnAra.ImageOptions.LargeImage")));
+            this.btnAra.ImageOptions.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("btnAra.ImageOptions.SvgImage")));
             this.btnAra.Name = "btnAra";
             // 
             // btnEkle
             // 
             this.btnEkle.Caption = "Ekle";
             this.btnEkle.Id = 6;
-            this.btnEkle.ImageOptions.Image = ((System.Drawing.Image)(resources.GetObject("btnEkle.ImageOptions.Image")));
-            this.btnEkle.ImageOptions.LargeImage = ((System.Drawing.Image)(resources.GetObject("btnEkle.ImageOptions.LargeImage")));
+            this.btnEkle.ImageOptions.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("btnEkle.ImageOptions.SvgImage")));
             this.btnEkle.Name = "btnEkle";
             // 
             // btnSil
             // 
             this.btnSil.Caption = "Sil";
             this.btnSil.Id = 7;
-            this.btnSil.ImageOptions.Image = ((System.Drawing.Image)(resources.GetObject("btnSil.ImageOptions.Image")));
-            this.btnSil.ImageOptions.LargeImage = ((System.Drawing.Image)(resources.GetObject("btnSil.ImageOptions.LargeImage")));
+            this.btnSil.ImageOptions.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("btnSil.ImageOptions.SvgImage")));
             this.btnSil.Name = "btnSil";
             // 
             // btnOdeme
             // 
-            this.btnOdeme.Caption = "💰 Ödeme Yap";
+            this.btnOdeme.Caption = "Ödeme Yap";
             this.btnOdeme.Id = 8;
+            this.btnOdeme.ImageOptions.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("btnOdeme.ImageOptions.SvgImage")));
             this.btnOdeme.Name = "btnOdeme";
             // 
             // ribbonPage1
@@ -190,6 +184,7 @@
             this.Controls.Add(this.ribbon);
             this.Name = "MainForm";
             this.Ribbon = this.ribbon;
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.StatusBar = this.ribbonStatusBar;
             this.Text = "MainForm";
             this.Load += new System.EventHandler(this.MainForm_Load);

@@ -143,20 +143,39 @@ namespace bursoto1
             {
                 using (SqlConnection conn = bgl.baglanti())
                 {
-                    SqlCommand cmd = new SqlCommand(@"
+                    // Burslar tablosundaki ID kolonunu dinamik tespit et
+                    string bursIDKolonu = "BursID";
+                    try
+                    {
+                        SqlCommand cmdKolon = new SqlCommand(@"SELECT TOP 1 COLUMN_NAME 
+                            FROM INFORMATION_SCHEMA.COLUMNS 
+                            WHERE TABLE_NAME = 'Burslar' 
+                            AND COLUMN_NAME IN ('BursID', 'ID')
+                            ORDER BY CASE COLUMN_NAME 
+                                WHEN 'BursID' THEN 1 
+                                WHEN 'ID' THEN 2 
+                                ELSE 3 END", conn);
+                        var kolonResult = cmdKolon.ExecuteScalar();
+                        if (kolonResult != null && kolonResult != DBNull.Value)
+                            bursIDKolonu = kolonResult.ToString();
+                    }
+                    catch { }
+
+                    // Sadece onaylanmış (Durum = 1) bursları göster
+                    SqlCommand cmd = new SqlCommand($@"
                         SELECT ob.Durum, ob.BaslangicTarihi, b.BursAdı, b.Miktar 
                         FROM OgrenciBurslari ob 
-                        LEFT JOIN Burslar b ON ob.BursID = b.BursID 
-                        WHERE ob.OgrenciID = @id", conn);
+                        LEFT JOIN Burslar b ON (ob.BursID = b.{bursIDKolonu})
+                        WHERE ob.OgrenciID = @id AND ob.Durum = 1", conn);
                     cmd.Parameters.AddWithValue("@id", secilenOgrenciID);
 
                     using (SqlDataReader reader = cmd.ExecuteReader())
                     {
                         if (reader.Read())
                         {
-                            int durum = reader["Durum"] != DBNull.Value ? Convert.ToInt32(reader["Durum"]) : 0;
-                            string durumText = durum == 1 ? "✅ Aktif Burslu" : "⏳ Beklemede";
-                            Color durumRenk = durum == 1 ? Color.FromArgb(39, 174, 96) : Color.FromArgb(243, 156, 18);
+                            // Sadece onaylanmış burslar buraya gelir
+                            string durumText = "✅ Aktif Burslu";
+                            Color durumRenk = Color.FromArgb(39, 174, 96);
                             
                             lblBursDurum.Text = "Burs Durumu: " + durumText;
                             lblBursDurum.ForeColor = durumRenk;
@@ -177,9 +196,10 @@ namespace bursoto1
                         }
                         else
                         {
-                            lblBursDurum.Text = "Burs Durumu: ❌ Burs kaydı yok";
-                            lblBursDurum.ForeColor = Color.FromArgb(231, 76, 60);
-                            lblBursMiktar.Text = "Burs: -";
+                            // Beklemede veya burs kaydı yok
+                            lblBursDurum.Text = "Burs Durumu: ⏳ Beklemede";
+                            lblBursDurum.ForeColor = Color.FromArgb(243, 156, 18);
+                            lblBursMiktar.Text = "Burs: Henüz atanmadı";
                             lblBaslangicTarihi.Text = "Başlangıç: -";
                         }
                     }

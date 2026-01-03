@@ -177,6 +177,39 @@ namespace bursoto1.Modules
                         cmdCreate.ExecuteNonQuery();
                         System.Diagnostics.Debug.WriteLine("BursVerenler tablosu oluşturuldu.");
                     }
+                    else
+                    {
+                        // Tablo varsa ama Tarih kolonu yoksa ekle
+                        try
+                        {
+                            SqlCommand cmdTarihCheck = new SqlCommand(@"IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.COLUMNS 
+                                WHERE TABLE_NAME = 'BursVerenler' AND COLUMN_NAME = 'Tarih')
+                                BEGIN
+                                    ALTER TABLE BursVerenler ADD Tarih DATETIME DEFAULT GETDATE()
+                                END", conn);
+                            cmdTarihCheck.ExecuteNonQuery();
+                        }
+                        catch { }
+                    }
+
+                    // Önce kolon isimlerini kontrol et
+                    string tarihKolonu = "Tarih";
+                    try
+                    {
+                        SqlCommand cmdKolon = new SqlCommand(@"SELECT TOP 1 COLUMN_NAME 
+                            FROM INFORMATION_SCHEMA.COLUMNS 
+                            WHERE TABLE_NAME = 'BursVerenler' 
+                            AND COLUMN_NAME IN ('Tarih', 'Tarih', 'KayitTarihi', 'OlusturmaTarihi')
+                            ORDER BY CASE COLUMN_NAME 
+                                WHEN 'Tarih' THEN 1 
+                                WHEN 'KayitTarihi' THEN 2 
+                                WHEN 'OlusturmaTarihi' THEN 3 
+                                ELSE 4 END", conn);
+                        var kolonResult = cmdKolon.ExecuteScalar();
+                        if (kolonResult != null && kolonResult != DBNull.Value)
+                            tarihKolonu = kolonResult.ToString();
+                    }
+                    catch { }
 
                     // Filtreye göre sorgu oluştur
                     string filtre = GetCurrentFilter();
@@ -193,7 +226,7 @@ namespace bursoto1.Modules
                         default: // Tümü
                             break;
                     }
-                    query += "ORDER BY Tarih DESC";
+                    query += $"ORDER BY {tarihKolonu} DESC";
 
                     SqlDataAdapter da = new SqlDataAdapter(query, conn);
                     da.Fill(dt);
@@ -280,9 +313,28 @@ namespace bursoto1.Modules
                     {
                         using (SqlConnection conn = bgl.baglanti())
                         {
+                            // Tarih kolonunu kontrol et
+                            string tarihKolonu = "Tarih";
+                            try
+                            {
+                                SqlCommand cmdTarih = new SqlCommand(@"SELECT TOP 1 COLUMN_NAME 
+                                    FROM INFORMATION_SCHEMA.COLUMNS 
+                                    WHERE TABLE_NAME = 'BursVerenler' 
+                                    AND COLUMN_NAME IN ('Tarih', 'KayitTarihi', 'OlusturmaTarihi')
+                                    ORDER BY CASE COLUMN_NAME 
+                                        WHEN 'Tarih' THEN 1 
+                                        WHEN 'KayitTarihi' THEN 2 
+                                        WHEN 'OlusturmaTarihi' THEN 3 
+                                        ELSE 4 END", conn);
+                                var tarihResult = cmdTarih.ExecuteScalar();
+                                if (tarihResult != null && tarihResult != DBNull.Value)
+                                    tarihKolonu = tarihResult.ToString();
+                            }
+                            catch { }
+
                             // Mail kolonu kullan (DB şemasına uygun)
-                            SqlCommand cmd = new SqlCommand(@"INSERT INTO BursVerenler 
-                                (AdSoyad, Telefon, Mail, BagisMiktari, Aciklama, Durum, Tarih) 
+                            SqlCommand cmd = new SqlCommand($@"INSERT INTO BursVerenler 
+                                (AdSoyad, Telefon, Mail, BagisMiktari, Aciklama, Durum, {tarihKolonu}) 
                                 VALUES (@p1, @p2, @p3, @p4, @p5, 'Beklemede', @p6)", conn);
                             cmd.Parameters.AddWithValue("@p1", txtAd.Text.Trim());
                             cmd.Parameters.AddWithValue("@p2", txtTel.Text.Trim());
@@ -314,8 +366,26 @@ namespace bursoto1.Modules
 
         public void btnSil_ItemClick(object sender, ItemClickEventArgs e)
         {
-            var id = gridView1.GetFocusedRowCellValue("ID");
-            if (id == null) return;
+            // ID kolonunu dinamik bul
+            object id = null;
+            try
+            {
+                id = gridView1.GetFocusedRowCellValue("ID");
+                if (id == null || id == DBNull.Value)
+                {
+                    // ID yoksa başka bir ID kolonu dene
+                    var row = gridView1.GetDataRow(gridView1.FocusedRowHandle);
+                    if (row != null && row.Table.Columns.Contains("ID"))
+                        id = row["ID"];
+                }
+            }
+            catch { }
+
+            if (id == null || id == DBNull.Value)
+            {
+                MessageHelper.ShowWarning("Lütfen silinecek bir bağışçı seçiniz.", "Seçim Yapılmadı");
+                return;
+            }
 
             if (MessageHelper.ShowConfirm("Bağışçıyı silmek istiyor musunuz?", "Silme"))
             {
@@ -361,7 +431,18 @@ namespace bursoto1.Modules
 
             string adSoyad = dr["AdSoyad"]?.ToString() ?? "Bilinmeyen";
             decimal miktar = Convert.ToDecimal(dr["BagisMiktari"] ?? 0);
-            string id = dr["ID"].ToString();
+            
+            // ID kolonunu güvenli şekilde al
+            object idObj = null;
+            if (dr.Table.Columns.Contains("ID"))
+                idObj = dr["ID"];
+            
+            if (idObj == null || idObj == DBNull.Value)
+            {
+                MessageHelper.ShowWarning("Bağış kaydı ID'si bulunamadı.", "Veri Hatası");
+                return;
+            }
+            string id = idObj.ToString();
 
             if (MessageHelper.ShowConfirm(
                 $"{adSoyad} kişisinin {miktar:C} tutarındaki bağışını onaylıyor musunuz?\n\n" +
@@ -402,7 +483,18 @@ namespace bursoto1.Modules
 
             string adSoyad = dr["AdSoyad"]?.ToString() ?? "Bilinmeyen";
             decimal miktar = Convert.ToDecimal(dr["BagisMiktari"] ?? 0);
-            string id = dr["ID"].ToString();
+            
+            // ID kolonunu güvenli şekilde al
+            object idObj = null;
+            if (dr.Table.Columns.Contains("ID"))
+                idObj = dr["ID"];
+            
+            if (idObj == null || idObj == DBNull.Value)
+            {
+                MessageHelper.ShowWarning("Bağış kaydı ID'si bulunamadı.", "Veri Hatası");
+                return;
+            }
+            string id = idObj.ToString();
 
             if (MessageHelper.ShowConfirm(
                 $"{adSoyad} kişisinin {miktar:C} tutarındaki bağışını reddetmek istediğinize emin misiniz?\n\n" +
