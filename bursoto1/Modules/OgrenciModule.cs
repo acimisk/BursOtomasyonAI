@@ -10,6 +10,7 @@ using System.Drawing;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
+// BursModel sınıfı bursoto1 namespace'inde tanımlı
 
 namespace bursoto1.Modules
 {
@@ -56,6 +57,21 @@ namespace bursoto1.Modules
             if (memoAIsonuc != null)
             {
                 memoAIsonuc.Properties.Appearance.ForeColor = Color.FromArgb(180, 180, 180);
+            }
+
+            // Tahmin Panel dark mode
+            if (panelTahmin != null)
+            {
+                panelTahmin.Appearance.BackColor = Color.FromArgb(40, 40, 43);
+                panelTahmin.Appearance.Options.UseBackColor = true;
+            }
+            if (lblTahminBaslik != null)
+            {
+                lblTahminBaslik.Appearance.ForeColor = Color.FromArgb(200, 200, 200);
+            }
+            if (lblTahminSonuc != null)
+            {
+                lblTahminSonuc.Appearance.ForeColor = Color.FromArgb(200, 200, 200);
             }
 
             // Filtre label dark mode
@@ -159,7 +175,11 @@ namespace bursoto1.Modules
                                 ELSE 3 END", conn);
                         var kolonResult = cmdKolon.ExecuteScalar();
                         if (kolonResult != null && kolonResult != DBNull.Value)
-                            ogrenciIDKolonu = kolonResult.ToString();
+                        {
+                            string kolonStr = kolonResult.ToString() ?? string.Empty;
+                            if (!string.IsNullOrEmpty(kolonStr))
+                                ogrenciIDKolonu = kolonStr;
+                        }
                     }
                     catch { }
 
@@ -481,7 +501,11 @@ namespace bursoto1.Modules
                                 ELSE 3 END", conn);
                         var kolonResult = cmdKolon.ExecuteScalar();
                         if (kolonResult != null && kolonResult != DBNull.Value)
-                            ogrenciIDKolonu = kolonResult.ToString();
+                        {
+                            string kolonStr = kolonResult.ToString();
+                            if (!string.IsNullOrEmpty(kolonStr))
+                                ogrenciIDKolonu = kolonStr;
+                        }
                     }
                     catch { }
 
@@ -557,7 +581,14 @@ namespace bursoto1.Modules
                     {
                         while (reader.Read())
                         {
-                            kolonlar.Add(reader[0].ToString());
+                            if (reader[0] != null && reader[0] != DBNull.Value)
+                            {
+                                string kolonAdi = reader[0].ToString() ?? string.Empty;
+                                if (!string.IsNullOrEmpty(kolonAdi))
+                                {
+                                    kolonlar.Add(kolonAdi);
+                                }
+                            }
                         }
                     }
 
@@ -575,7 +606,11 @@ namespace bursoto1.Modules
                                 ELSE 3 END", conn);
                         var kolonResult = cmdKolon.ExecuteScalar();
                         if (kolonResult != null && kolonResult != DBNull.Value)
-                            ogrenciIDKolonu = kolonResult.ToString();
+                        {
+                            string kolonStr = kolonResult.ToString();
+                            if (!string.IsNullOrEmpty(kolonStr))
+                                ogrenciIDKolonu = kolonStr;
+                        }
                     }
                     catch { }
 
@@ -1024,7 +1059,11 @@ namespace bursoto1.Modules
                                     ELSE 3 END", conn);
                             var kolonResult = cmdKolon.ExecuteScalar();
                             if (kolonResult != null && kolonResult != DBNull.Value)
-                                bursIDKolonu = kolonResult.ToString();
+                            {
+                                string kolonStr = kolonResult.ToString() ?? string.Empty;
+                                if (!string.IsNullOrEmpty(kolonStr))
+                                    bursIDKolonu = kolonStr;
+                            }
                         }
                         catch { }
 
@@ -1049,7 +1088,11 @@ namespace bursoto1.Modules
                                 WHERE TABLE_NAME = 'OgrenciBurslari' AND COLUMN_NAME = 'Durum'", conn);
                             var tipResult = cmdTip.ExecuteScalar();
                             if (tipResult != null && tipResult != DBNull.Value)
-                                durumKolonTipi = tipResult.ToString().ToUpper();
+                            {
+                                string tipStr = tipResult.ToString() ?? string.Empty;
+                                if (!string.IsNullOrEmpty(tipStr))
+                                    durumKolonTipi = tipStr.ToUpper();
+                            }
                         }
                         catch { }
                         
@@ -1093,14 +1136,22 @@ namespace bursoto1.Modules
                                         FROM INFORMATION_SCHEMA.COLUMNS 
                                         WHERE TABLE_NAME = 'OgrenciBurslari' AND COLUMN_NAME = 'Durum'", conn);
                                     var verifyResult = cmdVerify.ExecuteScalar();
-                                    if (verifyResult != null && verifyResult.ToString().ToUpper() == "INT")
+                                    if (verifyResult != null && verifyResult != DBNull.Value)
                                     {
-                                        durumKolonTipi = "INT";
-                                        System.Diagnostics.Debug.WriteLine("Durum kolonu tipi doğrulandı: INT");
+                                        string verifyStr = verifyResult.ToString();
+                                        if (!string.IsNullOrEmpty(verifyStr) && verifyStr.ToUpper() == "INT")
+                                        {
+                                            durumKolonTipi = "INT";
+                                            System.Diagnostics.Debug.WriteLine("Durum kolonu tipi doğrulandı: INT");
+                                        }
+                                        else
+                                        {
+                                            throw new Exception($"Durum kolonu tipi hala {verifyStr ?? "NULL"} olarak görünüyor. INT'e çevrilemedi.");
+                                        }
                                     }
                                     else
                                     {
-                                        throw new Exception($"Durum kolonu tipi hala {verifyResult} olarak görünüyor. INT'e çevrilemedi.");
+                                        throw new Exception("Durum kolonu tipi doğrulanamadı. INT'e çevrilemedi.");
                                     }
                                 }
                                 catch (Exception ex)
@@ -1201,7 +1252,162 @@ namespace bursoto1.Modules
 
         private void btnAIAnaliz_Click_1(object sender, EventArgs e)
         {
+            // Bu metod BtnAIAnaliz_Click tarafından kullanılıyor (async metod)
+            // BtnAIAnaliz_Click zaten async olduğu için await kullanmaya gerek yok
+            BtnAIAnaliz_Click(sender, e);
+        }
 
+        // ML.NET Tahmin - Mezuniyet Puanı Tahmini
+        private void btnTahmin_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                // Seçili öğrenciyi kontrol et
+                DataRow dr = gridView1.GetDataRow(gridView1.FocusedRowHandle);
+                if (dr == null)
+                {
+                    MessageHelper.ShowWarning("Lütfen tahmin yapılacak bir öğrenci seçiniz.", "Seçim Yapılmadı");
+                    return;
+                }
+
+                // Öğrenci verilerini al
+                string agnoStr = dr["AGNO"]?.ToString() ?? "0";
+                string gelirStr = dr["Hane Geliri"]?.ToString() ?? "0";
+                string kardesStr = dr["Kardeş"]?.ToString() ?? "0";
+                string bolum = dr["BÖLÜMÜ"]?.ToString() ?? string.Empty;
+
+                // String değerleri float'a çevir
+                if (!float.TryParse(agnoStr, out float mevcutAgno))
+                {
+                    MessageHelper.ShowWarning("AGNO değeri geçersiz. Lütfen kontrol edin.", "Veri Hatası");
+                    return;
+                }
+
+                if (!float.TryParse(gelirStr, out float haneGeliri))
+                {
+                    MessageHelper.ShowWarning("Hane Geliri değeri geçersiz. Lütfen kontrol edin.", "Veri Hatası");
+                    return;
+                }
+
+                if (!float.TryParse(kardesStr, out float kardesSayisi))
+                {
+                    MessageHelper.ShowWarning("Kardeş Sayısı değeri geçersiz. Lütfen kontrol edin.", "Veri Hatası");
+                    return;
+                }
+
+                // SehirMaliyet ve BolumZorluk değerlerini hesapla veya varsayılan değerler kullan
+                float sehirMaliyet = GetSehirMaliyet(); // Varsayılan: 1.0 (orta seviye)
+                float bolumZorluk = GetBolumZorluk(bolum); // Bölüme göre zorluk (0.5-2.0 arası)
+
+                // ModelInput oluştur
+                bursoto1.BursModel.ModelInput input = new bursoto1.BursModel.ModelInput
+                {
+                    MevcutAgno = mevcutAgno,
+                    HaneGeliri = haneGeliri,
+                    KardesSayisi = kardesSayisi,
+                    SehirMaliyet = sehirMaliyet,
+                    BolumZorluk = bolumZorluk
+                };
+
+                // Tahmin yap
+                bursoto1.BursModel.ModelOutput output = bursoto1.BursModel.Predict(input);
+                float tahminEdilenPuan = output.Score;
+
+                // Sonucu göster
+                ShowTahminSonucu(tahminEdilenPuan);
+            }
+            catch (Exception ex)
+            {
+                MessageHelper.ShowException(ex, "Tahmin Hatası");
+            }
+        }
+
+        // Şehir maliyetini al (varsayılan: 1.0)
+        private float GetSehirMaliyet()
+        {
+            // TODO: Veritabanından öğrencinin şehir bilgisini al ve maliyet hesapla
+            // Şimdilik varsayılan değer kullanıyoruz
+            return 1.0f; // Orta seviye maliyet
+        }
+
+        // Bölüm zorluğunu hesapla
+        private float GetBolumZorluk(string bolum)
+        {
+            if (string.IsNullOrWhiteSpace(bolum))
+                return 1.0f; // Varsayılan orta zorluk
+
+            // Bölüm adına göre zorluk seviyesi belirle
+            string bolumLower = bolum.ToLower();
+            
+            // Zor bölümler (2.0)
+            if (bolumLower.Contains("mühendislik") || bolumLower.Contains("tıp") || 
+                bolumLower.Contains("hukuk") || bolumLower.Contains("mimarlık"))
+            {
+                return 2.0f;
+            }
+            
+            // Orta zorluk (1.5)
+            if (bolumLower.Contains("işletme") || bolumLower.Contains("ekonomi") || 
+                bolumLower.Contains("eğitim") || bolumLower.Contains("fen"))
+            {
+                return 1.5f;
+            }
+            
+            // Kolay bölümler (0.5)
+            if (bolumLower.Contains("sosyal") || bolumLower.Contains("güzel sanatlar") || 
+                bolumLower.Contains("spor"))
+            {
+                return 0.5f;
+            }
+
+            // Varsayılan orta zorluk
+            return 1.0f;
+        }
+
+        // Tahmin sonucunu görsel olarak göster
+        private void ShowTahminSonucu(float tahminEdilenPuan)
+        {
+            try
+            {
+                // ProgressBar'ı güncelle (0-4 arası GPA)
+                if (progressBarTahmin != null)
+                {
+                    // ProgressBar 0-100 arası gösterir, biz 0-4 arası GPA'yi 0-100'e çeviriyoruz
+                    int progressValue = (int)((tahminEdilenPuan / 4.0f) * 100);
+                    progressBarTahmin.Position = Math.Max(0, Math.Min(100, progressValue));
+                    progressBarTahmin.Properties.Maximum = 100;
+                    progressBarTahmin.Properties.Minimum = 0;
+                }
+
+                // Label'ı güncelle
+                if (lblTahminSonuc != null)
+                {
+                    lblTahminSonuc.Text = $"Tahmin: {tahminEdilenPuan:F2} / 4.00";
+                    
+                    // Renklendirme: 3.00 üzeri yeşil, altı turuncu
+                    if (tahminEdilenPuan >= 3.0f)
+                    {
+                        lblTahminSonuc.Appearance.ForeColor = Color.FromArgb(39, 174, 96); // Yeşil
+                        if (progressBarTahmin != null)
+                        {
+                            progressBarTahmin.Properties.Appearance.ForeColor = Color.FromArgb(39, 174, 96);
+                        }
+                    }
+                    else
+                    {
+                        lblTahminSonuc.Appearance.ForeColor = Color.FromArgb(243, 156, 18); // Turuncu
+                        if (progressBarTahmin != null)
+                        {
+                            progressBarTahmin.Properties.Appearance.ForeColor = Color.FromArgb(243, 156, 18);
+                        }
+                    }
+                    lblTahminSonuc.Appearance.Options.UseForeColor = true;
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Tahmin sonucu gösterilirken hata: {ex.Message}");
+            }
         }
 
         private void memoAIsonuc_EditValueChanged(object sender, EventArgs e)

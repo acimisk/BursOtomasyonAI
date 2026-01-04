@@ -34,7 +34,7 @@
     </NuGetPackageImportStamp>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
+    <PlatformTarget>x64</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -44,7 +44,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
+    <PlatformTarget>x64</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
@@ -208,6 +208,9 @@
       <DependentUpon>FrmOgrenciEkle.cs</DependentUpon>
     </Compile>
     <Compile Include="GeminiAI.cs" />
+    <Compile Include="BursModel.consumption.cs" />
+    <Compile Include="BursModel.training.cs" />
+    <Compile Include="BursModel.evaluate.cs" />
     <Compile Include="Login.cs">
       <SubType>Form</SubType>
     </Compile>

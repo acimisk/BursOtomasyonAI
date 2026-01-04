@@ -163,7 +163,7 @@ namespace bursoto1.Modules
                         seri.Label.Font = new Font("Segoe UI", 9, FontStyle.Bold);
                         seri.Label.TextColor = Color.White;
                         seri.Label.BackColor = Color.Transparent;
-                        seri.Label.Border.Visible = false;
+                        seri.Label.Border.Visibility = DevExpress.Utils.DefaultBoolean.False;
 
                         // Doughnut view ayarları
                         DoughnutSeriesView view = (DoughnutSeriesView)seri.View;
@@ -194,7 +194,7 @@ namespace bursoto1.Modules
                         chartControl1.Legend.Direction = LegendDirection.TopToBottom;
                         chartControl1.Legend.TextColor = Color.White;
                         chartControl1.Legend.BackColor = Color.Transparent;
-                        chartControl1.Legend.Border.Visible = false;
+                        chartControl1.Legend.Border.Visibility = DevExpress.Utils.DefaultBoolean.False;
                         chartControl1.Legend.Font = new Font("Segoe UI", 9, FontStyle.Regular);
                         chartControl1.Legend.Margins.Left = 20;
                         chartControl1.Legend.Margins.Right = 20;

@@ -10,7 +10,7 @@ using Microsoft.ML.Data;
 using Microsoft.ML.Trainers;
 using Microsoft.ML.Trainers.FastTree;
 
-namespace Bursoto1
+namespace bursoto1
 {
     public partial class BursModel
     {

@@ -43,12 +43,20 @@
             this.lblAIbaslik = new DevExpress.XtraEditors.LabelControl();
             this.lblFiltre = new DevExpress.XtraEditors.LabelControl();
             this.cmbFiltre = new DevExpress.XtraEditors.ComboBoxEdit();
+            this.panelTahmin = new DevExpress.XtraEditors.PanelControl();
+            this.btnTahmin = new DevExpress.XtraEditors.SimpleButton();
+            this.lblTahminSonuc = new DevExpress.XtraEditors.LabelControl();
+            this.progressBarTahmin = new DevExpress.XtraEditors.ProgressBarControl();
+            this.lblTahminBaslik = new DevExpress.XtraEditors.LabelControl();
             ((System.ComponentModel.ISupportInitialize)(this.gridControl1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridView1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.panelAI)).BeginInit();
             this.panelAI.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.memoAIsonuc.Properties)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.cmbFiltre.Properties)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.panelTahmin)).BeginInit();
+            this.panelTahmin.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.progressBarTahmin.Properties)).BeginInit();
             this.SuspendLayout();
             // 
             // gridControl1
@@ -102,6 +110,7 @@
             this.panelAI.Appearance.BackColor = System.Drawing.Color.White;
             this.panelAI.Appearance.Options.UseBackColor = true;
             this.panelAI.BorderStyle = DevExpress.XtraEditors.Controls.BorderStyles.Simple;
+            this.panelAI.Controls.Add(this.panelTahmin);
             this.panelAI.Controls.Add(this.btnBursKabul);
             this.panelAI.Controls.Add(this.btnYedek);
             this.panelAI.Controls.Add(this.btnBursReddet);
@@ -112,6 +121,21 @@
             this.panelAI.Name = "panelAI";
             this.panelAI.Size = new System.Drawing.Size(635, 621);
             this.panelAI.TabIndex = 17;
+            // 
+            // memoAIsonuc
+            // 
+            this.memoAIsonuc.EditValue = "Bir öğrenci seçip \"AI Analiz\" butonuna tıklayın.\n\nAI, öğrencinin burs uygunluğunu" +
+    " değerlendirecek ve puan verecektir.";
+            this.memoAIsonuc.Location = new System.Drawing.Point(15, 100);
+            this.memoAIsonuc.Name = "memoAIsonuc";
+            this.memoAIsonuc.Properties.Appearance.Font = new System.Drawing.Font("Segoe UI", 10F);
+            this.memoAIsonuc.Properties.Appearance.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(52)))), ((int)(((byte)(73)))), ((int)(((byte)(94)))));
+            this.memoAIsonuc.Properties.Appearance.Options.UseFont = true;
+            this.memoAIsonuc.Properties.Appearance.Options.UseForeColor = true;
+            this.memoAIsonuc.Properties.ReadOnly = true;
+            this.memoAIsonuc.Size = new System.Drawing.Size(615, 398);
+            this.memoAIsonuc.TabIndex = 1;
+            this.memoAIsonuc.EditValueChanged += new System.EventHandler(this.memoAIsonuc_EditValueChanged);
             // 
             // btnBursKabul
             // 
@@ -180,21 +204,6 @@
             this.btnAIAnaliz.Text = "🤖 AI Analiz Yap";
             this.btnAIAnaliz.Click += new System.EventHandler(this.btnAIAnaliz_Click_1);
             // 
-            // memoAIsonuc
-            // 
-            this.memoAIsonuc.EditValue = "Bir öğrenci seçip \"AI Analiz\" butonuna tıklayın.\n\nAI, öğrencinin burs uygunluğunu" +
-    " değerlendirecek ve puan verecektir.";
-            this.memoAIsonuc.Location = new System.Drawing.Point(15, 93);
-            this.memoAIsonuc.Name = "memoAIsonuc";
-            this.memoAIsonuc.Properties.Appearance.Font = new System.Drawing.Font("Segoe UI", 10F);
-            this.memoAIsonuc.Properties.Appearance.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(52)))), ((int)(((byte)(73)))), ((int)(((byte)(94)))));
-            this.memoAIsonuc.Properties.Appearance.Options.UseFont = true;
-            this.memoAIsonuc.Properties.Appearance.Options.UseForeColor = true;
-            this.memoAIsonuc.Properties.ReadOnly = true;
-            this.memoAIsonuc.Size = new System.Drawing.Size(615, 405);
-            this.memoAIsonuc.TabIndex = 1;
-            this.memoAIsonuc.EditValueChanged += new System.EventHandler(this.memoAIsonuc_EditValueChanged);
-            // 
             // lblAIbaslik
             // 
             this.lblAIbaslik.Appearance.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold);
@@ -206,6 +215,66 @@
             this.lblAIbaslik.Size = new System.Drawing.Size(194, 28);
             this.lblAIbaslik.TabIndex = 0;
             this.lblAIbaslik.Text = "🤖 AI Analiz Sonucu";
+            // 
+            // panelTahmin
+            // 
+            this.panelTahmin.BorderStyle = DevExpress.XtraEditors.Controls.BorderStyles.Simple;
+            this.panelTahmin.Controls.Add(this.btnTahmin);
+            this.panelTahmin.Controls.Add(this.lblTahminSonuc);
+            this.panelTahmin.Controls.Add(this.progressBarTahmin);
+            this.panelTahmin.Controls.Add(this.lblTahminBaslik);
+            this.panelTahmin.Location = new System.Drawing.Point(15, 15);
+            this.panelTahmin.Name = "panelTahmin";
+            this.panelTahmin.Size = new System.Drawing.Size(605, 70);
+            this.panelTahmin.TabIndex = 22;
+            // 
+            // lblTahminBaslik
+            // 
+            this.lblTahminBaslik.Appearance.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
+            this.lblTahminBaslik.Appearance.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(44)))), ((int)(((byte)(62)))), ((int)(((byte)(80)))));
+            this.lblTahminBaslik.Appearance.Options.UseFont = true;
+            this.lblTahminBaslik.Appearance.Options.UseForeColor = true;
+            this.lblTahminBaslik.Location = new System.Drawing.Point(15, 15);
+            this.lblTahminBaslik.Name = "lblTahminBaslik";
+            this.lblTahminBaslik.Size = new System.Drawing.Size(200, 23);
+            this.lblTahminBaslik.TabIndex = 0;
+            this.lblTahminBaslik.Text = "🎯 ML.NET Mezuniyet Tahmini";
+            // 
+            // progressBarTahmin
+            // 
+            this.progressBarTahmin.Location = new System.Drawing.Point(15, 40);
+            this.progressBarTahmin.Name = "progressBarTahmin";
+            this.progressBarTahmin.Properties.Maximum = 100;
+            this.progressBarTahmin.Properties.Minimum = 0;
+            this.progressBarTahmin.Properties.ShowTitle = true;
+            this.progressBarTahmin.Properties.Step = 1;
+            this.progressBarTahmin.Size = new System.Drawing.Size(300, 20);
+            this.progressBarTahmin.TabIndex = 1;
+            // 
+            // lblTahminSonuc
+            // 
+            this.lblTahminSonuc.Appearance.Font = new System.Drawing.Font("Segoe UI", 11F, System.Drawing.FontStyle.Bold);
+            this.lblTahminSonuc.Appearance.Options.UseFont = true;
+            this.lblTahminSonuc.Location = new System.Drawing.Point(330, 38);
+            this.lblTahminSonuc.Name = "lblTahminSonuc";
+            this.lblTahminSonuc.Size = new System.Drawing.Size(120, 25);
+            this.lblTahminSonuc.TabIndex = 2;
+            this.lblTahminSonuc.Text = "Tahmin yapılmadı";
+            // 
+            // btnTahmin
+            // 
+            this.btnTahmin.Appearance.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(155)))), ((int)(((byte)(89)))), ((int)(((byte)(182)))));
+            this.btnTahmin.Appearance.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
+            this.btnTahmin.Appearance.ForeColor = System.Drawing.Color.White;
+            this.btnTahmin.Appearance.Options.UseBackColor = true;
+            this.btnTahmin.Appearance.Options.UseFont = true;
+            this.btnTahmin.Appearance.Options.UseForeColor = true;
+            this.btnTahmin.Location = new System.Drawing.Point(480, 35);
+            this.btnTahmin.Name = "btnTahmin";
+            this.btnTahmin.Size = new System.Drawing.Size(110, 30);
+            this.btnTahmin.TabIndex = 3;
+            this.btnTahmin.Text = "🔮 Tahmin Et";
+            this.btnTahmin.Click += new System.EventHandler(this.btnTahmin_Click);
             // 
             // lblFiltre
             // 
@@ -256,6 +325,10 @@
             this.panelAI.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.memoAIsonuc.Properties)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.cmbFiltre.Properties)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.panelTahmin)).EndInit();
+            this.panelTahmin.ResumeLayout(false);
+            this.panelTahmin.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.progressBarTahmin.Properties)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -276,5 +349,10 @@
         private DevExpress.XtraEditors.SimpleButton btnBursKabul;
         private DevExpress.XtraEditors.SimpleButton btnAIAnaliz;
         private DevExpress.XtraEditors.SimpleButton btnYedek;
+        private DevExpress.XtraEditors.PanelControl panelTahmin;
+        private DevExpress.XtraEditors.SimpleButton btnTahmin;
+        private DevExpress.XtraEditors.LabelControl lblTahminSonuc;
+        private DevExpress.XtraEditors.ProgressBarControl progressBarTahmin;
+        private DevExpress.XtraEditors.LabelControl lblTahminBaslik;
     }
 }
