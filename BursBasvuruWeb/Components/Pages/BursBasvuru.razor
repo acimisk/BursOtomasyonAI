@@ -803,7 +803,7 @@
                 if (emailKolon != null)
                 {
                     kolonlar.Add(emailKolon);
-                    degerler.Add($"@{paramIndex++}");
+                    degerler.Add($"@p{paramIndex++}");
                 }
 
                 // Üniversite kolonu
@@ -811,41 +811,41 @@
                 if (universiteKolon != null)
                 {
                     kolonlar.Add(universiteKolon);
-                    degerler.Add($"@{paramIndex++}");
+                    degerler.Add($"@p{paramIndex++}");
                 }
 
                 // Soru kolonları
                 if (mevcutKolonlar.Contains("Ihtiyac"))
                 {
                     kolonlar.Add("Ihtiyac");
-                    degerler.Add($"@{paramIndex++}");
+                    degerler.Add($"@p{paramIndex++}");
                 }
                 if (mevcutKolonlar.Contains("Hedefler"))
                 {
                     kolonlar.Add("Hedefler");
-                    degerler.Add($"@{paramIndex++}");
+                    degerler.Add($"@p{paramIndex++}");
                 }
                 if (mevcutKolonlar.Contains("BursKullanim"))
                 {
                     kolonlar.Add("BursKullanim");
-                    degerler.Add($"@{paramIndex++}");
+                    degerler.Add($"@p{paramIndex++}");
                 }
                 if (mevcutKolonlar.Contains("FarkliOzellik"))
                 {
                     kolonlar.Add("FarkliOzellik");
-                    degerler.Add($"@{paramIndex++}");
+                    degerler.Add($"@p{paramIndex++}");
                 }
 
                 // AINotu veya Motivasyon (fallback)
                 if (mevcutKolonlar.Contains("Motivasyon"))
                 {
                     kolonlar.Add("Motivasyon");
-                    degerler.Add($"@{paramIndex++}");
+                    degerler.Add($"@p{paramIndex++}");
                 }
                 else
                 {
                     kolonlar.Add("AINotu");
-                    degerler.Add($"@{paramIndex++}");
+                    degerler.Add($"@p{paramIndex++}");
                 }
 
                 string query = $"INSERT INTO Ogrenciler ({string.Join(", ", kolonlar)}) VALUES ({string.Join(", ", degerler)}); SELECT SCOPE_IDENTITY();";
@@ -943,9 +943,29 @@
                 kvkkOnay = false;
             }
         }
-        catch
+        catch (Exception ex)
         {
-            mesaj = "Hata: Başvuru kaydedilirken bir sorun oluştu. Lütfen daha sonra tekrar deneyin.";
+            // Detaylı hata mesajı için log
+            System.Diagnostics.Debug.WriteLine($"Başvuru kaydetme hatası: {ex.Message}");
+            System.Diagnostics.Debug.WriteLine($"Stack Trace: {ex.StackTrace}");
+            
+            // Kullanıcıya daha anlaşılır hata mesajı göster
+            if (ex.Message.Contains("Invalid column name") || ex.Message.Contains("Geçersiz sütun adı"))
+            {
+                mesaj = "Hata: Veritabanı şeması ile uyumsuzluk tespit edildi. Lütfen sistem yöneticisine başvurun.";
+            }
+            else if (ex.Message.Contains("Cannot insert") || ex.Message.Contains("Ekleme yapılamıyor"))
+            {
+                mesaj = "Hata: Veri kaydedilemedi. Lütfen tüm alanların doğru doldurulduğundan emin olun.";
+            }
+            else if (ex.Message.Contains("connection") || ex.Message.Contains("bağlantı"))
+            {
+                mesaj = "Hata: Veritabanı bağlantısı kurulamadı. Lütfen daha sonra tekrar deneyin.";
+            }
+            else
+            {
+                mesaj = $"Hata: {ex.Message}";
+            }
         }
 
         StateHasChanged();
