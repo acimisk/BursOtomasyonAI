@@ -1,0 +1,278 @@
+﻿{
+  "Scenario": "Regression",
+  "DataSource": {
+    "Version": 3,
+    "EscapeCharacter": "\"",
+    "ReadMultiLines": false,
+    "KeepDiacritics": false,
+    "KeepPunctuations": false,
+    "AllowQuoting": false,
+    "Type": "TabularFile",
+    "FilePath": "C:\\Users\\KENAN\\Desktop\\burs_egitim_verisi.csv",
+    "Delimiter": ",",
+    "DecimalMarker": ".",
+    "HasHeader": true,
+    "ColumnProperties": [
+      {
+        "ColumnName": "MevcutAgno",
+        "ColumnPurpose": "Feature",
+        "ColumnDataFormat": "Single",
+        "IsCategorical": false,
+        "Type": "Column",
+        "Version": 5
+      },
+      {
+        "ColumnName": "HaneGeliri",
+        "ColumnPurpose": "Feature",
+        "ColumnDataFormat": "Single",
+        "IsCategorical": false,
+        "Type": "Column",
+        "Version": 5
+      },
+      {
+        "ColumnName": "KardesSayisi",
+        "ColumnPurpose": "Feature",
+        "ColumnDataFormat": "Single",
+        "IsCategorical": false,
+        "Type": "Column",
+        "Version": 5
+      },
+      {
+        "ColumnName": "SehirMaliyet",
+        "ColumnPurpose": "Feature",
+        "ColumnDataFormat": "Single",
+        "IsCategorical": false,
+        "Type": "Column",
+        "Version": 5
+      },
+      {
+        "ColumnName": "BolumZorluk",
+        "ColumnPurpose": "Feature",
+        "ColumnDataFormat": "Single",
+        "IsCategorical": false,
+        "Type": "Column",
+        "Version": 5
+      },
+      {
+        "ColumnName": "MezuniyetPuani",
+        "ColumnPurpose": "Label",
+        "ColumnDataFormat": "Single",
+        "IsCategorical": false,
+        "Type": "Column",
+        "Version": 5
+      }
+    ]
+  },
+  "Environment": {
+    "Type": "LocalCPU",
+    "Version": 1
+  },
+  "RunHistory": {
+    "Version": 3,
+    "Type": "Result",
+    "Trials": [
+      {
+        "Version": 1,
+        "Type": "Trial",
+        "TrainerName": "FastForestRegression",
+        "Score": 0.804412642725216,
+        "RuntimeInSeconds": 0.115,
+        "Parameter": {
+          "_SCHEMA_": "e0 * e1 * e3",
+          "e0": {
+            "OutputColumnNames": [
+              "MevcutAgno",
+              "HaneGeliri",
+              "KardesSayisi",
+              "SehirMaliyet",
+              "BolumZorluk"
+            ],
+            "InputColumnNames": [
+              "MevcutAgno",
+              "HaneGeliri",
+              "KardesSayisi",
+              "SehirMaliyet",
+              "BolumZorluk"
+            ]
+          },
+          "e1": {
+            "InputColumnNames": [
+              "MevcutAgno",
+              "HaneGeliri",
+              "KardesSayisi",
+              "SehirMaliyet",
+              "BolumZorluk"
+            ],
+            "OutputColumnName": "Features"
+          },
+          "e3": {
+            "NumberOfTrees": 5,
+            "NumberOfLeaves": 4,
+            "FeatureFraction": 0.9458863,
+            "LabelColumnName": "MezuniyetPuani",
+            "FeatureColumnName": "Features"
+          }
+        }
+      },
+      {
+        "Version": 1,
+        "Type": "Trial",
+        "TrainerName": "FastForestRegression",
+        "Score": 0.79726356394922182,
+        "RuntimeInSeconds": 0.274,
+        "Parameter": {
+          "_SCHEMA_": "e0 * e1 * e3",
+          "e0": {
+            "OutputColumnNames": [
+              "MevcutAgno",
+              "HaneGeliri",
+              "KardesSayisi",
+              "SehirMaliyet",
+              "BolumZorluk"
+            ],
+            "InputColumnNames": [
+              "MevcutAgno",
+              "HaneGeliri",
+              "KardesSayisi",
+              "SehirMaliyet",
+              "BolumZorluk"
+            ]
+          },
+          "e1": {
+            "InputColumnNames": [
+              "MevcutAgno",
+              "HaneGeliri",
+              "KardesSayisi",
+              "SehirMaliyet",
+              "BolumZorluk"
+            ],
+            "OutputColumnName": "Features"
+          },
+          "e3": {
+            "NumberOfTrees": 4,
+            "NumberOfLeaves": 4,
+            "FeatureFraction": 1.0,
+            "LabelColumnName": "MezuniyetPuani",
+            "FeatureColumnName": "Features"
+          }
+        }
+      },
+      {
+        "Version": 1,
+        "Type": "Trial",
+        "TrainerName": "FastForestRegression",
+        "Score": 0.79726356394922182,
+        "RuntimeInSeconds": 0.116,
+        "Parameter": {
+          "_SCHEMA_": "e0 * e1 * e3",
+          "e0": {
+            "OutputColumnNames": [
+              "MevcutAgno",
+              "HaneGeliri",
+              "KardesSayisi",
+              "SehirMaliyet",
+              "BolumZorluk"
+            ],
+            "InputColumnNames": [
+              "MevcutAgno",
+              "HaneGeliri",
+              "KardesSayisi",
+              "SehirMaliyet",
+              "BolumZorluk"
+            ]
+          },
+          "e1": {
+            "InputColumnNames": [
+              "MevcutAgno",
+              "HaneGeliri",
+              "KardesSayisi",
+              "SehirMaliyet",
+              "BolumZorluk"
+            ],
+            "OutputColumnName": "Features"
+          },
+          "e3": {
+            "NumberOfTrees": 4,
+            "NumberOfLeaves": 7,
+            "FeatureFraction": 1.0,
+            "LabelColumnName": "MezuniyetPuani",
+            "FeatureColumnName": "Features"
+          }
+        }
+      },
+      {
+        "Version": 1,
+        "Type": "Trial",
+        "TrainerName": "FastTreeRegression",
+        "Score": -17.150986585814046,
+        "RuntimeInSeconds": 0.13,
+        "Parameter": {
+          "_SCHEMA_": "e0 * e1 * e2",
+          "e0": {
+            "OutputColumnNames": [
+              "MevcutAgno",
+              "HaneGeliri",
+              "KardesSayisi",
+              "SehirMaliyet",
+              "BolumZorluk"
+            ],
+            "InputColumnNames": [
+              "MevcutAgno",
+              "HaneGeliri",
+              "KardesSayisi",
+              "SehirMaliyet",
+              "BolumZorluk"
+            ]
+          },
+          "e1": {
+            "InputColumnNames": [
+              "MevcutAgno",
+              "HaneGeliri",
+              "KardesSayisi",
+              "SehirMaliyet",
+              "BolumZorluk"
+            ],
+            "OutputColumnName": "Features"
+          },
+          "e2": {
+            "NumberOfLeaves": 4,
+            "MinimumExampleCountPerLeaf": 20,
+            "NumberOfTrees": 4,
+            "MaximumBinCountPerFeature": 254,
+            "FeatureFraction": 1.0,
+            "LearningRate": 0.099999999999999978,
+            "LabelColumnName": "MezuniyetPuani",
+            "FeatureColumnName": "Features",
+            "DiskTranspose": false
+          }
+        }
+      }
+    ],
+    "Estimators": {
+      "e0": "ReplaceMissingValues",
+      "e1": "Concatenate",
+      "e2": "FastTreeRegression",
+      "e3": "FastForestRegression",
+      "e4": "LightGbmRegression",
+      "e5": "LbfgsPoissonRegressionRegression",
+      "e6": "SdcaRegression"
+    },
+    "Schema": "e0 * e1 * (e2 + e3 + e4 + e5 + e6)",
+    "MetricName": "RSquared",
+    "ModelFilePath": "C:\\Users\\KENAN\\source\\repos\\bursoto1\\bursoto1\\BursModel.mlnet"
+  },
+  "Type": "TrainingConfig",
+  "Version": 5,
+  "TrainingOption": {
+    "Version": 2,
+    "Subsampling": false,
+    "Type": "RegressionTrainingOption",
+    "TrainingTime": 60,
+    "LabelColumn": "MezuniyetPuani",
+    "ValidationOption": {
+      "Version": 0,
+      "Type": "CrossValidationValidationOption",
+      "NumberOfFolds": 5
+    }
+  }
+}
