@@ -1,5 +1,5 @@
 ﻿<!DOCTYPE html>
-<html lang="en">
+<html lang="tr" class="light">
 
 <head>
     <meta charset="utf-8" />
@@ -9,12 +9,56 @@
     <link rel="stylesheet" href="app.css" />
     <link rel="stylesheet" href="BursBasvuruWeb.styles.css" />
     <link rel="icon" type="image/png" href="favicon.png" />
+    <link href="https://fonts.googleapis.com" rel="preconnect"/>
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@100..900&amp;family=Noto+Sans:wght@300..800&amp;display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "primary": "#1736cf",
+              "primary-dark": "#0f25a0",
+              "background-light": "#f6f6f8",
+              "background-dark": "#111421",
+              "surface-light": "#ffffff",
+              "surface-dark": "#1a1f32",
+              "text-main": "#0e101b",
+              "text-secondary": "#4e5a97",
+              "text-sub": "#4e5a97",
+              "border-color": "#e7e9f3",
+              "input-border": "#d0d4e7",
+            },
+            fontFamily: {
+              "display": ["Lexend", "sans-serif"],
+              "body": ["Noto Sans", "sans-serif"],
+            },
+            borderRadius: {
+              "DEFAULT": "0.375rem",
+              "lg": "0.5rem",
+              "xl": "0.75rem",
+              "2xl": "1rem",
+              "full": "9999px"
+            },
+          },
+        },
+      }
+    </script>
+    <style>
+      .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      }
+    </style>
     <HeadOutlet />
 </head>
 
-<body>
+<body class="bg-background-light dark:bg-background-dark font-display text-text-main antialiased selection:bg-primary selection:text-white">
     <Routes />
     <script src="_framework/blazor.web.js"></script>
+    <script src="js/clipboard.js"></script>
 </body>
 
 </html>

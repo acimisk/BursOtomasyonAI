@@ -1,315 +1,321 @@
 ﻿@page "/"
 @using Microsoft.AspNetCore.Components.Web
 @rendermode InteractiveServer
-@using Microsoft.Data.SqlClient
-@inject NavigationManager Nav
+@inject NavigationManager NavManager
 
-<PageTitle>Burs Başvuru Sistemi</PageTitle>
+<PageTitle>Burs Vakfı - Ana Sayfa</PageTitle>
 
-<div class="container mt-5">
-    <div class="card shadow-lg border-0 rounded-4">
-        <div class="card-header bg-primary bg-gradient text-white rounded-top-4">
-            <div class="d-flex justify-content-between align-items-center">
+<div class="relative flex min-h-screen w-full flex-col overflow-x-hidden">
+    <!-- Navigation -->
+    <header class="sticky top-0 z-50 w-full bg-[#f8f9fc]/90 backdrop-blur-md border-b border-[#e7e9f3]">
+        <div class="layout-container flex justify-center w-full">
+            <div class="flex items-center justify-between w-full max-w-[1280px] px-6 py-4 lg:px-10">
+                <!-- Logo -->
+                <div class="flex items-center gap-3 text-text-main cursor-pointer" @onclick="NavigateHome">
+                    <div class="flex items-center justify-center size-10 bg-primary/10 rounded-lg text-primary">
+                        <span class="material-symbols-outlined text-[28px]">school</span>
+                    </div>
+                    <h2 class="text-xl font-bold leading-tight tracking-tight">Burs Vakfı</h2>
+                </div>
+                <!-- Desktop Menu -->
+                <div class="hidden md:flex flex-1 justify-end gap-8 items-center">
+                    <nav class="flex items-center gap-8">
+                        <a class="text-sm font-medium hover:text-primary transition-colors" href="/">Ana Sayfa</a>
+                        <a class="text-sm font-medium hover:text-primary transition-colors" href="#">Hakkımızda</a>
+                        <a class="text-sm font-medium hover:text-primary transition-colors" href="#">Burslar</a>
+                        <a class="text-sm font-medium hover:text-primary transition-colors" href="#">İletişim</a>
+                    </nav>
+                    <button class="flex items-center justify-center overflow-hidden rounded-lg h-10 px-6 bg-primary hover:bg-primary-dark transition-colors text-white text-sm font-bold shadow-sm shadow-primary/20" @onclick="NavigateToDonation">
+                        <span class="truncate">Bağış Yap</span>
+                    </button>
+                </div>
+                <!-- Mobile Menu Icon (Visual Only) -->
+                <div class="md:hidden flex items-center text-text-main">
+                    <span class="material-symbols-outlined">menu</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex flex-col items-center w-full">
+        <!-- Hero Section -->
+        <section class="w-full max-w-[1280px] px-4 md:px-10 py-8 md:py-12">
+            <div class="relative flex min-h-[560px] flex-col gap-6 overflow-hidden rounded-2xl bg-cover bg-center bg-no-repeat shadow-xl md:gap-8 items-center justify-center p-8 md:p-16 text-center" style='background-image: linear-gradient(rgba(0, 0, 0, 0.3) 0%, rgba(0, 0, 0, 0.6) 100%), url("https://lh3.googleusercontent.com/aida-public/AB6AXuCZTNeTpFwlZo4HiPBnxfqFaYAnjMPJG3qC9TZDiqKKYm1NahUU4uFoS_UlFFiDqPX5dAxLYTLEfcgsp5J0V3oQBaYo9GCqMyDotPzeqN8RmkljyAtLVgj_BI5h-7k8iHrtjcShm7_7tFbuHGkzZOERT3IcI7JpXxqdl8Fvs_86RaBi-_mqKDY0Ue_bYwvakiP0OYGpZxCE20B798-ii9R60gvXh-XXtlV0AeTv1LbimBdocBsccYCk9nBX7A8vkKzrNcCTeDMo_Q9B");'>
+                <div class="flex flex-col gap-4 max-w-3xl">
+                    <h1 class="text-white text-4xl md:text-6xl font-black leading-tight tracking-tight drop-shadow-sm">
+                        Geleceği Birlikte <br class="hidden md:block"/> İnşa Ediyoruz
+                    </h1>
+                    <h2 class="text-gray-100 text-lg md:text-xl font-medium leading-relaxed max-w-2xl mx-auto drop-shadow-sm">
+                        Maddi desteğe ihtiyaç duyan başarılı öğrencilere umut oluyoruz. Geleceği aydınlatmak için bize katılın.
+                    </h2>
+                </div>
+                <div class="flex flex-wrap gap-4 justify-center mt-4">
+                    <button class="flex items-center justify-center rounded-lg h-12 px-8 bg-primary hover:bg-primary-dark text-white text-base font-bold shadow-lg shadow-primary/30 transition-all transform hover:-translate-y-0.5" @onclick="NavigateToApplication">
+                        <span>Burs Başvurusu Yap</span>
+                    </button>
+                    <button class="flex items-center justify-center rounded-lg h-12 px-8 bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/30 text-white text-base font-bold transition-all" @onclick="NavigateToDonation">
+                        <span>Bağış Yap</span>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Quick Actions (Hızlı İşlemler) -->
+        <section class="w-full max-w-[1280px] px-4 md:px-10 py-12">
+            <div class="flex flex-col gap-8">
+                <div class="flex flex-col gap-2">
+                    <h2 class="text-text-main text-3xl font-bold tracking-tight">Hızlı İşlemler</h2>
+                    <p class="text-text-sub text-base">Eğitime destek olmak veya destek almak için size uygun yolu seçin.</p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Student Card -->
+                    <div class="group flex flex-col gap-6 rounded-2xl border border-gray-200 bg-white p-8 shadow-sm hover:shadow-md transition-shadow">
+                        <div class="flex items-center gap-4">
+                            <div class="flex items-center justify-center size-14 rounded-full bg-blue-50 text-primary">
+                                <span class="material-symbols-outlined text-[32px]">school</span>
+                            </div>
+                            <div>
+                                <h3 class="text-xl font-bold text-text-main">Öğrenciler İçin</h3>
+                                <p class="text-sm text-text-sub">Geleceğinize ilk adımı atın</p>
+                            </div>
+                        </div>
+                        <p class="text-text-main/80 leading-relaxed">
+                            Burs başvuru şartlarını inceleyin, gerekli belgeleri hazırlayın ve eğitim hayatınızda yeni bir sayfa açmak için hemen başvurunuzu tamamlayın.
+                        </p>
+                        <button class="mt-auto flex w-full items-center justify-center rounded-lg h-11 border border-primary text-primary font-bold hover:bg-primary hover:text-white transition-colors" @onclick="NavigateToApplication">
+                            Başvuru Yap
+                        </button>
+                    </div>
+                    <!-- Donor Card -->
+                    <div class="group flex flex-col gap-6 rounded-2xl border border-gray-200 bg-white p-8 shadow-sm hover:shadow-md transition-shadow">
+                        <div class="flex items-center gap-4">
+                            <div class="flex items-center justify-center size-14 rounded-full bg-green-50 text-emerald-600">
+                                <span class="material-symbols-outlined text-[32px]">volunteer_activism</span>
+                            </div>
+                            <div>
+                                <h3 class="text-xl font-bold text-text-main">Destekçiler İçin</h3>
+                                <p class="text-sm text-text-sub">Bir hayata dokunun</p>
+                            </div>
+                        </div>
+                        <p class="text-text-main/80 leading-relaxed">
+                            Küçük bir katkı büyük bir değişimin başlangıcı olabilir. Eğitime katkıda bulunun, bir öğrencinin hayallerine ortak olun ve geleceği inşa edin.
+                        </p>
+                        <button class="mt-auto flex w-full items-center justify-center rounded-lg h-11 bg-primary text-white font-bold hover:bg-primary-dark shadow-sm shadow-primary/20 transition-colors" @onclick="NavigateToDonation">
+                            Bağış Yap
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- About Us (Biz Kimiz?) -->
+        <section class="w-full bg-white border-y border-gray-100">
+            <div class="max-w-[1280px] mx-auto px-4 md:px-10 py-16 md:py-20">
+                <div class="flex flex-col lg:flex-row gap-12 items-center">
+                    <div class="w-full lg:w-1/2">
+                        <div class="relative aspect-[4/3] w-full overflow-hidden rounded-2xl shadow-lg bg-gray-100">
+                            <img alt="Two female students studying together in a library" class="h-full w-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBnd0K_HX3a3mzyD6eDD9LKVAyNvIQw8G_IqL4_ubw1dBx5aEtU_lIuv7nVxqnx99PclmEDYYG5xqNYkE4oSyHydkvVciYJcHd3065c9Y4lvCLyYNcu5DywOl3LKSPIZCf5EkBbzO-NCb6y8cPbofA59dTYdC-LqOonnL5s4yB_mKE2G5qHSgSV9M-g3UfoHDZHkOE5CCWTz7KIYMVuGxwcCS8obV6aOr7CabwG57JArMrBaLfBPDUt0YTVaKzeaFLgDrqyoOQm9o-q"/>
+                        </div>
+                    </div>
+                    <div class="w-full lg:w-1/2 flex flex-col gap-6">
+                        <div class="flex flex-col gap-3">
+                            <span class="text-primary font-bold tracking-wider text-sm uppercase">Hakkımızda</span>
+                            <h2 class="text-4xl font-black text-text-main tracking-tight leading-tight">Biz Kimiz?</h2>
+                        </div>
+                        <p class="text-lg text-text-sub leading-relaxed">
+                            Burs Vakfı olarak 10 yıldır eğitime gönül vermiş bağışçılarımızla birlikte, imkanları kısıtlı ancak hayalleri büyük gençlerin yanındayız.
+                        </p>
+                        <p class="text-base text-text-main/70 leading-relaxed">
+                            Şeffaflık ve güven ilkeleriyle yönetilen vakfımız, Türkiye'nin dört bir yanındaki öğrencilere ulaşıyor. Amacımız sadece maddi destek sağlamak değil, aynı zamanda mentorluk programlarıyla gençlerimizin kariyer yolculuklarında onlara rehberlik etmektir.
+                        </p>
+                        <div class="pt-4">
+                            <button class="flex items-center gap-2 text-primary font-bold hover:gap-3 transition-all">
+                                <span>Daha Fazla Bilgi</span>
+                                <span class="material-symbols-outlined text-sm">arrow_forward</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Impact Stats (Etkimiz) -->
+        <section class="w-full max-w-[1280px] px-4 md:px-10 py-16 md:py-24">
+            <div class="flex flex-col items-center gap-12">
+                <div class="text-center max-w-2xl">
+                    <h2 class="text-3xl font-bold text-text-main mb-3">Yarattığımız Etki</h2>
+                    <p class="text-text-sub">Rakamlarla 10 yıllık yolculuğumuz ve eğitime katkımız.</p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 w-full">
+                    <!-- Stat Card 1 -->
+                    <div class="flex flex-col items-center justify-center p-8 bg-white rounded-2xl border border-gray-100 shadow-sm text-center gap-2 hover:border-primary/30 transition-colors">
+                        <span class="material-symbols-outlined text-primary text-5xl mb-2">groups</span>
+                        <span class="text-4xl font-black text-text-main">500+</span>
+                        <span class="text-text-sub font-medium">Öğrenciye Destek</span>
+                    </div>
+                    <!-- Stat Card 2 -->
+                    <div class="flex flex-col items-center justify-center p-8 bg-white rounded-2xl border border-gray-100 shadow-sm text-center gap-2 hover:border-primary/30 transition-colors">
+                        <span class="material-symbols-outlined text-primary text-5xl mb-2">payments</span>
+                        <span class="text-4xl font-black text-text-main">₺2M+</span>
+                        <span class="text-text-sub font-medium">Burs Desteği</span>
+                    </div>
+                    <!-- Stat Card 3 -->
+                    <div class="flex flex-col items-center justify-center p-8 bg-white rounded-2xl border border-gray-100 shadow-sm text-center gap-2 hover:border-primary/30 transition-colors">
+                        <span class="material-symbols-outlined text-primary text-5xl mb-2">calendar_month</span>
+                        <span class="text-4xl font-black text-text-main">10</span>
+                        <span class="text-text-sub font-medium">Yıllık Tecrübe</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Student Showcase -->
+        <section class="w-full bg-[#f1f3f9] py-16 md:py-20">
+            <div class="max-w-[1280px] mx-auto px-4 md:px-10">
+                <div class="flex flex-col md:flex-row justify-between items-end mb-10 gap-4">
+                    <div>
+                        <h2 class="text-3xl font-bold text-text-main mb-2">Geleceğin Mimarları</h2>
+                        <p class="text-text-sub">Desteklediğimiz parlak zihinlerden bazıları.</p>
+                    </div>
+                    <a class="text-primary font-bold text-sm hover:underline" href="#">Tümünü Gör</a>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <!-- Student 1 -->
+                    <div class="bg-white p-4 rounded-xl shadow-sm hover:shadow-md transition-shadow flex flex-col gap-4">
+                        <div class="aspect-square w-full rounded-lg overflow-hidden bg-gray-200">
+                            <img alt="Portrait of Elif, a computer engineering student" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDZYR54fVQjqL6S8Gicyo8Qb8qJZRL9ThklcKofNwDrV7qbld6a-CcNAXa1YdsX2NoODWWkEywzCO0Wgv8gVseLaW1la_3NMjgI7qchUryqils0rw7Fn0rtSkhH4XA97-texP-oUrq8oCOa298XU6sAozAA2EKJ3ZfYb1WK9GmBUZwGVCbrbNkNOv5cnp0mhnM4XhLK-oXs_h_bxcuqHgrGei1WIC_6S2UbKGF-XtHQVcpY_lAOboz9-ptU31AKKOXXDPFLAyMhSAnC"/>
+                        </div>
+                        <div class="flex flex-col gap-1">
+                            <h3 class="font-bold text-text-main text-lg">Elif Yılmaz</h3>
+                            <p class="text-xs text-primary font-semibold uppercase tracking-wide">ODTÜ - Bilgisayar Müh.</p>
+                            <p class="text-sm text-text-sub mt-2 italic">"Bu burs sayesinde sadece eğitimime odaklanabildim."</p>
+                        </div>
+                    </div>
+                    <!-- Student 2 -->
+                    <div class="bg-white p-4 rounded-xl shadow-sm hover:shadow-md transition-shadow flex flex-col gap-4">
+                        <div class="aspect-square w-full rounded-lg overflow-hidden bg-gray-200">
+                            <img alt="Portrait of Mert, a medicine student" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBzPNy7jbQDY8s6y7ZnOb4k15uENylYpRKnaSHGyWtCLX0aJenFBKasUdJThkzXFU2QavJK20VYH6JOf401_DOGMC9c_WjIwzSkzYP4BoItnAW9vpd3QVRcbTLnjPxlRxF2iIbJLX2zw_wUS3QQjdmztFZ96hzowVLfyDB_uFEhF7_By4Qpjsfn5Vw8LALqG-0IKe5wTPMNEguLKl6I11XPZZ6lZ22ERvZGYr09kEb5vQr6xZd5vt4yVnmVuF5flLNorip6eh5tjfGb"/>
+                        </div>
+                        <div class="flex flex-col gap-1">
+                            <h3 class="font-bold text-text-main text-lg">Mert Demir</h3>
+                            <p class="text-xs text-primary font-semibold uppercase tracking-wide">Hacettepe - Tıp</p>
+                            <p class="text-sm text-text-sub mt-2 italic">"Doktor olma hayalime giden yolda yanımda olduğunuz için teşekkürler."</p>
+                        </div>
+                    </div>
+                    <!-- Student 3 -->
+                    <div class="bg-white p-4 rounded-xl shadow-sm hover:shadow-md transition-shadow flex flex-col gap-4">
+                        <div class="aspect-square w-full rounded-lg overflow-hidden bg-gray-200">
+                            <img alt="Portrait of Ayşe, a law student" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDGkKNW8NzDpKJ-YuUaXW73FV7sY7FymfABKIRZffRAMNUO7aaxs2mHmILdgf5r0uFvfsOCSCBimlZZYSE6zH8nunVviGBM4yo1F7CNJY8rMQZHLbKt6dVUHfZAKUYemM8Va9SkfktLpRbmIV4VzXagTcp7m-s-o0u6S3Z6F9YINnZjir5cXeCtV75VTerMUbzXkzwbQV6bOBic7B3H5fSEbyYjx0YrRD-e-ea_hijNKHGTx5Kail5kNJ7zt4pVuFkhNYjVB2b7hr36"/>
+                        </div>
+                        <div class="flex flex-col gap-1">
+                            <h3 class="font-bold text-text-main text-lg">Ayşe Kara</h3>
+                            <p class="text-xs text-primary font-semibold uppercase tracking-wide">İstanbul Üni. - Hukuk</p>
+                            <p class="text-sm text-text-sub mt-2 italic">"Adalet arayışımda bana güç veren en büyük destekçim Burs Vakfı."</p>
+                        </div>
+                    </div>
+                    <!-- Student 4 -->
+                    <div class="bg-white p-4 rounded-xl shadow-sm hover:shadow-md transition-shadow flex flex-col gap-4">
+                        <div class="aspect-square w-full rounded-lg overflow-hidden bg-gray-200">
+                            <img alt="Portrait of Can, an architecture student" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAUXTRtaPNWAKoqXRPdkMA5h9cxshOe3Syz9w2T3ZwwE0OGOzO0G90HDcAL5I264UMfdBwF-NPdecrT9d-0Rx_8xcur1N_E81_EEG6GUfUdHS6dzVBl6ygO5BAdqAaEluclaPTUqzxreMs6iCyjPWyGr95WhHdCpbihjkTTxH7_2A5r8XNzPvTv9mfkk_UbXDXaZmeBiUrk6U3Xo723S8CDlbau90yFxRK1jgbknkr_ilsobrmdHZiw1tKX01hq0_dm90aqmAqX7tPV"/>
+                        </div>
+                        <div class="flex flex-col gap-1">
+                            <h3 class="font-bold text-text-main text-lg">Can Öztürk</h3>
+                            <p class="text-xs text-primary font-semibold uppercase tracking-wide">İTÜ - Mimarlık</p>
+                            <p class="text-sm text-text-sub mt-2 italic">"Şehirleri güzelleştirme tutkumu gerçekleştirmemi sağladınız."</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-gray-200 pt-16 pb-8">
+        <div class="max-w-[1280px] mx-auto px-4 md:px-10">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-10 mb-12">
+                <div class="flex flex-col gap-4">
+                    <div class="flex items-center gap-2 text-primary">
+                        <span class="material-symbols-outlined text-3xl">school</span>
+                        <span class="text-xl font-bold text-text-main">Burs Vakfı</span>
+                    </div>
+                    <p class="text-sm text-text-sub leading-relaxed">
+                        Geleceğin liderlerini, bilim insanlarını ve sanatçılarını desteklemek için çalışan kar amacı gütmeyen kuruluş.
+                    </p>
+                </div>
                 <div>
-                    <h3 class="mb-0 fw-bold">Öğrenci Burs Başvuru Formu</h3>
-                    <small class="opacity-75">Lütfen bilgilerinizi eksiksiz ve doğru giriniz.</small>
+                    <h4 class="font-bold text-text-main mb-4">Hızlı Bağlantılar</h4>
+                    <ul class="flex flex-col gap-2 text-sm text-text-sub">
+                        <li><a class="hover:text-primary transition-colors" href="/">Ana Sayfa</a></li>
+                        <li><a class="hover:text-primary transition-colors" href="#">Hakkımızda</a></li>
+                        <li><a class="hover:text-primary transition-colors" href="/burs-basvuru">Burs Başvurusu</a></li>
+                        <li><a class="hover:text-primary transition-colors" href="/burs-ver">Bağış Yap</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-bold text-text-main mb-4">İletişim</h4>
+                    <ul class="flex flex-col gap-3 text-sm text-text-sub">
+                        <li class="flex items-start gap-2">
+                            <span class="material-symbols-outlined text-lg">location_on</span>
+                            <span>Levent Mah. Büyükdere Cad. No:123<br/>İstanbul, Türkiye</span>
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <span class="material-symbols-outlined text-lg">call</span>
+                            <span>+90 (212) 555 01 23</span>
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <span class="material-symbols-outlined text-lg">mail</span>
+                            <span>iletisim@bursvakfi.org.tr</span>
+                        </li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-bold text-text-main mb-4">Bülten</h4>
+                    <p class="text-sm text-text-sub mb-4">Gelişmelerden haberdar olmak için e-bültenimize abone olun.</p>
+                    <div class="flex gap-2">
+                        <input class="flex-1 h-10 px-3 rounded-lg border border-gray-300 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary" placeholder="E-posta adresiniz" type="email" @bind="email" @bind:event="oninput"/>
+                        <button class="h-10 px-4 bg-primary text-white rounded-lg text-sm font-bold hover:bg-primary-dark transition-colors" @onclick="SubscribeNewsletter">
+                            Gönder
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="border-t border-gray-100 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-text-sub">
+                <p>© 2024 Burs Vakfı. Tüm hakları saklıdır.</p>
+                <div class="flex gap-6">
+                    <a class="hover:text-primary" href="#">Kullanım Şartları</a>
+                    <a class="hover:text-primary" href="#">Gizlilik Politikası</a>
+                    <a class="hover:text-primary" href="#">KVKK</a>
                 </div>
             </div>
         </div>
-        <div class="card-body p-4 p-lg-5">
-            <div class="row g-3">
-                <div class="col-md-6">
-                    <label class="form-label fw-semibold">Ad</label>
-                    <input type="text" @bind="ad" class="form-control form-control-lg" placeholder="Adınız" />
-                </div>
-                <div class="col-md-6">
-                    <label class="form-label fw-semibold">Soyad</label>
-                    <input type="text" @bind="soyad" class="form-control form-control-lg" placeholder="Soyadınız" />
-                </div>
-            </div>
-
-            <div class="row g-3 mt-1">
-                <div class="col-md-4">
-                    <label class="form-label fw-semibold">Bölüm</label>
-                    <select @bind="bolum" class="form-select form-select-lg">
-                        <option value="">Bölüm Seçiniz...</option>
-                        @foreach (var item in bolumler)
-                        {
-                            <option value="@item">@item</option>
-                        }
-                    </select>
-                </div>
-                <div class="col-md-4">
-                    <label class="form-label fw-semibold">Sınıf</label>
-                    <select @bind="sinif" class="form-select form-select-lg">
-                        <option value="">Seçiniz...</option>
-                        <option value="Hazırlık">Hazırlık</option>
-                        <option value="1. Sınıf">1. Sınıf</option>
-                        <option value="2. Sınıf">2. Sınıf</option>
-                        <option value="3. Sınıf">3. Sınıf</option>
-                        <option value="4. Sınıf">4. Sınıf</option>
-                    </select>
-                </div>
-                <div class="col-md-4">
-                    <label class="form-label fw-semibold">AGNO (0-4)</label>
-                    <input type="number" step="0.01" min="0" max="4" @bind="agno" class="form-control form-control-lg" placeholder="Örn: 3,25" />
-                    <small class="form-text text-muted">Lütfen transkriptinizdeki güncel ortalamayı giriniz.</small>
-                </div>
-            </div>
-
-            <div class="row g-3 mt-1">
-                <div class="col-md-4">
-                    <label class="form-label fw-semibold">Kardeş Sayısı</label>
-                    <input type="number" min="0" @bind="kardesSayisi" class="form-control form-control-lg" />
-                </div>
-                <div class="col-md-4">
-                    <label class="form-label fw-semibold">Toplam Hane Geliri (₺)</label>
-                    <input type="number" min="0" @bind="gelir" class="form-control form-control-lg" placeholder="Aylık toplam gelir" />
-                </div>
-                <div class="col-md-4">
-                    <label class="form-label fw-semibold">Telefon</label>
-                    <input type="text" @bind="telefon" class="form-control form-control-lg" placeholder="05XX XXX XX XX" />
-                </div>
-            </div>
-
-            <div class="mt-3">
-                <label class="form-label fw-semibold">Profil Fotoğrafı</label>
-                <InputFile OnChange="FotoSec" class="form-control" />
-                <small class="form-text text-muted d-block mt-1">Yüzünüzün net göründüğü güncel bir fotoğraf yükleyiniz. (Opsiyonel)</small>
-                @if (!string.IsNullOrEmpty(fotoBase64))
-                {
-                    <img src="@fotoBase64" class="mt-3 rounded shadow-sm" style="width:120px; height:120px; object-fit:cover;" />
-                }
-            </div>
-
-            <div class="card mt-4 border-0 shadow-sm">
-                <div class="card-header bg-light">
-                    <h5 class="mb-0 fw-bold text-secondary">Motivasyon Soruları</h5>
-                    <small class="text-muted">Bu sorular, komisyonun seni daha iyi tanımasını sağlar. Lütfen samimi ve detaylı yanıtlar ver.</small>
-                </div>
-                <div class="card-body">
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">1. Neden bu bursa ihtiyacın var?</label>
-                        <textarea @bind="soru1" class="form-control" rows="3"
-                                  placeholder="Ailenin ekonomik durumunu, gelir kaynaklarını ve maddi zorluklarını açıkla..."></textarea>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">2. Akademik hedeflerin neler?</label>
-                        <textarea @bind="soru2" class="form-control" rows="3"
-                                  placeholder="Mezun olduktan sonra ne yapmak istiyorsun? Kariyer planların neler?"></textarea>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">3. Burs aldığında nasıl kullanacaksın?</label>
-                        <textarea @bind="soru3" class="form-control" rows="3"
-                                  placeholder="Bursu eğitim masrafları, kitap, barınma gibi hangi alanlarda kullanmayı planlıyorsun?"></textarea>
-                    </div>
-                    
-                    <div class="mb-0">
-                        <label class="form-label fw-semibold">4. Seni diğer adaylardan ayıran özelliğin ne?</label>
-                        <textarea @bind="soru4" class="form-control" rows="3"
-                                  placeholder="Gönüllü çalışmalar, projeler, başarılar veya zorluklara rağmen elde ettiğin kazanımlar..."></textarea>
-                    </div>
-                </div>
-            </div>
-
-            <button class="btn btn-success btn-lg w-100 mt-4 fw-bold" @onclick="Kaydet">
-                Başvuruyu Gönder
-            </button>
-
-            @if (!string.IsNullOrEmpty(mesaj))
-            {
-                var alertClass = mesaj.StartsWith("Hata") ? "alert-danger" : "alert-success";
-                <div class="alert @alertClass mt-4 mb-0" role="alert">
-                    @mesaj
-                </div>
-            }
-        </div>
-    </div>
+    </footer>
 </div>
 
 @code {
-    // Varsayılan değerler (null referans hatalarını engellemek için)
-    private string ad = "";
-    private string soyad = "";
-    private string sinif = "";
-    private string bolum = "";
-    private string telefon = "";
-    private string mesaj = "";
-    private string fotoBase64 = "";
+    private string email = "";
 
-    // Motivasyon soruları
-    private string soru1 = ""; // Neden bursa ihtiyacın var?
-    private string soru2 = ""; // Akademik hedeflerin
-    private string soru3 = ""; // Bursu nasıl kullanacaksın?
-    private string soru4 = ""; // Seni ayıran özellik
-
-    private double agno;
-    private decimal gelir;
-    private int kardesSayisi;
-    private List<string> bolumler = new List<string>();
-
-    // Tüm motivasyon cevaplarını birleştir
-    private string TumMotivasyonlar => $"[İHTİYAÇ]: {soru1}\n[HEDEFLER]: {soru2}\n[KULLANIM]: {soru3}\n[FARK]: {soru4}";
-
-    protected override async Task OnInitializedAsync()
+    private void NavigateHome()
     {
-        await BolumleriYukleAsync();
+        NavManager.NavigateTo("/");
     }
 
-    private async Task BolumleriYukleAsync()
+    private void NavigateToApplication()
     {
-        try
-        {
-            string connString = @"Data Source=(localdb)\MSSQLLocalDB; initial catalog=bursOtoDeneme1; Integrated Security=TRUE";
-            using (SqlConnection conn = new SqlConnection(connString))
-            {
-                await conn.OpenAsync();
-                string query = "SELECT DISTINCT BolumAdi FROM Bolumler ORDER BY BolumAdi ASC";
-
-                using (SqlCommand cmd = new SqlCommand(query, conn))
-                using (SqlDataReader dr = await cmd.ExecuteReaderAsync())
-                {
-                    bolumler.Clear();
-                    while (await dr.ReadAsync())
-                    {
-                        var adi = dr["BolumAdi"]?.ToString();
-                        if (!string.IsNullOrWhiteSpace(adi))
-                        {
-                            bolumler.Add(adi);
-                        }
-                    }
-                }
-            }
-        }
-        catch
-        {
-            // Bölüm listesi yüklenemezse form yine de çalışsın,
-            // kullanıcı manuel yazabilsin diye fallback olarak listesi boş bırakıyoruz.
-        }
+        NavManager.NavigateTo("/burs-basvuru");
     }
 
-    async Task FotoSec(InputFileChangeEventArgs e)
+    private void NavigateToDonation()
     {
-        try
-        {
-            var format = "image/png";
-            var resizedImage = await e.File.RequestImageFileAsync(format, 300, 300);
-            var buffer = new byte[resizedImage.Size];
-            await resizedImage.OpenReadStream().ReadAsync(buffer);
-            fotoBase64 = $"data:{format};base64,{Convert.ToBase64String(buffer)}";
-        }
-        catch (Exception ex)
-        {
-            mesaj = "Hata: Fotoğraf yüklenirken bir sorun oluştu. Lütfen tekrar deneyin.";
-        }
+        NavManager.NavigateTo("/burs-ver");
     }
 
-    private bool FormGecerliMi()
+    private void SubscribeNewsletter()
     {
-        if (string.IsNullOrWhiteSpace(ad) || string.IsNullOrWhiteSpace(soyad))
+        if (!string.IsNullOrWhiteSpace(email))
         {
-            mesaj = "Hata: Lütfen ad ve soyad bilgilerini giriniz.";
-            return false;
-        }
-
-        if (string.IsNullOrWhiteSpace(bolum) || string.IsNullOrWhiteSpace(sinif))
-        {
-            mesaj = "Hata: Lütfen bölüm ve sınıf bilgilerini seçiniz.";
-            return false;
-        }
-
-        if (string.IsNullOrWhiteSpace(telefon))
-        {
-            mesaj = "Hata: Lütfen telefon numaranızı giriniz.";
-            return false;
-        }
-
-        if (gelir <= 0)
-        {
-            mesaj = "Hata: Lütfen geçerli bir hane geliri giriniz.";
-            return false;
-        }
-
-        if (agno < 0 || agno > 4)
-        {
-            mesaj = "Hata: AGNO 0 ile 4 arasında olmalıdır.";
-            return false;
-        }
-
-        // En az bir motivasyon sorusu doldurulmalı
-        if (string.IsNullOrWhiteSpace(soru1) && string.IsNullOrWhiteSpace(soru2) && 
-            string.IsNullOrWhiteSpace(soru3) && string.IsNullOrWhiteSpace(soru4))
-        {
-            mesaj = "Hata: Lütfen motivasyon sorularından en az birini cevaplayınız.";
-            return false;
-        }
-
-        return true;
-    }
-
-    private void Kaydet()
-    {
-        if (!FormGecerliMi())
-        {
-            return;
-        }
-
-        try
-        {
-            string connString = @"Data Source=(localdb)\MSSQLLocalDB; initial catalog=bursOtoDeneme1; Integrated Security=TRUE";
-            using (SqlConnection conn = new SqlConnection(connString))
-            {
-                conn.Open();
-                
-                // Öğrenciyi ekle ve ID'yi al
-                string query = @"INSERT INTO Ogrenciler
-                                (AD, SOYAD, [KARDEŞ SAYISI], [TOPLAM HANE GELİRİ], SINIF, BÖLÜMÜ, AGNO, TELEFON, FOTO, AINotu)
-                                VALUES (@p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8, @p9, @p10);
-                                SELECT SCOPE_IDENTITY();";
-                
-                int yeniOgrenciID;
-                using (SqlCommand cmd = new SqlCommand(query, conn))
-                {
-                    cmd.Parameters.AddWithValue("@p1", ad.Trim().ToUpper());
-                    cmd.Parameters.AddWithValue("@p2", soyad.Trim().ToUpper());
-                    cmd.Parameters.AddWithValue("@p3", kardesSayisi);
-                    cmd.Parameters.AddWithValue("@p4", gelir);
-                    cmd.Parameters.AddWithValue("@p5", sinif);
-                    cmd.Parameters.AddWithValue("@p6", bolum);
-                    cmd.Parameters.AddWithValue("@p7", agno);
-                    cmd.Parameters.AddWithValue("@p8", telefon);
-                    cmd.Parameters.AddWithValue("@p9", fotoBase64);
-                    cmd.Parameters.AddWithValue("@p10", TumMotivasyonlar); // Tüm motivasyon cevapları
-                    yeniOgrenciID = Convert.ToInt32(cmd.ExecuteScalar());
-                }
-
-                // OgrenciBurslari tablosuna beklemede kaydı ekle (BursID=1 varsayılan burs)
-                try
-                {
-                    string bursQuery = @"INSERT INTO OgrenciBurslari (OgrenciID, BursID, BaslangicTarihi, Durum) 
-                                         VALUES (@ogrID, 1, @tarih, 0)";
-                    using (SqlCommand bursCmd = new SqlCommand(bursQuery, conn))
-                    {
-                        bursCmd.Parameters.AddWithValue("@ogrID", yeniOgrenciID);
-                        bursCmd.Parameters.AddWithValue("@tarih", DateTime.Now);
-                        bursCmd.ExecuteNonQuery();
-                    }
-                }
-                catch { } // Burs kaydı opsiyonel, hata olursa öğrenci yine kaydedilmiş olur
-
-                mesaj = "Başvurunuz başarıyla kaydedildi. Komisyon değerlendirmesi sonrasında tarafınıza bilgi verilecektir.";
-
-                // Formu Temizle
-                ad = soyad = bolum = sinif = telefon = fotoBase64 = "";
-                soru1 = soru2 = soru3 = soru4 = "";
-                agno = 0; gelir = 0; kardesSayisi = 0;
-            }
-        }
-        catch (Exception)
-        {
-            mesaj = "Hata: Başvuru kaydedilirken bir sorun oluştu. Lütfen daha sonra tekrar deneyin.";
+            // Bülten aboneliği işlemi burada yapılabilir
+            // Şimdilik sadece mesaj gösterilebilir
         }
     }
 }

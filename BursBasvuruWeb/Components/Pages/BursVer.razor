@@ -1,82 +1,228 @@
 ﻿@page "/burs-ver"
 @using Microsoft.Data.SqlClient
+@using System.Linq
 @inject NavigationManager NavManager
+@inject IJSRuntime JSRuntime
 @rendermode InteractiveServer
 
-<PageTitle>Eğitim Gönüllüsü Ol - Burs Ver</PageTitle>
+<PageTitle>Bağış Yap - Burs Vakfı</PageTitle>
 
-<div class="container py-5">
-    <div class="row justify-content-center">
-        <div class="col-lg-8">
-            <div class="card shadow-lg border-0 rounded-4">
+<!-- Top Navigation -->
+<header class="sticky top-0 z-50 w-full bg-[#f8f9fc]/80 backdrop-blur-md dark:bg-[#111421]/90 border-b border-[#e7e9f3] dark:border-gray-800 transition-colors duration-300">
+    <div class="max-w-[1280px] mx-auto px-6 h-16 flex items-center justify-between">
+        <div class="flex items-center gap-3 text-[#0e101b] dark:text-white group cursor-pointer" @onclick="NavigateHome">
+            <div class="size-9 rounded-lg bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-all">
+                <span class="material-symbols-outlined text-2xl">school</span>
+            </div>
+            <h2 class="text-xl font-bold leading-tight tracking-tight">Burs Vakfı</h2>
+        </div>
+        <nav class="hidden md:flex items-center gap-8">
+            <a class="text-sm font-medium text-gray-600 hover:text-primary transition-colors dark:text-gray-300 dark:hover:text-white" href="/">Anasayfa</a>
+            <a class="text-sm font-medium text-gray-600 hover:text-primary transition-colors dark:text-gray-300 dark:hover:text-white" href="#">Hakkımızda</a>
+            <a class="text-sm font-medium text-gray-600 hover:text-primary transition-colors dark:text-gray-300 dark:hover:text-white" href="#">Burslar</a>
+            <a class="text-sm font-medium text-gray-600 hover:text-primary transition-colors dark:text-gray-300 dark:hover:text-white" href="#">İletişim</a>
+        </nav>
+        <div class="flex items-center gap-4">
+            <button class="hidden sm:flex h-10 px-6 items-center justify-center rounded-full bg-primary text-white text-sm font-bold hover:bg-blue-700 transition-colors shadow-lg shadow-blue-500/20 dark:shadow-none">
+                Bağış Yap
+            </button>
+        </div>
+    </div>
+</header>
 
-                <div class="card-header bg-primary bg-gradient text-white text-center py-4 rounded-top-4">
-                    <h3 class="fw-bold mb-0"><i class="bi bi-heart-fill me-2"></i>Eğitim Gönüllüsü Ol</h3>
-                    <p class="mb-0 mt-2 opacity-75">Geleceğin mimarlarına bir tuğla da siz koyun.</p>
-                </div>
+<main class="flex-1 w-full flex flex-col items-center justify-start py-10 px-4 sm:px-6">
+    <div class="max-w-[1120px] w-full flex flex-col gap-8 lg:gap-12">
+        <!-- Page Heading Section -->
+        <div class="flex flex-col sm:items-start gap-4 animate-fade-in-up">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-100 text-primary text-xs font-bold uppercase tracking-wide dark:bg-blue-900/30 dark:text-blue-300">
+                <span class="material-symbols-outlined text-sm">volunteer_activism</span>
+                Güvenli Bağış
+            </div>
+            <h1 class="text-4xl sm:text-5xl font-black tracking-tight text-[#0e101b] dark:text-white leading-[1.1]">
+                Eğitime Destek Olun
+            </h1>
+            <p class="text-lg text-[#4e5a97] dark:text-gray-400 max-w-2xl leading-relaxed">
+                Geleceğin liderlerini yetiştirmek için bağışlarınızla yanımızda olun. Sadece formu doldurun ve banka havalesi ile işleminizi tamamlayın.
+            </p>
+        </div>
 
-                <div class="card-body p-5">
+        @if (!string.IsNullOrEmpty(mesaj))
+        {
+            var alertClass = IsErrorMessage ? "bg-red-50 border-red-200 text-red-800 dark:bg-red-900/20 dark:border-red-800 dark:text-red-300" : "bg-green-50 border-green-200 text-green-800 dark:bg-green-900/20 dark:border-green-800 dark:text-green-300";
+            <div class="@alertClass border rounded-xl p-4 flex items-center gap-3">
+                <span class="material-symbols-outlined">@(IsErrorMessage ? "error" : "check_circle")</span>
+                <div>@mesaj</div>
+            </div>
+        }
 
-                    @if (!string.IsNullOrEmpty(mesaj))
-                    {
-                        var alertClass = IsErrorMessage ? "alert-danger" : "alert-success";
-                        <div class="alert @alertClass d-flex align-items-center mb-4 shadow-sm" role="alert">
-                            @if (IsErrorMessage)
-                            {
-                                <i class="bi bi-exclamation-triangle-fill me-2"></i>
-                            }
-                            else
-                            {
-                                <i class="bi bi-check-circle-fill me-2"></i>
-                            }
-                            <div>@mesaj</div>
+        <!-- Content Grid: Form (Left) & Bank Info (Right) -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-start">
+            <!-- Left Column: Donation Form -->
+            <div class="lg:col-span-7 flex flex-col gap-6 order-2 lg:order-1">
+                <div class="bg-white dark:bg-[#1a1d2d] rounded-2xl shadow-sm border border-[#e7e9f3] dark:border-gray-800 p-6 sm:p-8">
+                    <form class="flex flex-col gap-6" @onsubmit="HandleSubmit" @onsubmit:preventDefault>
+                        <div class="flex items-center justify-between border-b border-[#e7e9f3] dark:border-gray-700 pb-4">
+                            <h3 class="text-xl font-bold text-[#0e101b] dark:text-white">
+                                Bağışçı Bilgileri
+                            </h3>
+                            <span class="text-sm text-gray-400 font-medium">Adım 1/2</span>
                         </div>
-                    }
 
-                    <div class="row g-4">
-                        <div class="col-md-6">
-                            <label class="form-label fw-bold text-secondary">Ad Soyad</label>
-                            <input type="text" @bind="adSoyad" class="form-control form-control-lg bg-light" placeholder="Adınız Soyadınız">
+                        <!-- Form Row 1 -->
+                        <div class="flex flex-col sm:flex-row gap-5">
+                            <label class="flex flex-col flex-1 group">
+                                <span class="text-sm font-semibold text-[#0e101b] dark:text-gray-200 mb-2 group-focus-within:text-primary transition-colors">Ad Soyad</span>
+                                <div class="relative">
+                                    <input class="form-input h-14 w-full rounded-xl border-[#d0d4e7] bg-[#f8f9fc] dark:bg-gray-800 dark:border-gray-600 px-4 pl-14 text-base focus:border-primary focus:ring-primary dark:text-white placeholder-gray-400 transition-shadow" 
+                                           placeholder="Adınız Soyadınız" 
+                                           type="text" 
+                                           @bind="adSoyad" />
+                                    <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-primary transition-colors pointer-events-none">person</span>
+                                </div>
+                            </label>
+                            <label class="flex flex-col flex-1 group">
+                                <span class="text-sm font-semibold text-[#0e101b] dark:text-gray-200 mb-2 group-focus-within:text-primary transition-colors">Telefon</span>
+                                <div class="relative">
+                                    <input class="form-input h-14 w-full rounded-xl border-[#d0d4e7] bg-[#f8f9fc] dark:bg-gray-800 dark:border-gray-600 px-4 pl-14 text-base focus:border-primary focus:ring-primary dark:text-white placeholder-gray-400 transition-shadow" 
+                                           placeholder="0(5xx)" 
+                                           type="tel" 
+                                           value="@telefon"
+                                           @oninput="OnPhoneInput" />
+                                    <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-primary transition-colors pointer-events-none">call</span>
+                                </div>
+                            </label>
                         </div>
 
-                        <div class="col-md-6">
-                            <label class="form-label fw-bold text-secondary">Telefon</label>
-                            <input type="tel" @bind="telefon" class="form-control form-control-lg bg-light" placeholder="05XX XXX XX XX">
+                        <!-- Form Row 2 -->
+                        <div class="flex flex-col sm:flex-row gap-5">
+                            <label class="flex flex-col flex-1 group">
+                                <span class="text-sm font-semibold text-[#0e101b] dark:text-gray-200 mb-2 group-focus-within:text-primary transition-colors">E-Posta</span>
+                                <div class="relative">
+                                    <input class="form-input h-14 w-full rounded-xl border-[#d0d4e7] bg-[#f8f9fc] dark:bg-gray-800 dark:border-gray-600 px-4 pl-14 text-base focus:border-primary focus:ring-primary dark:text-white placeholder-gray-400 transition-shadow" 
+                                           placeholder="mail@ornek.com" 
+                                           type="email" 
+                                           @bind="eposta" />
+                                    <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-primary transition-colors pointer-events-none">mail</span>
+                                </div>
+                            </label>
+                            <label class="flex flex-col flex-1 group">
+                                <span class="text-sm font-semibold text-[#0e101b] dark:text-gray-200 mb-2 group-focus-within:text-primary transition-colors">Kurum / Şirket <span class="text-xs font-normal text-gray-400">(Opsiyonel)</span></span>
+                                <div class="relative">
+                                    <input class="form-input h-14 w-full rounded-xl border-[#d0d4e7] bg-[#f8f9fc] dark:bg-gray-800 dark:border-gray-600 px-4 pl-14 text-base focus:border-primary focus:ring-primary dark:text-white placeholder-gray-400 transition-shadow" 
+                                           placeholder="Varsa kurumunuz" 
+                                           type="text" 
+                                           @bind="kurumAdi" />
+                                    <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-primary transition-colors pointer-events-none">business</span>
+                                </div>
+                            </label>
                         </div>
 
-                        <div class="col-md-6">
-                            <label class="form-label fw-bold text-secondary">E-Posta</label>
-                            <input type="email" @bind="eposta" class="form-control form-control-lg bg-light" placeholder="mail@ornek.com">
-                        </div>
-
-                        <div class="col-md-6">
-                            <label class="form-label fw-bold text-secondary">Kurum / Şirket (Opsiyonel)</label>
-                            <input type="text" @bind="kurumAdi" class="form-control form-control-lg bg-light" placeholder="Varsa kurumunuz">
-                        </div>
-
-                        <div class="col-12">
-                            <label class="form-label fw-bold text-secondary">Bağışlamak İstediğiniz Tutar (₺)</label>
-                            <div class="input-group input-group-lg">
-                                <span class="input-group-text bg-success text-white fw-bold">₺</span>
-                                <input type="number" @bind="miktar" class="form-control bg-light" placeholder="Örn: 5000">
+                        <!-- Form Row 3 -->
+                        <label class="flex flex-col w-full group">
+                            <span class="text-sm font-semibold text-[#0e101b] dark:text-gray-200 mb-2 group-focus-within:text-primary transition-colors">Bağışlamak İstediğiniz Tutar (₺)</span>
+                            <div class="relative">
+                                <input class="form-input h-14 w-full rounded-xl border-[#d0d4e7] bg-[#f8f9fc] dark:bg-gray-800 dark:border-gray-600 px-4 pl-14 pr-16 text-base focus:border-primary focus:ring-primary dark:text-white font-semibold text-primary placeholder-gray-400 transition-shadow" 
+                                       placeholder="Örn: 5000" 
+                                       type="number" 
+                                       step="0.01"
+                                       min="0"
+                                       @bind="miktar" />
+                                <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-primary transition-colors pointer-events-none">payments</span>
+                                <span class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 font-bold text-sm">TL</span>
                             </div>
-                            <div class="form-text mt-2"><i class="bi bi-info-circle"></i> Bağışınız doğrudan burs havuzuna aktarılacaktır.</div>
-                        </div>
+                            <p class="mt-2 text-xs text-gray-400 dark:text-gray-500">
+                                <span class="material-symbols-outlined text-xs align-middle">info</span> Bağışınız doğrudan burs havuzuna aktarılacaktır.
+                            </p>
+                        </label>
 
-                        <div class="col-12 mt-4">
-                            <button class="btn btn-primary btn-lg w-100 py-3 fw-bold shadow hover-scale" @onclick="BursuKaydet">
-                                BAŞVURUYU TAMAMLA <i class="bi bi-arrow-right-circle ms-2"></i>
+                        <div class="pt-4">
+                            <button type="submit" class="w-full rounded-xl bg-primary py-4 text-white font-bold text-lg hover:bg-blue-700 transition-all shadow-lg shadow-blue-600/20 active:scale-[0.99] flex items-center justify-center gap-2">
+                                <span>Bağış Bildirimi Oluştur</span>
+                                <span class="material-symbols-outlined">send</span>
                             </button>
+                            <p class="mt-4 text-xs text-center text-gray-400 dark:text-gray-500">
+                                Bildirimi gönderdikten sonra banka uygulamanızdan transfer yapmayı unutmayınız.
+                            </p>
                         </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Right Column: Bank Info Sticky Card -->
+            <div class="lg:col-span-5 flex flex-col gap-6 lg:sticky lg:top-24 order-1 lg:order-2">
+                <!-- Info Card -->
+                <div class="bg-gradient-to-br from-white to-blue-50/50 dark:from-[#1a1d2d] dark:to-blue-900/10 border border-blue-100 dark:border-gray-700 rounded-2xl p-6 sm:p-8 flex flex-col gap-6 shadow-sm">
+                    <div class="flex items-start gap-4">
+                        <div class="bg-blue-100 dark:bg-blue-900/40 p-3 rounded-xl shadow-inner text-primary dark:text-blue-300 shrink-0">
+                            <span class="material-symbols-outlined text-2xl">account_balance</span>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-bold text-[#0e101b] dark:text-white leading-tight">
+                                Banka Havalesi / EFT
+                            </h3>
+                            <p class="text-sm text-[#4e5a97] dark:text-gray-400 mt-1">
+                                Aşağıdaki bilgilerle işleminizi güvenle tamamlayın.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="bg-white dark:bg-[#111421] rounded-xl border border-gray-100 dark:border-gray-800 p-1 shadow-sm">
+                        <div class="p-4 space-y-4">
+                            <div class="space-y-1">
+                                <p class="text-[10px] uppercase tracking-wider text-gray-400 font-bold">Alıcı</p>
+                                <p class="text-base font-semibold text-[#0e101b] dark:text-white">Burs Vakfı İktisadi İşletmesi</p>
+                            </div>
+                            <div class="w-full h-px bg-gray-100 dark:bg-gray-800"></div>
+                            <div class="space-y-1">
+                                <p class="text-[10px] uppercase tracking-wider text-gray-400 font-bold">Banka</p>
+                                <div class="flex items-center gap-2.5">
+                                    <div class="w-8 h-8 rounded bg-red-600 flex items-center justify-center text-[10px] font-bold text-white shadow-sm">ZB</div>
+                                    <p class="text-base font-semibold text-[#0e101b] dark:text-white">Ziraat Bankası</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-gray-50 dark:bg-gray-800/50 rounded-b-lg border-t border-gray-100 dark:border-gray-800 p-4">
+                            <p class="text-[10px] uppercase tracking-wider text-gray-400 font-bold mb-2">IBAN</p>
+                            <div class="relative group">
+                                <div class="font-mono text-lg sm:text-xl font-bold text-primary dark:text-blue-400 tracking-tight break-all">
+                                    TR12 0006 1000 0000 1234 5678 90
+                                </div>
+                                <button type="button" 
+                                        class="absolute -right-2 top-1/2 -translate-y-1/2 p-2 text-gray-400 hover:text-primary transition-all active:scale-90 hover:bg-white dark:hover:bg-gray-700 rounded-lg shadow-sm opacity-0 group-hover:opacity-100" 
+                                        title="Kopyala"
+                                        @onclick="KopyalaIBAN">
+                                    <span class="material-symbols-outlined text-xl">content_copy</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex gap-3 bg-blue-600/5 dark:bg-blue-500/10 p-4 rounded-xl border border-blue-100 dark:border-blue-900/30">
+                    <span class="material-symbols-outlined text-primary dark:text-blue-400 text-xl shrink-0 mt-0.5">info</span>
+                    <div class="space-y-1">
+                        <p class="text-sm font-semibold text-gray-900 dark:text-white">Nasıl Yapılır?</p>
+                        <p class="text-sm text-gray-600 dark:text-gray-400 leading-snug">
+                            Formu doldurduktan sonra, banka uygulamanızdan yukarıdaki IBAN'a havale yapmanız yeterlidir.
+                        </p>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
+</main>
+
+<!-- Simple Footer -->
+<footer class="w-full border-t border-[#e7e9f3] dark:border-gray-800 bg-white dark:bg-[#111421] py-8 mt-auto">
+    <div class="max-w-[1280px] mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
+        <p>© 2024 Burs Vakfı. Tüm hakları saklıdır.</p>
+        <div class="flex gap-6">
+            <a class="hover:text-primary transition-colors" href="#">Gizlilik Politikası</a>
+            <a class="hover:text-primary transition-colors" href="#">Kullanım Şartları</a>
+        </div>
+    </div>
+</footer>
 
 @code {
-    // Başlangıç değerlerini boş veriyoruz ki sayfa açılırken "NullReference" hatası verip beyaz ekran yapmasın.
+    // Form alanları - Eski dosyadaki yapıya göre
     private string adSoyad = "";
     private string kurumAdi = "";
     private string eposta = "";
@@ -84,19 +230,74 @@
     private string mesaj = "";
     private decimal miktar = 0;
 
-    // KRİTİK NOKTA: TrustServerCertificate=True ve Encrypt=False ekledik!
-    // Bu sayede "SSL Provider" hatası almadan LocalDB'ye bağlanacak.
+    // IBAN bilgisi
+    private const string IBAN = "TR12 0006 1000 0000 1234 5678 90";
+
+    // Bağlantı string'i
     string connectionString = @"Data Source=(localdb)\MSSQLLocalDB; initial catalog=bursOtoDeneme1; Integrated Security=TRUE; Encrypt=False; TrustServerCertificate=True;";
 
     private bool IsErrorMessage =>
         !string.IsNullOrEmpty(mesaj) && mesaj.StartsWith("Hata");
 
-    private void BursuKaydet()
+    private async Task OnPhoneInput(ChangeEventArgs e)
     {
-        // Basit bir validasyon (boş alan kontrolü)
+        try
+        {
+            if (e.Value != null)
+            {
+                string value = e.Value.ToString() ?? "";
+                // Sadece rakamları al
+                string digitsOnly = new string(value.Where(char.IsDigit).ToArray());
+                
+                // Maksimum 11 rakam (0 + 10 haneli numara)
+                if (digitsOnly.Length > 11)
+                {
+                    digitsOnly = digitsOnly.Substring(0, 11);
+                }
+                
+                // Formatla: 0(5XX)XXX XX XX (maksimum 13 karakter: 0(546)235 44 55)
+                if (digitsOnly.Length == 0)
+                {
+                    telefon = "";
+                }
+                else if (digitsOnly.Length <= 1)
+                {
+                    telefon = digitsOnly;
+                }
+                else if (digitsOnly.Length <= 4)
+                {
+                    telefon = $"0({digitsOnly.Substring(1)}";
+                }
+                else if (digitsOnly.Length <= 7)
+                {
+                    telefon = $"0({digitsOnly.Substring(1, 3)}){digitsOnly.Substring(4)}";
+                }
+                else if (digitsOnly.Length <= 9)
+                {
+                    telefon = $"0({digitsOnly.Substring(1, 3)}){digitsOnly.Substring(4, 3)} {digitsOnly.Substring(7)}";
+                }
+                else
+                {
+                    // Maksimum format: 0(546)235 44 55
+                    telefon = $"0({digitsOnly.Substring(1, 3)}){digitsOnly.Substring(4, 3)} {digitsOnly.Substring(7, 2)} {digitsOnly.Substring(9, 2)}";
+                }
+                
+                await InvokeAsync(StateHasChanged);
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"OnPhoneInput hatası: {ex.Message}");
+        }
+    }
+
+    private async Task HandleSubmit()
+    {
+        // Validasyon - Eski dosyadaki validasyona göre
         if (string.IsNullOrWhiteSpace(adSoyad) || string.IsNullOrWhiteSpace(telefon) || miktar <= 0)
         {
             mesaj = "Hata: Lütfen Ad Soyad, Telefon ve geçerli bir Tutar giriniz.";
+            StateHasChanged();
             return;
         }
 
@@ -106,16 +307,65 @@
             {
                 conn.Open();
 
-                // SQL Sorgusu: Tablo adının ve sütunların veritabanındakiyle aynı olduğuna emin ol.
-                string query = "INSERT INTO BursVerenler (AdSoyad, KurumAdı, BagisMiktari, Eposta, Telefon, Durum) VALUES (@p1, @p2, @p3, @p4, @p5, 'Beklemede')";
+                // SQL Sorgusu: Eski dosyadaki yapıya göre
+                // Eski dosyada: AdSoyad, KurumAdı, BagisMiktari, Eposta, Telefon, Durum
+                // Veritabanında Mail kolonu var mı kontrol et (Eposta yerine)
+                bool mailKolonuVarMi = false;
+                bool epostaKolonuVarMi = false;
+                bool kurumAdiVarMi = false;
+                
+                try
+                {
+                    using (SqlCommand checkCmd = new SqlCommand(
+                        "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'BursVerenler' AND COLUMN_NAME IN ('Mail', 'Eposta', 'Email', 'KurumAdı')", conn))
+                    {
+                        using (var reader = checkCmd.ExecuteReader())
+                        {
+                            while (reader.Read())
+                            {
+                                var kolonAdi = reader[0].ToString();
+                                if (kolonAdi == "Mail") mailKolonuVarMi = true;
+                                if (kolonAdi == "Eposta" || kolonAdi == "Email") epostaKolonuVarMi = true;
+                                if (kolonAdi == "KurumAdı") kurumAdiVarMi = true;
+                            }
+                        }
+                    }
+                }
+                catch { }
+
+                // SQL Sorgusu: Eski dosyadaki yapıya göre (AdSoyad, KurumAdı, BagisMiktari, Eposta, Telefon, Durum)
+                // Veritabanında Mail kolonu var, Eposta değil - BagisModule.cs'deki yapıya göre
+                string query;
+                string emailKolonAdi = mailKolonuVarMi ? "Mail" : "Eposta";
+                
+                if (kurumAdiVarMi)
+                {
+                    query = $@"INSERT INTO BursVerenler (AdSoyad, KurumAdı, BagisMiktari, {emailKolonAdi}, Telefon, Durum) 
+                             VALUES (@p1, @p2, @p3, @p4, @p5, 'Beklemede')";
+                }
+                else
+                {
+                    // KurumAdı kolonu yoksa, eski dosyadaki gibi sadece AdSoyad kullan
+                    query = $@"INSERT INTO BursVerenler (AdSoyad, BagisMiktari, {emailKolonAdi}, Telefon, Durum) 
+                             VALUES (@p1, @p2, @p3, @p4, 'Beklemede')";
+                }
 
                 using (SqlCommand cmd = new SqlCommand(query, conn))
                 {
-                    cmd.Parameters.AddWithValue("@p1", adSoyad);
-                    cmd.Parameters.AddWithValue("@p2", kurumAdi); // Boşsa boş string gider
-                    cmd.Parameters.AddWithValue("@p3", miktar);
-                    cmd.Parameters.AddWithValue("@p4", eposta);
-                    cmd.Parameters.AddWithValue("@p5", telefon);
+                    cmd.Parameters.AddWithValue("@p1", adSoyad.Trim());
+                    if (kurumAdiVarMi)
+                    {
+                        cmd.Parameters.AddWithValue("@p2", string.IsNullOrWhiteSpace(kurumAdi) ? "" : kurumAdi.Trim()); // Boşsa boş string gider
+                        cmd.Parameters.AddWithValue("@p3", miktar);
+                        cmd.Parameters.AddWithValue("@p4", eposta.Trim());
+                        cmd.Parameters.AddWithValue("@p5", telefon.Trim());
+                    }
+                    else
+                    {
+                        cmd.Parameters.AddWithValue("@p2", miktar);
+                        cmd.Parameters.AddWithValue("@p3", eposta.Trim());
+                        cmd.Parameters.AddWithValue("@p4", telefon.Trim());
+                    }
 
                     cmd.ExecuteNonQuery();
                 }
@@ -124,12 +374,50 @@
             mesaj = "Teşekkürler! Bağış başvurunuz başarıyla alındı. Sizinle iletişime geçeceğiz.";
 
             // Başarılı olursa kutuları temizle
-            adSoyad = ""; kurumAdi = ""; eposta = ""; telefon = ""; miktar = 0;
+            adSoyad = ""; 
+            kurumAdi = ""; 
+            eposta = ""; 
+            telefon = ""; 
+            miktar = 0;
         }
-        catch (Exception ex)
+        catch
         {
-            // Hata mesajını ekrana basıyoruz ki sorunu görelim
             mesaj = "Hata: Bağış kaydedilirken bir sorun oluştu. Lütfen daha sonra tekrar deneyin.";
+        }
+        
+        StateHasChanged();
+    }
+
+    private void NavigateHome()
+    {
+        NavManager.NavigateTo("/");
+    }
+
+    private async Task KopyalaIBAN()
+    {
+        try
+        {
+            var ibanTemiz = IBAN.Replace(" ", "");
+            var basarili = await JSRuntime.InvokeAsync<bool>("copyToClipboard", ibanTemiz);
+            
+            if (basarili)
+            {
+                // Geçici başarı mesajı göster
+                var eskiMesaj = mesaj;
+                mesaj = "IBAN panoya kopyalandı!";
+                StateHasChanged();
+                
+                await Task.Delay(2000);
+                if (mesaj == "IBAN panoya kopyalandı!")
+                {
+                    mesaj = eskiMesaj;
+                    StateHasChanged();
+                }
+            }
+        }
+        catch
+        {
+            // Clipboard API desteklenmiyorsa sessizce geç
         }
     }
 }

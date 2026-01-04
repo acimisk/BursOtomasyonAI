@@ -850,5 +850,10 @@ namespace bursoto1.Modules
                 }
             }
         }
+
+        private void btnAIAnaliz_Click_1(object sender, EventArgs e)
+        {
+
+        }
     }
 }

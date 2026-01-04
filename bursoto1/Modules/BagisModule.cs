@@ -247,8 +247,8 @@ namespace bursoto1.Modules
                     gridView1.Columns["BagisMiktari"].Caption = "Bağış Miktarı";
                 if (gridView1.Columns["Aciklama"] != null)
                     gridView1.Columns["Aciklama"].Caption = "Açıklama";
-                if (gridView1.Columns["Mail"] != null)
-                    gridView1.Columns["Mail"].Caption = "E-posta";
+                if (gridView1.Columns["Eposta"] != null)
+                    gridView1.Columns["Eposta"].Caption = "E-posta";
                     
                 gridView1.BestFitColumns();
                 ApplyDarkGrid(gridView1);
@@ -334,7 +334,7 @@ namespace bursoto1.Modules
 
                             // Mail kolonu kullan (DB şemasına uygun)
                             SqlCommand cmd = new SqlCommand($@"INSERT INTO BursVerenler 
-                                (AdSoyad, Telefon, Mail, BagisMiktari, Aciklama, Durum, {tarihKolonu}) 
+                                (AdSoyad, Telefon, Eposta, BagisMiktari, Aciklama, Durum, {tarihKolonu}) 
                                 VALUES (@p1, @p2, @p3, @p4, @p5, 'Beklemede', @p6)", conn);
                             cmd.Parameters.AddWithValue("@p1", txtAd.Text.Trim());
                             cmd.Parameters.AddWithValue("@p2", txtTel.Text.Trim());

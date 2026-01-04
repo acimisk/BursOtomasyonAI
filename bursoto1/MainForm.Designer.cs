@@ -125,6 +125,7 @@
             this.btnOdeme.Id = 8;
             this.btnOdeme.ImageOptions.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("btnOdeme.ImageOptions.SvgImage")));
             this.btnOdeme.Name = "btnOdeme";
+            this.btnOdeme.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnOdeme_ItemClick);
             // 
             // ribbonPage1
             // 

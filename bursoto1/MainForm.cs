@@ -338,21 +338,59 @@ namespace bursoto1
                                     OgrenciID INT,
                                     BursID INT,
                                     Tutar DECIMAL(18,2),
-                                    Tarih DATETIME DEFAULT GETDATE(),
+                                    OdemeTarihi DATETIME NOT NULL DEFAULT GETDATE(),
+                                    Ay INT NOT NULL DEFAULT MONTH(GETDATE()),
+                                    Yil INT NOT NULL DEFAULT YEAR(GETDATE()),
                                     Aciklama NVARCHAR(500)
                                 )
                             END", conn);
                         cmdCheck.ExecuteNonQuery();
                         
-                        // Tablo varsa ama Tarih kolonu yoksa ekle
+                        // Tablo varsa ama OdemeTarihi kolonu yoksa ekle (öncelikli)
                         try
                         {
                             SqlCommand cmdTarihCheck = new SqlCommand(@"IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.COLUMNS 
+                                WHERE TABLE_NAME = 'BursGiderleri' AND COLUMN_NAME = 'OdemeTarihi')
+                                BEGIN
+                                    ALTER TABLE BursGiderleri ADD OdemeTarihi DATETIME NOT NULL DEFAULT GETDATE()
+                                END", conn);
+                            cmdTarihCheck.ExecuteNonQuery();
+                        }
+                        catch { }
+                        
+                        // Tarih kolonu yoksa ekle (alternatif)
+                        try
+                        {
+                            SqlCommand cmdTarihCheck2 = new SqlCommand(@"IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.COLUMNS 
                                 WHERE TABLE_NAME = 'BursGiderleri' AND COLUMN_NAME = 'Tarih')
                                 BEGIN
                                     ALTER TABLE BursGiderleri ADD Tarih DATETIME DEFAULT GETDATE()
                                 END", conn);
-                            cmdTarihCheck.ExecuteNonQuery();
+                            cmdTarihCheck2.ExecuteNonQuery();
+                        }
+                        catch { }
+                        
+                        // Ay kolonu yoksa ekle
+                        try
+                        {
+                            SqlCommand cmdAyCheck = new SqlCommand(@"IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.COLUMNS 
+                                WHERE TABLE_NAME = 'BursGiderleri' AND COLUMN_NAME = 'Ay')
+                                BEGIN
+                                    ALTER TABLE BursGiderleri ADD Ay INT NOT NULL DEFAULT MONTH(GETDATE())
+                                END", conn);
+                            cmdAyCheck.ExecuteNonQuery();
+                        }
+                        catch { }
+                        
+                        // Yil kolonu yoksa ekle
+                        try
+                        {
+                            SqlCommand cmdYilCheck = new SqlCommand(@"IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.COLUMNS 
+                                WHERE TABLE_NAME = 'BursGiderleri' AND COLUMN_NAME = 'Yil')
+                                BEGIN
+                                    ALTER TABLE BursGiderleri ADD Yil INT NOT NULL DEFAULT YEAR(GETDATE())
+                                END", conn);
+                            cmdYilCheck.ExecuteNonQuery();
                         }
                         catch { }
 
@@ -415,17 +453,17 @@ namespace bursoto1
                         {
                             string query = "";
                             
-                            // BursGiderleri tablosundaki tarih kolonunu kontrol et
-                            string tarihKolonu = "Tarih";
+                            // BursGiderleri tablosundaki tarih kolonunu kontrol et (OdemeTarihi öncelikli)
+                            string tarihKolonu = "OdemeTarihi"; // Varsayılan - veritabanında bu kolon var
                             try
                             {
                                 SqlCommand cmdTarih = new SqlCommand(@"SELECT TOP 1 COLUMN_NAME 
                                     FROM INFORMATION_SCHEMA.COLUMNS 
                                     WHERE TABLE_NAME = 'BursGiderleri' 
-                                    AND COLUMN_NAME IN ('Tarih', 'OdemeTarihi', 'KayitTarihi')
+                                    AND COLUMN_NAME IN ('OdemeTarihi', 'Tarih', 'KayitTarihi')
                                     ORDER BY CASE COLUMN_NAME 
-                                        WHEN 'Tarih' THEN 1 
-                                        WHEN 'OdemeTarihi' THEN 2 
+                                        WHEN 'OdemeTarihi' THEN 1 
+                                        WHEN 'Tarih' THEN 2 
                                         WHEN 'KayitTarihi' THEN 3 
                                         ELSE 4 END", conn);
                                 var tarihResult = cmdTarih.ExecuteScalar();
@@ -623,56 +661,203 @@ namespace bursoto1
                                     try
                                     {
                                         var ogrenciID = gridViewOdeme.GetRowCellValue(rowHandle, "ID");
-                                        if (ogrenciID != null && ogrenciID != DBNull.Value)
+                                        if (ogrenciID == null || ogrenciID == DBNull.Value)
                                         {
-                                            // Öğrencinin burs ID'sini bul
-                                            int ogrenciBursID = bursID;
-                                            if (bursID == 0)
-                                            {
-                                                // Tümü seçildiyse, öğrencinin bursunu bul
-                                                SqlCommand cmdFindBurs = new SqlCommand(@"SELECT TOP 1 ISNULL(ob.BursID, 0) 
-                                                    FROM OgrenciBurslari ob 
-                                                    WHERE ob.OgrenciID = @ogrenciID AND ob.Durum = 1", conn);
-                                                cmdFindBurs.Parameters.AddWithValue("@ogrenciID", ogrenciID);
-                                                var result = cmdFindBurs.ExecuteScalar();
-                                                if (result != null && result != DBNull.Value)
-                                                    ogrenciBursID = Convert.ToInt32(result);
-                                            }
-
-                                            // BursGiderleri tablosundaki tarih kolonunu kontrol et
-                                            string tarihKolonu = "Tarih";
-                                            try
-                                            {
-                                                SqlCommand cmdTarih = new SqlCommand(@"SELECT TOP 1 COLUMN_NAME 
-                                                    FROM INFORMATION_SCHEMA.COLUMNS 
-                                                    WHERE TABLE_NAME = 'BursGiderleri' 
-                                                    AND COLUMN_NAME IN ('Tarih', 'OdemeTarihi', 'KayitTarihi')
-                                                    ORDER BY CASE COLUMN_NAME 
-                                                        WHEN 'Tarih' THEN 1 
-                                                        WHEN 'OdemeTarihi' THEN 2 
-                                                        WHEN 'KayitTarihi' THEN 3 
-                                                        ELSE 4 END", conn);
-                                                var tarihResult = cmdTarih.ExecuteScalar();
-                                                if (tarihResult != null && tarihResult != DBNull.Value)
-                                                    tarihKolonu = tarihResult.ToString();
-                                            }
-                                            catch { }
-
-                                            SqlCommand cmd = new SqlCommand($@"INSERT INTO BursGiderleri 
-                                                (OgrenciID, BursID, Tutar, {tarihKolonu}, Aciklama) 
-                                                VALUES (@p1, @p2, @p3, @p4, @p5)", conn);
-                                            cmd.Parameters.AddWithValue("@p1", ogrenciID);
-                                            cmd.Parameters.AddWithValue("@p2", ogrenciBursID);
-                                            cmd.Parameters.AddWithValue("@p3", tutar);
-                                            cmd.Parameters.AddWithValue("@p4", DateTime.Now);
-                                            cmd.Parameters.AddWithValue("@p5", $"{bursAdi} - {DateTime.Now:MMMM yyyy}");
-                                            cmd.ExecuteNonQuery();
-                                            basarili++;
+                                            hatali++;
+                                            continue;
                                         }
+
+                                        // Öğrencinin burs ID'sini bul
+                                        int ogrenciBursID = bursID;
+                                        if (bursID == 0)
+                                        {
+                                            // Tümü seçildiyse, öğrencinin bursunu bul
+                                            SqlCommand cmdFindBurs = new SqlCommand(@"SELECT TOP 1 ISNULL(ob.BursID, 0) 
+                                                FROM OgrenciBurslari ob 
+                                                WHERE ob.OgrenciID = @ogrenciID AND ob.Durum = 1", conn);
+                                            cmdFindBurs.Parameters.AddWithValue("@ogrenciID", ogrenciID);
+                                            var result = cmdFindBurs.ExecuteScalar();
+                                            if (result != null && result != DBNull.Value)
+                                                ogrenciBursID = Convert.ToInt32(result);
+                                            
+                                            if (ogrenciBursID == 0)
+                                            {
+                                                System.Diagnostics.Debug.WriteLine($"Öğrenci {ogrenciID} için burs bulunamadı");
+                                                hatali++;
+                                                continue;
+                                            }
+                                        }
+
+                                        // BursGiderleri tablosundaki tarih kolonunu ÖNCE kontrol et
+                                        string tarihKolonu = "OdemeTarihi"; // Varsayılan olarak OdemeTarihi
+                                        try
+                                        {
+                                            SqlCommand cmdTarih = new SqlCommand(@"SELECT TOP 1 COLUMN_NAME 
+                                                FROM INFORMATION_SCHEMA.COLUMNS 
+                                                WHERE TABLE_NAME = 'BursGiderleri' 
+                                                AND COLUMN_NAME IN ('OdemeTarihi', 'Tarih', 'KayitTarihi')
+                                                ORDER BY CASE COLUMN_NAME 
+                                                    WHEN 'OdemeTarihi' THEN 1 
+                                                    WHEN 'Tarih' THEN 2 
+                                                    WHEN 'KayitTarihi' THEN 3 
+                                                    ELSE 4 END", conn);
+                                            var tarihResult = cmdTarih.ExecuteScalar();
+                                            if (tarihResult != null && tarihResult != DBNull.Value)
+                                                tarihKolonu = tarihResult.ToString();
+                                        }
+                                        catch { }
+
+                                        // BursGiderleri tablosunu kontrol et ve gerekirse oluştur
+                                        try
+                                        {
+                                            SqlCommand cmdCheck = new SqlCommand(@"IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'BursGiderleri')
+                                                BEGIN
+                                                    CREATE TABLE BursGiderleri (
+                                                        ID INT IDENTITY(1,1) PRIMARY KEY,
+                                                        OgrenciID INT,
+                                                        BursID INT,
+                                                        Tutar DECIMAL(18,2),
+                                                        OdemeTarihi DATETIME NOT NULL DEFAULT GETDATE(),
+                                                        Ay INT NOT NULL DEFAULT MONTH(GETDATE()),
+                                                        Yil INT NOT NULL DEFAULT YEAR(GETDATE()),
+                                                        Aciklama NVARCHAR(500)
+                                                    )
+                                                END", conn);
+                                            cmdCheck.ExecuteNonQuery();
+                                            
+                                            // OdemeTarihi kolonu yoksa ekle (öncelikli)
+                                            SqlCommand cmdTarihCheck = new SqlCommand(@"IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.COLUMNS 
+                                                WHERE TABLE_NAME = 'BursGiderleri' AND COLUMN_NAME = 'OdemeTarihi')
+                                                BEGIN
+                                                    ALTER TABLE BursGiderleri ADD OdemeTarihi DATETIME NOT NULL DEFAULT GETDATE()
+                                                END", conn);
+                                            cmdTarihCheck.ExecuteNonQuery();
+                                            
+                                            // Tarih kolonu yoksa ekle (alternatif)
+                                            SqlCommand cmdTarihCheck2 = new SqlCommand(@"IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.COLUMNS 
+                                                WHERE TABLE_NAME = 'BursGiderleri' AND COLUMN_NAME = 'Tarih')
+                                                BEGIN
+                                                    ALTER TABLE BursGiderleri ADD Tarih DATETIME DEFAULT GETDATE()
+                                                END", conn);
+                                            cmdTarihCheck2.ExecuteNonQuery();
+                                            
+                                            // Ay kolonu yoksa ekle
+                                            SqlCommand cmdAyCheck = new SqlCommand(@"IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.COLUMNS 
+                                                WHERE TABLE_NAME = 'BursGiderleri' AND COLUMN_NAME = 'Ay')
+                                                BEGIN
+                                                    ALTER TABLE BursGiderleri ADD Ay INT NOT NULL DEFAULT MONTH(GETDATE())
+                                                END", conn);
+                                            cmdAyCheck.ExecuteNonQuery();
+                                            
+                                            // Yil kolonu yoksa ekle
+                                            SqlCommand cmdYilCheck = new SqlCommand(@"IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.COLUMNS 
+                                                WHERE TABLE_NAME = 'BursGiderleri' AND COLUMN_NAME = 'Yil')
+                                                BEGIN
+                                                    ALTER TABLE BursGiderleri ADD Yil INT NOT NULL DEFAULT YEAR(GETDATE())
+                                                END", conn);
+                                            cmdYilCheck.ExecuteNonQuery();
+                                        }
+                                        catch (Exception tableEx)
+                                        {
+                                            System.Diagnostics.Debug.WriteLine($"Tablo kontrol hatası: {tableEx.Message}");
+                                        }
+
+                                        // Tekrar tarih kolonunu kontrol et (tablo oluşturulduktan sonra)
+                                        try
+                                        {
+                                            SqlCommand cmdTarih = new SqlCommand(@"SELECT TOP 1 COLUMN_NAME 
+                                                FROM INFORMATION_SCHEMA.COLUMNS 
+                                                WHERE TABLE_NAME = 'BursGiderleri' 
+                                                AND COLUMN_NAME IN ('OdemeTarihi', 'Tarih', 'KayitTarihi')
+                                                ORDER BY CASE COLUMN_NAME 
+                                                    WHEN 'OdemeTarihi' THEN 1 
+                                                    WHEN 'Tarih' THEN 2 
+                                                    WHEN 'KayitTarihi' THEN 3 
+                                                    ELSE 4 END", conn);
+                                            var tarihResult = cmdTarih.ExecuteScalar();
+                                            if (tarihResult != null && tarihResult != DBNull.Value)
+                                                tarihKolonu = tarihResult.ToString();
+                                        }
+                                        catch { }
+
+                                        // BursID kolonunu kontrol et
+                                        string bursIDKolonu = "BursID";
+                                        try
+                                        {
+                                            SqlCommand cmdBursID = new SqlCommand(@"SELECT TOP 1 COLUMN_NAME 
+                                                FROM INFORMATION_SCHEMA.COLUMNS 
+                                                WHERE TABLE_NAME = 'BursGiderleri' 
+                                                AND COLUMN_NAME IN ('BursID', 'ID')
+                                                ORDER BY CASE COLUMN_NAME 
+                                                    WHEN 'BursID' THEN 1 
+                                                    WHEN 'ID' THEN 2 
+                                                    ELSE 3 END", conn);
+                                            var bursIDResult = cmdBursID.ExecuteScalar();
+                                            if (bursIDResult != null && bursIDResult != DBNull.Value)
+                                                bursIDKolonu = bursIDResult.ToString();
+                                        }
+                                        catch { }
+
+                                        // Ay ve Yil kolonlarını kontrol et
+                                        bool hasAy = false;
+                                        bool hasYil = false;
+                                        try
+                                        {
+                                            SqlCommand cmdKolonlar = new SqlCommand(@"SELECT COLUMN_NAME 
+                                                FROM INFORMATION_SCHEMA.COLUMNS 
+                                                WHERE TABLE_NAME = 'BursGiderleri' 
+                                                AND COLUMN_NAME IN ('Ay', 'Yil')", conn);
+                                            using (var reader = cmdKolonlar.ExecuteReader())
+                                            {
+                                                while (reader.Read())
+                                                {
+                                                    string kolonAdi = reader["COLUMN_NAME"].ToString();
+                                                    if (kolonAdi == "Ay") hasAy = true;
+                                                    if (kolonAdi == "Yil") hasYil = true;
+                                                }
+                                            }
+                                        }
+                                        catch { }
+
+                                        // INSERT sorgusu - kolonları dinamik kullan
+                                        DateTime now = DateTime.Now;
+                                        string kolonlar = $"OgrenciID, {bursIDKolonu}, Tutar, {tarihKolonu}, Aciklama";
+                                        string degerler = "@p1, @p2, @p3, @p4, @p5";
+                                        
+                                        if (hasAy)
+                                        {
+                                            kolonlar += ", Ay";
+                                            degerler += ", @p6";
+                                        }
+                                        if (hasYil)
+                                        {
+                                            kolonlar += ", Yil";
+                                            degerler += ", @p7";
+                                        }
+                                        
+                                        string insertQuery = $@"INSERT INTO BursGiderleri 
+                                            ({kolonlar}) 
+                                            VALUES ({degerler})";
+                                        
+                                        SqlCommand cmd = new SqlCommand(insertQuery, conn);
+                                        cmd.Parameters.AddWithValue("@p1", ogrenciID);
+                                        cmd.Parameters.AddWithValue("@p2", ogrenciBursID);
+                                        cmd.Parameters.AddWithValue("@p3", tutar);
+                                        cmd.Parameters.AddWithValue("@p4", now);
+                                        cmd.Parameters.AddWithValue("@p5", $"{bursAdi} - {now:MMMM yyyy}");
+                                        
+                                        if (hasAy)
+                                            cmd.Parameters.AddWithValue("@p6", now.Month);
+                                        if (hasYil)
+                                            cmd.Parameters.AddWithValue("@p7", now.Year);
+                                        
+                                        cmd.ExecuteNonQuery();
+                                        basarili++;
                                     }
                                     catch (Exception rowEx)
                                     {
-                                        System.Diagnostics.Debug.WriteLine($"Ödeme satır hatası: {rowEx.Message}");
+                                        System.Diagnostics.Debug.WriteLine($"Ödeme satır hatası (RowHandle: {rowHandle}): {rowEx.Message}");
+                                        System.Diagnostics.Debug.WriteLine($"Stack trace: {rowEx.StackTrace}");
                                         hatali++;
                                     }
                                 }
@@ -686,16 +871,18 @@ namespace bursoto1
                             }
                             else if (basarili > 0 && hatali > 0)
                             {
-                                MessageHelper.ShowWarning($"{basarili} öğrenciye ödeme yapıldı, {hatali} öğrenci için başarısız.", "Kısmi Başarı");
+                                MessageHelper.ShowWarning($"{basarili} öğrenciye ödeme yapıldı, {hatali} öğrenci için başarısız.\n\nDetaylar için Debug çıktısını kontrol edin.", "Kısmi Başarı");
                                 loadStudents();
                             }
                             else
                             {
-                                MessageHelper.ShowError("Ödeme yapılamadı.", "Hata");
+                                MessageHelper.ShowError($"Hiçbir öğrenciye ödeme yapılamadı. {hatali} öğrenci için hata oluştu.\n\nDetaylar için Debug çıktısını kontrol edin.", "Ödeme Başarısız");
                             }
                         }
                         catch (Exception ex)
                         {
+                            System.Diagnostics.Debug.WriteLine($"Ödeme genel hatası: {ex.Message}");
+                            System.Diagnostics.Debug.WriteLine($"Stack trace: {ex.StackTrace}");
                             MessageHelper.ShowException(ex, "Ödeme Hatası");
                         }
                     }
@@ -720,5 +907,9 @@ namespace bursoto1
             public override string ToString() => $"{BursAdi} ({Miktar:C}/ay)";
         }
 
+        private void btnOdeme_ItemClick(object sender, ItemClickEventArgs e)
+        {
+
+        }
     }
 }

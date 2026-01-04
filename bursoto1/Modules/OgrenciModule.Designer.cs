@@ -36,6 +36,7 @@
             this.sqlDataSource1 = new DevExpress.DataAccess.Sql.SqlDataSource(this.components);
             this.panelAI = new DevExpress.XtraEditors.PanelControl();
             this.btnBursKabul = new DevExpress.XtraEditors.SimpleButton();
+            this.btnYedek = new DevExpress.XtraEditors.SimpleButton();
             this.btnBursReddet = new DevExpress.XtraEditors.SimpleButton();
             this.btnAIAnaliz = new DevExpress.XtraEditors.SimpleButton();
             this.lblAIsonuc = new DevExpress.XtraEditors.LabelControl();
@@ -129,7 +130,6 @@
             // 
             // btnYedek
             // 
-            this.btnYedek = new DevExpress.XtraEditors.SimpleButton();
             this.btnYedek.Appearance.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(243)))), ((int)(((byte)(156)))), ((int)(((byte)(18)))));
             this.btnYedek.Appearance.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
             this.btnYedek.Appearance.ForeColor = System.Drawing.Color.White;
@@ -175,6 +175,7 @@
             this.btnAIAnaliz.Size = new System.Drawing.Size(182, 28);
             this.btnAIAnaliz.TabIndex = 18;
             this.btnAIAnaliz.Text = "🤖 AI Analiz Yap";
+            this.btnAIAnaliz.Click += new System.EventHandler(this.btnAIAnaliz_Click_1);
             // 
             // lblAIsonuc
             // 

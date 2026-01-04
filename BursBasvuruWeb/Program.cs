@@ -1,10 +1,20 @@
 using BursBasvuruWeb.Components;
+using Microsoft.AspNetCore.Components.Server;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
+
+// Enable detailed errors for development
+if (builder.Environment.IsDevelopment())
+{
+    builder.Services.Configure<CircuitOptions>(options =>
+    {
+        options.DetailedErrors = true;
+    });
+}
 
 var app = builder.Build();
 
