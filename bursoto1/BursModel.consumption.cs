@@ -5,7 +5,7 @@ using System;
 using System.Linq;
 using System.IO;
 using System.Collections.Generic;
-namespace bursoto1
+namespace Bursoto1
 {
     public partial class BursModel
     {

@@ -10,7 +10,7 @@ using Microsoft.ML.Data;
 using Microsoft.ML.Trainers;
 using Microsoft.ML.Trainers.FastTree;
 
-namespace bursoto1
+namespace Bursoto1
 {
     public partial class BursModel
     {
@@ -92,7 +92,7 @@ namespace bursoto1
             // Data process configuration with pipeline data transformations
             var pipeline = mlContext.Transforms.ReplaceMissingValues(new []{new InputOutputColumnPair(@"MevcutAgno", @"MevcutAgno"),new InputOutputColumnPair(@"HaneGeliri", @"HaneGeliri"),new InputOutputColumnPair(@"KardesSayisi", @"KardesSayisi"),new InputOutputColumnPair(@"SehirMaliyet", @"SehirMaliyet"),new InputOutputColumnPair(@"BolumZorluk", @"BolumZorluk")})      
                                     .Append(mlContext.Transforms.Concatenate(@"Features", new []{@"MevcutAgno",@"HaneGeliri",@"KardesSayisi",@"SehirMaliyet",@"BolumZorluk"}))      
-                                    .Append(mlContext.Regression.Trainers.FastForest(new FastForestRegressionTrainer.Options(){NumberOfTrees=5,NumberOfLeaves=4,FeatureFraction=0.9458863F,LabelColumnName=@"MezuniyetPuani",FeatureColumnName=@"Features"}));
+                                    .Append(mlContext.Regression.Trainers.FastTree(new FastTreeRegressionTrainer.Options(){NumberOfLeaves=4,MinimumExampleCountPerLeaf=3,NumberOfTrees=42,MaximumBinCountPerFeature=123,FeatureFraction=0.99999999,LearningRate=0.46718116434891377,LabelColumnName=@"MezuniyetPuani",FeatureColumnName=@"Features",DiskTranspose=false}));
 
             return pipeline;
         }

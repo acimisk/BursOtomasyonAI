@@ -1300,7 +1300,7 @@ namespace bursoto1.Modules
                 float bolumZorluk = GetBolumZorluk(bolum); // Bölüme göre zorluk (0.5-2.0 arası)
 
                 // ModelInput oluştur
-                bursoto1.BursModel.ModelInput input = new bursoto1.BursModel.ModelInput
+                Bursoto1.BursModel.ModelInput input = new Bursoto1.BursModel.ModelInput
                 {
                     MevcutAgno = mevcutAgno,
                     HaneGeliri = haneGeliri,
@@ -1310,7 +1310,7 @@ namespace bursoto1.Modules
                 };
 
                 // Tahmin yap
-                bursoto1.BursModel.ModelOutput output = bursoto1.BursModel.Predict(input);
+                Bursoto1.BursModel.ModelOutput output = Bursoto1.BursModel.Predict(input);
                 float tahminEdilenPuan = output.Score;
 
                 // Sonucu göster
