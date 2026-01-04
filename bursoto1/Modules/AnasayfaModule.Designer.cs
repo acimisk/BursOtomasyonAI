@@ -64,7 +64,7 @@
             this.splitContainerControl1.Panel2.Controls.Add(this.chartControl1);
             this.splitContainerControl1.Panel2.Text = "Panel2";
             this.splitContainerControl1.Size = new System.Drawing.Size(1200, 700);
-            this.splitContainerControl1.SplitterPosition = 343;
+            this.splitContainerControl1.SplitterPosition = 280;
             this.splitContainerControl1.TabIndex = 0;
             // 
             // tileControl2
@@ -131,13 +131,14 @@
             // chartControl1
             // 
             this.chartControl1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.chartControl1.Legend.AlignmentHorizontal = DevExpress.XtraCharts.LegendAlignmentHorizontal.Center;
-            this.chartControl1.Legend.AlignmentVertical = DevExpress.XtraCharts.LegendAlignmentVertical.Bottom;
-            this.chartControl1.Legend.Direction = DevExpress.XtraCharts.LegendDirection.LeftToRight;
+            this.chartControl1.Legend.AlignmentHorizontal = DevExpress.XtraCharts.LegendAlignmentHorizontal.Right;
+            this.chartControl1.Legend.AlignmentVertical = DevExpress.XtraCharts.LegendAlignmentVertical.Top;
+            this.chartControl1.Legend.Direction = DevExpress.XtraCharts.LegendDirection.TopToBottom;
+            this.chartControl1.Legend.Visibility = DevExpress.Utils.DefaultBoolean.True;
             this.chartControl1.Location = new System.Drawing.Point(0, 0);
             this.chartControl1.Name = "chartControl1";
             this.chartControl1.SeriesSerializable = new DevExpress.XtraCharts.Series[0];
-            this.chartControl1.Size = new System.Drawing.Size(1200, 345);
+            this.chartControl1.Size = new System.Drawing.Size(1200, 420);
             this.chartControl1.TabIndex = 0;
             this.chartControl1.Click += new System.EventHandler(this.chartControl1_Click);
             // 

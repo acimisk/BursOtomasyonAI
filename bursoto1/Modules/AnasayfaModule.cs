@@ -156,15 +156,19 @@ namespace bursoto1.Modules
                         // Seri oluştur - Doughnut
                         Series seri = new Series("Bölüm Dağılımı", ViewType.Doughnut);
                         
-                        // Label ayarları - sadece değer ve yüzde göster
-                        seri.Label.TextPattern = "{A}\n{VP:P0}";
+                        // Label ayarları - sadece yüzde göster, bölüm adını legend'da göster
+                        seri.Label.TextPattern = "{VP:P0}";
                         seri.LabelsVisibility = DevExpress.Utils.DefaultBoolean.True;
                         seri.Label.ResolveOverlappingMode = ResolveOverlappingMode.Default;
+                        seri.Label.Font = new Font("Segoe UI", 9, FontStyle.Bold);
+                        seri.Label.TextColor = Color.White;
+                        seri.Label.BackColor = Color.Transparent;
+                        seri.Label.Border.Visible = false;
 
                         // Doughnut view ayarları
                         DoughnutSeriesView view = (DoughnutSeriesView)seri.View;
                         view.ExplodeMode = PieExplodeMode.None;
-                        view.HoleRadiusPercent = 40;
+                        view.HoleRadiusPercent = 35;
 
                         // Legend ayarları
                         seri.LegendTextPattern = "{A}: {V}";
@@ -183,6 +187,18 @@ namespace bursoto1.Modules
 
                         chartControl1.Series.Add(seri);
 
+                        // Legend ayarları - daha görünür yap
+                        chartControl1.Legend.Visibility = DevExpress.Utils.DefaultBoolean.True;
+                        chartControl1.Legend.AlignmentHorizontal = LegendAlignmentHorizontal.Right;
+                        chartControl1.Legend.AlignmentVertical = LegendAlignmentVertical.Top;
+                        chartControl1.Legend.Direction = LegendDirection.TopToBottom;
+                        chartControl1.Legend.TextColor = Color.White;
+                        chartControl1.Legend.BackColor = Color.Transparent;
+                        chartControl1.Legend.Border.Visible = false;
+                        chartControl1.Legend.Font = new Font("Segoe UI", 9, FontStyle.Regular);
+                        chartControl1.Legend.Margins.Left = 20;
+                        chartControl1.Legend.Margins.Right = 20;
+
                         // Chart başlığı
                         chartControl1.Titles.Clear();
                         ChartTitle title = new ChartTitle();
@@ -190,6 +206,12 @@ namespace bursoto1.Modules
                         title.Font = new Font("Segoe UI", 12, FontStyle.Bold);
                         title.TextColor = Color.White;
                         chartControl1.Titles.Add(title);
+
+                        // Chart padding ayarları - daha fazla alan
+                        chartControl1.Padding.Left = 10;
+                        chartControl1.Padding.Right = 10;
+                        chartControl1.Padding.Top = 10;
+                        chartControl1.Padding.Bottom = 10;
 
                         // Dark mode için chart arkaplan
                         chartControl1.BackColor = Color.FromArgb(32, 32, 32);
