@@ -123,11 +123,12 @@
             this.btnBursKabul.Appearance.Options.UseForeColor = true;
             this.btnBursKabul.AppearancePressed.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(34)))), ((int)(((byte)(153)))), ((int)(((byte)(84)))));
             this.btnBursKabul.AppearancePressed.Options.UseBackColor = true;
-            this.btnBursKabul.Location = new System.Drawing.Point(55, 548);
+            this.btnBursKabul.Location = new System.Drawing.Point(57, 561);
             this.btnBursKabul.Name = "btnBursKabul";
-            this.btnBursKabul.Size = new System.Drawing.Size(160, 28);
+            this.btnBursKabul.Size = new System.Drawing.Size(175, 44);
             this.btnBursKabul.TabIndex = 19;
             this.btnBursKabul.Text = "✓ Bursu Kabul Et";
+            this.btnBursKabul.Click += new System.EventHandler(this.btnBursKabul_Click_1);
             // 
             // btnYedek
             // 
@@ -139,11 +140,11 @@
             this.btnYedek.Appearance.Options.UseForeColor = true;
             this.btnYedek.AppearancePressed.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(211)))), ((int)(((byte)(84)))), ((int)(((byte)(0)))));
             this.btnYedek.AppearancePressed.Options.UseBackColor = true;
-            this.btnYedek.Location = new System.Drawing.Point(225, 548);
+            this.btnYedek.Location = new System.Drawing.Point(420, 561);
             this.btnYedek.Name = "btnYedek";
-            this.btnYedek.Size = new System.Drawing.Size(160, 28);
+            this.btnYedek.Size = new System.Drawing.Size(184, 44);
             this.btnYedek.TabIndex = 21;
-            this.btnYedek.Text = "⏳ Yedek Listesi";
+            this.btnYedek.Text = "⏳    Yedek Listesi";
             // 
             // btnBursReddet
             // 
@@ -155,11 +156,12 @@
             this.btnBursReddet.Appearance.Options.UseForeColor = true;
             this.btnBursReddet.AppearancePressed.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(57)))), ((int)(((byte)(43)))));
             this.btnBursReddet.AppearancePressed.Options.UseBackColor = true;
-            this.btnBursReddet.Location = new System.Drawing.Point(225, 591);
+            this.btnBursReddet.Location = new System.Drawing.Point(238, 561);
             this.btnBursReddet.Name = "btnBursReddet";
-            this.btnBursReddet.Size = new System.Drawing.Size(163, 28);
+            this.btnBursReddet.Size = new System.Drawing.Size(176, 44);
             this.btnBursReddet.TabIndex = 20;
             this.btnBursReddet.Text = "✗ Bursu Reddet";
+            this.btnBursReddet.Click += new System.EventHandler(this.btnBursReddet_Click_1);
             // 
             // btnAIAnaliz
             // 
@@ -171,9 +173,9 @@
             this.btnAIAnaliz.Appearance.Options.UseForeColor = true;
             this.btnAIAnaliz.AppearancePressed.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(41)))), ((int)(((byte)(128)))), ((int)(((byte)(185)))));
             this.btnAIAnaliz.AppearancePressed.Options.UseBackColor = true;
-            this.btnAIAnaliz.Location = new System.Drawing.Point(55, 504);
+            this.btnAIAnaliz.Location = new System.Drawing.Point(238, 504);
             this.btnAIAnaliz.Name = "btnAIAnaliz";
-            this.btnAIAnaliz.Size = new System.Drawing.Size(182, 28);
+            this.btnAIAnaliz.Size = new System.Drawing.Size(176, 38);
             this.btnAIAnaliz.TabIndex = 18;
             this.btnAIAnaliz.Text = "🤖 AI Analiz Yap";
             this.btnAIAnaliz.Click += new System.EventHandler(this.btnAIAnaliz_Click_1);
@@ -230,7 +232,9 @@
             this.cmbFiltre.Properties.Items.AddRange(new object[] {
             "Tüm Öğrenciler",
             "Burs Alanlar",
-            "Beklemedeki Öğrenciler"});
+            "Beklemedeki Öğrenciler",
+            "Yedek Listesi",
+            "Reddedilen Öğrenciler"});
             this.cmbFiltre.Properties.TextEditStyle = DevExpress.XtraEditors.Controls.TextEditStyles.DisableTextEditor;
             this.cmbFiltre.Size = new System.Drawing.Size(194, 28);
             this.cmbFiltre.TabIndex = 15;

@@ -333,11 +333,59 @@ namespace bursoto1
 
                         if (affected == 0)
                         {
+                            // Burslar tablosundaki ID kolonunu dinamik tespit et
+                            string bursIDKolonu = "BursID";
+                            try
+                            {
+                                SqlCommand cmdKolon = new SqlCommand(@"SELECT TOP 1 COLUMN_NAME 
+                                    FROM INFORMATION_SCHEMA.COLUMNS 
+                                    WHERE TABLE_NAME = 'Burslar' 
+                                    AND COLUMN_NAME IN ('BursID', 'ID')
+                                    ORDER BY CASE COLUMN_NAME 
+                                        WHEN 'BursID' THEN 1 
+                                        WHEN 'ID' THEN 2 
+                                        ELSE 3 END", conn);
+                                var kolonResult = cmdKolon.ExecuteScalar();
+                                if (kolonResult != null && kolonResult != DBNull.Value)
+                                    bursIDKolonu = kolonResult.ToString();
+                            }
+                            catch { }
+
+                            // Mevcut bir burs ID'si bul (herhangi bir burs)
+                            int mevcutBursID = 0;
+                            try
+                            {
+                                SqlCommand cmdBurs = new SqlCommand($"SELECT TOP 1 [{bursIDKolonu}] FROM Burslar", conn);
+                                var bursResult = cmdBurs.ExecuteScalar();
+                                if (bursResult != null && bursResult != DBNull.Value)
+                                    mevcutBursID = Convert.ToInt32(bursResult);
+                            }
+                            catch { }
+
                             // Kayıt yoksa ekle
-                            SqlCommand cmdInsert = new SqlCommand("INSERT INTO OgrenciBurslari (OgrenciID, BursID, BaslangicTarihi, Durum) VALUES (@id, 1, @tarih, 1)", conn);
-                            cmdInsert.Parameters.AddWithValue("@id", ogrenciID);
-                            cmdInsert.Parameters.AddWithValue("@tarih", DateTime.Now);
-                            cmdInsert.ExecuteNonQuery();
+                            if (mevcutBursID > 0)
+                            {
+                                SqlCommand cmdInsert = new SqlCommand("INSERT INTO OgrenciBurslari (OgrenciID, BursID, BaslangicTarihi, Durum) VALUES (@id, @bursID, @tarih, 1)", conn);
+                                cmdInsert.Parameters.AddWithValue("@id", ogrenciID);
+                                cmdInsert.Parameters.AddWithValue("@bursID", mevcutBursID);
+                                cmdInsert.Parameters.AddWithValue("@tarih", DateTime.Now);
+                                cmdInsert.ExecuteNonQuery();
+                            }
+                            else
+                            {
+                                // Burs yoksa BursID olmadan ekle (eğer tablo izin veriyorsa)
+                                try
+                                {
+                                    SqlCommand cmdInsert = new SqlCommand("INSERT INTO OgrenciBurslari (OgrenciID, BaslangicTarihi, Durum) VALUES (@id, @tarih, 1)", conn);
+                                    cmdInsert.Parameters.AddWithValue("@id", ogrenciID);
+                                    cmdInsert.Parameters.AddWithValue("@tarih", DateTime.Now);
+                                    cmdInsert.ExecuteNonQuery();
+                                }
+                                catch
+                                {
+                                    throw new Exception("Sistemde aktif burs bulunamadı. Lütfen önce bir burs tanımlayın.");
+                                }
+                            }
                         }
                     }
 

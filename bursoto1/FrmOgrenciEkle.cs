@@ -257,12 +257,62 @@ namespace bursoto1
                         // Öğrenciyi "Beklemede" durumuna ekle
                         try
                         {
-                            string beklemeSorgu = @"INSERT INTO OgrenciBurslari (OgrenciID, BursID, BaslangicTarihi, Durum) 
-                                                   VALUES (@OgrenciID, 1, @Tarih, 0)";
-                            SqlCommand cmdBekleme = new SqlCommand(beklemeSorgu, conn);
-                            cmdBekleme.Parameters.AddWithValue("@OgrenciID", yeniOgrenciID);
-                            cmdBekleme.Parameters.AddWithValue("@Tarih", DateTime.Now);
-                            cmdBekleme.ExecuteNonQuery();
+                            // Burslar tablosundaki ID kolonunu dinamik tespit et
+                            string bursIDKolonu = "BursID";
+                            try
+                            {
+                                SqlCommand cmdKolon = new SqlCommand(@"SELECT TOP 1 COLUMN_NAME 
+                                    FROM INFORMATION_SCHEMA.COLUMNS 
+                                    WHERE TABLE_NAME = 'Burslar' 
+                                    AND COLUMN_NAME IN ('BursID', 'ID')
+                                    ORDER BY CASE COLUMN_NAME 
+                                        WHEN 'BursID' THEN 1 
+                                        WHEN 'ID' THEN 2 
+                                        ELSE 3 END", conn);
+                                var kolonResult = cmdKolon.ExecuteScalar();
+                                if (kolonResult != null && kolonResult != DBNull.Value)
+                                    bursIDKolonu = kolonResult.ToString();
+                            }
+                            catch { }
+
+                            // Mevcut bir burs ID'si bul (herhangi bir burs)
+                            int mevcutBursID = 0;
+                            try
+                            {
+                                SqlCommand cmdBurs = new SqlCommand($"SELECT TOP 1 [{bursIDKolonu}] FROM Burslar", conn);
+                                var bursResult = cmdBurs.ExecuteScalar();
+                                if (bursResult != null && bursResult != DBNull.Value)
+                                    mevcutBursID = Convert.ToInt32(bursResult);
+                            }
+                            catch { }
+
+                            if (mevcutBursID > 0)
+                            {
+                                string beklemeSorgu = @"INSERT INTO OgrenciBurslari (OgrenciID, BursID, BaslangicTarihi, Durum) 
+                                                       VALUES (@OgrenciID, @BursID, @Tarih, 0)";
+                                SqlCommand cmdBekleme = new SqlCommand(beklemeSorgu, conn);
+                                cmdBekleme.Parameters.AddWithValue("@OgrenciID", yeniOgrenciID);
+                                cmdBekleme.Parameters.AddWithValue("@BursID", mevcutBursID);
+                                cmdBekleme.Parameters.AddWithValue("@Tarih", DateTime.Now);
+                                cmdBekleme.ExecuteNonQuery();
+                            }
+                            else
+                            {
+                                // Burs yoksa BursID olmadan ekle (eğer tablo izin veriyorsa)
+                                try
+                                {
+                                    string beklemeSorgu = @"INSERT INTO OgrenciBurslari (OgrenciID, BaslangicTarihi, Durum) 
+                                                           VALUES (@OgrenciID, @Tarih, 0)";
+                                    SqlCommand cmdBekleme = new SqlCommand(beklemeSorgu, conn);
+                                    cmdBekleme.Parameters.AddWithValue("@OgrenciID", yeniOgrenciID);
+                                    cmdBekleme.Parameters.AddWithValue("@Tarih", DateTime.Now);
+                                    cmdBekleme.ExecuteNonQuery();
+                                }
+                                catch
+                                {
+                                    // BursID zorunluysa sessizce devam et (öğrenci zaten eklendi)
+                                }
+                            }
                         }
                         catch
                         {

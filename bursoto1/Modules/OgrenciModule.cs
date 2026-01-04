@@ -104,10 +104,10 @@ namespace bursoto1.Modules
         // 🔥 GRID ZORLA DARK MODE
         private void ApplyDarkGrid(GridView gv)
         {
-            // SATIRLAR
+            // SATIRLAR - Varsayılan renk (RowStyle event handler renklendirmeyi override edecek)
             gv.Appearance.Row.BackColor = Color.FromArgb(32, 32, 32);
             gv.Appearance.Row.ForeColor = Color.White;
-            gv.Appearance.Row.Options.UseBackColor = true;
+            gv.Appearance.Row.Options.UseBackColor = false; // RowStyle event handler'ına izin ver
             gv.Appearance.Row.Options.UseForeColor = true;
 
             // BAŞLIK
@@ -145,34 +145,123 @@ namespace bursoto1.Modules
                 DataTable dt = new DataTable();
                 using (SqlConnection conn = bgl.baglanti())
                 {
+                    // Ogrenciler tablosundaki ID kolonunu dinamik tespit et
+                    string ogrenciIDKolonu = "ID";
+                    try
+                    {
+                        SqlCommand cmdKolon = new SqlCommand(@"SELECT TOP 1 COLUMN_NAME 
+                            FROM INFORMATION_SCHEMA.COLUMNS 
+                            WHERE TABLE_NAME = 'Ogrenciler' 
+                            AND COLUMN_NAME IN ('ID', 'OgrenciID')
+                            ORDER BY CASE COLUMN_NAME 
+                                WHEN 'ID' THEN 1 
+                                WHEN 'OgrenciID' THEN 2 
+                                ELSE 3 END", conn);
+                        var kolonResult = cmdKolon.ExecuteScalar();
+                        if (kolonResult != null && kolonResult != DBNull.Value)
+                            ogrenciIDKolonu = kolonResult.ToString();
+                    }
+                    catch { }
+
+                    // OgrenciBurslari tablosundaki ID kolonunu kontrol et
+                    bool ogrenciBurslariIDVar = false;
+                    try
+                    {
+                        SqlCommand cmdCheck = new SqlCommand(@"SELECT COUNT(*) 
+                            FROM INFORMATION_SCHEMA.COLUMNS 
+                            WHERE TABLE_NAME = 'OgrenciBurslari' AND COLUMN_NAME = 'ID'", conn);
+                        ogrenciBurslariIDVar = Convert.ToInt32(cmdCheck.ExecuteScalar()) > 0;
+                    }
+                    catch { }
+
                     string sorgu;
                     
                     switch (filtreTipi)
                     {
                         case "Burs Alanlar":
-                            sorgu = @"SELECT DISTINCT o.ID, o.AD, o.SOYAD, o.BÖLÜMÜ, o.SINIF, o.AGNO, 
+                            sorgu = $@"SELECT DISTINCT o.[{ogrenciIDKolonu}] AS ID, o.AD, o.SOYAD, o.BÖLÜMÜ, o.SINIF, o.AGNO, 
                                      o.[TOPLAM HANE GELİRİ] AS [Hane Geliri], o.[KARDEŞ SAYISI] AS [Kardeş], 
-                                     ISNULL(o.AISkor, 0) AS [AI Puanı]
+                                     ISNULL(o.AISkor, 0) AS [AI Puanı],
+                                     ISNULL(ob.Durum, -1) AS [Durum],
+                                     CASE 
+                                         WHEN ob.Durum = 1 THEN 'Kabul Edildi'
+                                         WHEN ob.Durum = 0 THEN 'Beklemede'
+                                         WHEN ob.Durum = 2 THEN 'Yedek'
+                                         ELSE 'Reddedildi'
+                                     END AS [Durum Metni]
                                      FROM Ogrenciler o
-                                     INNER JOIN OgrenciBurslari ob ON o.ID = ob.OgrenciID
+                                     INNER JOIN OgrenciBurslari ob ON o.[{ogrenciIDKolonu}] = ob.OgrenciID
                                      WHERE ob.Durum = 1
-                                     ORDER BY o.ID ASC";
+                                     ORDER BY o.[{ogrenciIDKolonu}] ASC";
                             break;
                         case "Beklemedeki Öğrenciler":
-                            sorgu = @"SELECT DISTINCT o.ID, o.AD, o.SOYAD, o.BÖLÜMÜ, o.SINIF, o.AGNO, 
+                            sorgu = $@"SELECT DISTINCT o.[{ogrenciIDKolonu}] AS ID, o.AD, o.SOYAD, o.BÖLÜMÜ, o.SINIF, o.AGNO, 
                                      o.[TOPLAM HANE GELİRİ] AS [Hane Geliri], o.[KARDEŞ SAYISI] AS [Kardeş], 
-                                     ISNULL(o.AISkor, 0) AS [AI Puanı]
+                                     ISNULL(o.AISkor, 0) AS [AI Puanı],
+                                     ISNULL(ob.Durum, -1) AS [Durum],
+                                     CASE 
+                                         WHEN ob.Durum = 1 THEN 'Kabul Edildi'
+                                         WHEN ob.Durum = 0 THEN 'Beklemede'
+                                         WHEN ob.Durum = 2 THEN 'Yedek'
+                                         ELSE 'Reddedildi'
+                                     END AS [Durum Metni]
                                      FROM Ogrenciler o
-                                     INNER JOIN OgrenciBurslari ob ON o.ID = ob.OgrenciID
+                                     INNER JOIN OgrenciBurslari ob ON o.[{ogrenciIDKolonu}] = ob.OgrenciID
                                      WHERE ob.Durum = 0
-                                     ORDER BY o.ID ASC";
+                                     ORDER BY o.[{ogrenciIDKolonu}] ASC";
+                            break;
+                        case "Yedek Listesi":
+                            sorgu = $@"SELECT DISTINCT o.[{ogrenciIDKolonu}] AS ID, o.AD, o.SOYAD, o.BÖLÜMÜ, o.SINIF, o.AGNO, 
+                                     o.[TOPLAM HANE GELİRİ] AS [Hane Geliri], o.[KARDEŞ SAYISI] AS [Kardeş], 
+                                     ISNULL(o.AISkor, 0) AS [AI Puanı],
+                                     ISNULL(ob.Durum, -1) AS [Durum],
+                                     CASE 
+                                         WHEN ob.Durum = 1 THEN 'Kabul Edildi'
+                                         WHEN ob.Durum = 0 THEN 'Beklemede'
+                                         WHEN ob.Durum = 2 THEN 'Yedek'
+                                         ELSE 'Reddedildi'
+                                     END AS [Durum Metni]
+                                     FROM Ogrenciler o
+                                     INNER JOIN OgrenciBurslari ob ON o.[{ogrenciIDKolonu}] = ob.OgrenciID
+                                     WHERE ob.Durum = 2
+                                     ORDER BY o.[{ogrenciIDKolonu}] ASC";
+                            break;
+                        case "Reddedilen Öğrenciler":
+                            sorgu = $@"SELECT o.[{ogrenciIDKolonu}] AS ID, o.AD, o.SOYAD, o.BÖLÜMÜ, o.SINIF, o.AGNO, 
+                                     o.[TOPLAM HANE GELİRİ] AS [Hane Geliri], o.[KARDEŞ SAYISI] AS [Kardeş], 
+                                     ISNULL(o.AISkor, 0) AS [AI Puanı],
+                                     -1 AS [Durum],
+                                     'Reddedildi' AS [Durum Metni]
+                                     FROM Ogrenciler o
+                                     WHERE NOT EXISTS (SELECT 1 FROM OgrenciBurslari ob WHERE ob.OgrenciID = o.[{ogrenciIDKolonu}])
+                                     ORDER BY o.[{ogrenciIDKolonu}] ASC";
                             break;
                         default: // "Tüm Öğrenciler"
-                            sorgu = @"SELECT ID, AD, SOYAD, BÖLÜMÜ, SINIF, AGNO, 
-                                  [TOPLAM HANE GELİRİ] AS [Hane Geliri], [KARDEŞ SAYISI] AS [Kardeş], 
-                                  ISNULL(AISkor, 0) AS [AI Puanı]
-                                     FROM Ogrenciler
-                                     ORDER BY ID ASC";
+                            string orderByClause = ogrenciBurslariIDVar ? "BaslangicTarihi DESC, ID DESC" : "BaslangicTarihi DESC";
+                            sorgu = $@"SELECT o.[{ogrenciIDKolonu}] AS ID, o.AD, o.SOYAD, o.BÖLÜMÜ, o.SINIF, o.AGNO, 
+                                  o.[TOPLAM HANE GELİRİ] AS [Hane Geliri], o.[KARDEŞ SAYISI] AS [Kardeş], 
+                                  ISNULL(o.AISkor, 0) AS [AI Puanı],
+                                  CASE 
+                                      WHEN ob.Durum IS NULL THEN -1
+                                      WHEN ob.Durum = 1 THEN 1
+                                      WHEN ob.Durum = 0 THEN 0
+                                      WHEN ob.Durum = 2 THEN 2
+                                      ELSE -1
+                                  END AS [Durum],
+                                  CASE 
+                                      WHEN ob.Durum IS NULL THEN 'Reddedildi'
+                                      WHEN ob.Durum = 1 THEN 'Kabul Edildi'
+                                      WHEN ob.Durum = 0 THEN 'Beklemede'
+                                      WHEN ob.Durum = 2 THEN 'Yedek'
+                                      ELSE 'Reddedildi'
+                                  END AS [Durum Metni]
+                                  FROM Ogrenciler o
+                                  LEFT JOIN (
+                                      SELECT OgrenciID, Durum, 
+                                             ROW_NUMBER() OVER (PARTITION BY OgrenciID ORDER BY {orderByClause}) as rn
+                                      FROM OgrenciBurslari
+                                  ) ob ON o.[{ogrenciIDKolonu}] = ob.OgrenciID AND ob.rn = 1
+                                  ORDER BY o.[{ogrenciIDKolonu}] ASC";
                             break;
                     }
 
@@ -184,8 +273,24 @@ namespace bursoto1.Modules
                 if (gridView1.Columns["ID"] != null)
                     gridView1.Columns["ID"].Visible = false;
 
+                // Durum kolonunu en sağa taşı ve görünür yap
+                if (gridView1.Columns["Durum Metni"] != null)
+                {
+                    gridView1.Columns["Durum Metni"].VisibleIndex = gridView1.Columns.Count - 1;
+                    gridView1.Columns["Durum Metni"].Caption = "Durum";
+                    gridView1.Columns["Durum Metni"].Width = 120;
+                }
+                if (gridView1.Columns["Durum"] != null)
+                {
+                    gridView1.Columns["Durum"].Visible = false; // Sadece renklendirme için kullanılacak
+                }
+
                 gridView1.BestFitColumns();
                 ApplyDarkGrid(gridView1);
+                
+                // Satır renklendirmesi için event handler ekle (ApplyDarkGrid'den sonra)
+                gridView1.RowStyle -= GridView1_RowStyle;
+                gridView1.RowStyle += GridView1_RowStyle;
             }
             catch (Exception ex)
             {
@@ -247,6 +352,24 @@ namespace bursoto1.Modules
                 {
                     using (SqlConnection conn = bgl.baglanti())
                     {
+                        // Ogrenciler tablosundaki ID kolonunu dinamik tespit et
+                        string ogrenciIDKolonu = "ID";
+                        try
+                        {
+                            SqlCommand cmdKolon = new SqlCommand(@"SELECT TOP 1 COLUMN_NAME 
+                                FROM INFORMATION_SCHEMA.COLUMNS 
+                                WHERE TABLE_NAME = 'Ogrenciler' 
+                                AND COLUMN_NAME IN ('ID', 'OgrenciID')
+                                ORDER BY CASE COLUMN_NAME 
+                                    WHEN 'ID' THEN 1 
+                                    WHEN 'OgrenciID' THEN 2 
+                                    ELSE 3 END", conn);
+                            var kolonResult = cmdKolon.ExecuteScalar();
+                            if (kolonResult != null && kolonResult != DBNull.Value)
+                                ogrenciIDKolonu = kolonResult.ToString();
+                        }
+                        catch { }
+
                         foreach (int rowHandle in seciliSatirlar)
                         {
                             var id = gridView1.GetRowCellValue(rowHandle, "ID");
@@ -267,7 +390,7 @@ namespace bursoto1.Modules
                                     cmdBurs.ExecuteNonQuery();
 
                                     // 3. Son olarak öğrenciyi sil
-                                    SqlCommand cmdOgr = new SqlCommand("DELETE FROM Ogrenciler WHERE ID=@p1", conn, transaction);
+                                    SqlCommand cmdOgr = new SqlCommand($"DELETE FROM Ogrenciler WHERE [{ogrenciIDKolonu}]=@p1", conn, transaction);
                                     cmdOgr.Parameters.AddWithValue("@p1", id);
                                     cmdOgr.ExecuteNonQuery();
 
@@ -344,9 +467,27 @@ namespace bursoto1.Modules
                 // Tüm öğrenci bilgilerini veritabanından çek
                 using (SqlConnection conn = bgl.baglanti())
                 {
-                    SqlCommand cmd = new SqlCommand(@"SELECT AD, SOYAD, [TOPLAM HANE GELİRİ], FOTO, TELEFON, 
+                    // Ogrenciler tablosundaki ID kolonunu dinamik tespit et
+                    string ogrenciIDKolonu = "ID";
+                    try
+                    {
+                        SqlCommand cmdKolon = new SqlCommand(@"SELECT TOP 1 COLUMN_NAME 
+                            FROM INFORMATION_SCHEMA.COLUMNS 
+                            WHERE TABLE_NAME = 'Ogrenciler' 
+                            AND COLUMN_NAME IN ('ID', 'OgrenciID')
+                            ORDER BY CASE COLUMN_NAME 
+                                WHEN 'ID' THEN 1 
+                                WHEN 'OgrenciID' THEN 2 
+                                ELSE 3 END", conn);
+                        var kolonResult = cmdKolon.ExecuteScalar();
+                        if (kolonResult != null && kolonResult != DBNull.Value)
+                            ogrenciIDKolonu = kolonResult.ToString();
+                    }
+                    catch { }
+
+                    SqlCommand cmd = new SqlCommand($@"SELECT AD, SOYAD, [TOPLAM HANE GELİRİ], FOTO, TELEFON, 
                                                       BÖLÜMÜ, SINIF, [KARDEŞ SAYISI], AGNO, AISkor, AINotu
-                                                      FROM Ogrenciler WHERE ID = @id", conn);
+                                                      FROM Ogrenciler WHERE [{ogrenciIDKolonu}] = @id", conn);
                     cmd.Parameters.AddWithValue("@id", ogrenciID);
 
                     using (SqlDataReader reader = cmd.ExecuteReader())
@@ -420,8 +561,26 @@ namespace bursoto1.Modules
                         }
                     }
 
+                    // Ogrenciler tablosundaki ID kolonunu dinamik tespit et
+                    string ogrenciIDKolonu = "ID";
+                    try
+                    {
+                        SqlCommand cmdKolon = new SqlCommand(@"SELECT TOP 1 COLUMN_NAME 
+                            FROM INFORMATION_SCHEMA.COLUMNS 
+                            WHERE TABLE_NAME = 'Ogrenciler' 
+                            AND COLUMN_NAME IN ('ID', 'OgrenciID')
+                            ORDER BY CASE COLUMN_NAME 
+                                WHEN 'ID' THEN 1 
+                                WHEN 'OgrenciID' THEN 2 
+                                ELSE 3 END", conn);
+                        var kolonResult = cmdKolon.ExecuteScalar();
+                        if (kolonResult != null && kolonResult != DBNull.Value)
+                            ogrenciIDKolonu = kolonResult.ToString();
+                    }
+                    catch { }
+
                     // Mevcut kolonları kullanarak sorgu oluştur
-                    string selectColumns = "ID";
+                    string selectColumns = $"[{ogrenciIDKolonu}]";
                     if (kolonlar.Contains("Motivasyon")) selectColumns += ", ISNULL(Motivasyon, '') as Motivasyon";
                     if (kolonlar.Contains("Ihtiyac")) selectColumns += ", ISNULL(Ihtiyac, '') as Ihtiyac";
                     if (kolonlar.Contains("Hedefler")) selectColumns += ", ISNULL(Hedefler, '') as Hedefler";
@@ -429,7 +588,7 @@ namespace bursoto1.Modules
                     if (kolonlar.Contains("FarkliOzellik")) selectColumns += ", ISNULL(FarkliOzellik, '') as Fark";
                     if (kolonlar.Contains("AINotu")) selectColumns += ", ISNULL(AINotu, '') as AINotu";
 
-                    SqlCommand cmd = new SqlCommand($"SELECT {selectColumns} FROM Ogrenciler WHERE ID = @id", conn);
+                    SqlCommand cmd = new SqlCommand($"SELECT {selectColumns} FROM Ogrenciler WHERE [{ogrenciIDKolonu}] = @id", conn);
                     cmd.Parameters.AddWithValue("@id", ogrenciID);
                     
                     using (var reader = cmd.ExecuteReader())
@@ -738,7 +897,7 @@ namespace bursoto1.Modules
                     MessageHelper.ShowSuccess($"{adSoyad} öğrencisine burs başarıyla atandı.", "İşlem Başarılı");
                     DataChangedNotifier.NotifyOgrenciChanged();
                     DataChangedNotifier.NotifyBursChanged();
-                    Listele(GetCurrentFilter());
+                    Listele(cmbFiltre?.SelectedIndex >= 0 ? cmbFiltre.Properties.Items[cmbFiltre.SelectedIndex].ToString() : "Tüm Öğrenciler");
                 }
             }
         }
@@ -823,7 +982,7 @@ namespace bursoto1.Modules
                     MessageHelper.ShowInfo($"{adSoyad} öğrencisinin burs başvurusu REDDEDİLDİ.", "İşlem Tamamlandı");
                     DataChangedNotifier.NotifyOgrenciChanged();
                     DataChangedNotifier.NotifyBursChanged();
-                    Listele(GetCurrentFilter());
+                    Listele(cmbFiltre?.SelectedIndex >= 0 ? cmbFiltre.Properties.Items[cmbFiltre.SelectedIndex].ToString() : "Tüm Öğrenciler");
                 }
                 catch (Exception ex)
                 {
@@ -851,30 +1010,187 @@ namespace bursoto1.Modules
                 {
                     using (SqlConnection conn = bgl.baglanti())
                     {
+                        // Burslar tablosundaki ID kolonunu dinamik tespit et
+                        string bursIDKolonu = "BursID";
+                        try
+                        {
+                            SqlCommand cmdKolon = new SqlCommand(@"SELECT TOP 1 COLUMN_NAME 
+                                FROM INFORMATION_SCHEMA.COLUMNS 
+                                WHERE TABLE_NAME = 'Burslar' 
+                                AND COLUMN_NAME IN ('BursID', 'ID')
+                                ORDER BY CASE COLUMN_NAME 
+                                    WHEN 'BursID' THEN 1 
+                                    WHEN 'ID' THEN 2 
+                                    ELSE 3 END", conn);
+                            var kolonResult = cmdKolon.ExecuteScalar();
+                            if (kolonResult != null && kolonResult != DBNull.Value)
+                                bursIDKolonu = kolonResult.ToString();
+                        }
+                        catch { }
+
+                        // Mevcut bir burs ID'si bul (herhangi bir burs)
+                        int mevcutBursID = 0;
+                        try
+                        {
+                            SqlCommand cmdBurs = new SqlCommand($"SELECT TOP 1 [{bursIDKolonu}] FROM Burslar", conn);
+                            var bursResult = cmdBurs.ExecuteScalar();
+                            if (bursResult != null && bursResult != DBNull.Value)
+                                mevcutBursID = Convert.ToInt32(bursResult);
+                        }
+                        catch { }
+
                         // Durum = 2 (Yedek)
+                        // Önce Durum kolonunun tipini kontrol et
+                        string durumKolonTipi = "INT";
+                        try
+                        {
+                            SqlCommand cmdTip = new SqlCommand(@"SELECT DATA_TYPE 
+                                FROM INFORMATION_SCHEMA.COLUMNS 
+                                WHERE TABLE_NAME = 'OgrenciBurslari' AND COLUMN_NAME = 'Durum'", conn);
+                            var tipResult = cmdTip.ExecuteScalar();
+                            if (tipResult != null && tipResult != DBNull.Value)
+                                durumKolonTipi = tipResult.ToString().ToUpper();
+                        }
+                        catch { }
+                        
+                        System.Diagnostics.Debug.WriteLine($"Durum kolonu tipi: {durumKolonTipi}");
+                        
+                        // Önce mevcut durumu kontrol et
+                        SqlCommand cmdCheckDurum = new SqlCommand("SELECT TOP 1 Durum FROM OgrenciBurslari WHERE OgrenciID = @id ORDER BY BaslangicTarihi DESC", conn);
+                        cmdCheckDurum.Parameters.AddWithValue("@id", ogrenciID);
+                        object mevcutDurumObj = cmdCheckDurum.ExecuteScalar();
+                        int mevcutDurum = -1;
+                        if (mevcutDurumObj != null && mevcutDurumObj != DBNull.Value)
+                        {
+                            if (mevcutDurumObj is bool)
+                                mevcutDurum = ((bool)mevcutDurumObj) ? 1 : 0;
+                            else
+                                mevcutDurum = Convert.ToInt32(mevcutDurumObj);
+                        }
+                        System.Diagnostics.Debug.WriteLine($"Mevcut durum (OgrenciID: {ogrenciID}): {mevcutDurum} (tip: {mevcutDurumObj?.GetType().Name})");
+                        
                         SqlCommand cmdCheck = new SqlCommand("SELECT COUNT(*) FROM OgrenciBurslari WHERE OgrenciID = @id", conn);
                         cmdCheck.Parameters.AddWithValue("@id", ogrenciID);
                         int exists = Convert.ToInt32(cmdCheck.ExecuteScalar());
+                        System.Diagnostics.Debug.WriteLine($"OgrenciBurslari kayıt sayısı (OgrenciID: {ogrenciID}): {exists}");
 
                         if (exists > 0)
                         {
-                            SqlCommand cmd = new SqlCommand("UPDATE OgrenciBurslari SET Durum = 2 WHERE OgrenciID = @id", conn);
+                            // Eğer Durum kolonu BIT ise, önce INT'e çevirmemiz gerekebilir
+                            if (durumKolonTipi == "BIT")
+                            {
+                                // BIT kolonu sadece 0 ve 1 alabilir, bu yüzden önce kolonu INT'e çevirmemiz gerekir
+                                try
+                                {
+                                    // Önce mevcut verileri yedekle (gerekirse)
+                                    // ALTER TABLE komutunu çalıştır
+                                    SqlCommand cmdAlter = new SqlCommand("ALTER TABLE OgrenciBurslari ALTER COLUMN Durum INT", conn);
+                                    cmdAlter.ExecuteNonQuery();
+                                    System.Diagnostics.Debug.WriteLine("Durum kolonu BIT'ten INT'e çevrildi");
+                                    
+                                    // Tip değişikliğini doğrula
+                                    SqlCommand cmdVerify = new SqlCommand(@"SELECT DATA_TYPE 
+                                        FROM INFORMATION_SCHEMA.COLUMNS 
+                                        WHERE TABLE_NAME = 'OgrenciBurslari' AND COLUMN_NAME = 'Durum'", conn);
+                                    var verifyResult = cmdVerify.ExecuteScalar();
+                                    if (verifyResult != null && verifyResult.ToString().ToUpper() == "INT")
+                                    {
+                                        durumKolonTipi = "INT";
+                                        System.Diagnostics.Debug.WriteLine("Durum kolonu tipi doğrulandı: INT");
+                                    }
+                                    else
+                                    {
+                                        throw new Exception($"Durum kolonu tipi hala {verifyResult} olarak görünüyor. INT'e çevrilemedi.");
+                                    }
+                                }
+                                catch (Exception ex)
+                                {
+                                    System.Diagnostics.Debug.WriteLine($"Durum kolonu INT'e çevrilemedi: {ex.Message}");
+                                    string hataMesaji = $"Durum kolonu BIT tipinde olduğu için yedek durumu (2) kaydedilemiyor.\n\n" +
+                                        $"Lütfen SQL Server Management Studio'da şu komutu çalıştırın:\n\n" +
+                                        $"ALTER TABLE OgrenciBurslari ALTER COLUMN Durum INT\n\n" +
+                                        $"Bu komut çalıştıktan sonra tekrar deneyin.\n\n" +
+                                        $"Hata: {ex.Message}";
+                                    throw new Exception(hataMesaji);
+                                }
+                            }
+                            
+                            // Durum = 2 (Yedek) olarak güncelle
+                            string updateQuery = "UPDATE OgrenciBurslari SET Durum = @durum WHERE OgrenciID = @id";
+                            SqlCommand cmd = new SqlCommand(updateQuery, conn);
                             cmd.Parameters.AddWithValue("@id", ogrenciID);
-                            cmd.ExecuteNonQuery();
+                            cmd.Parameters.AddWithValue("@durum", 2);
+                            int affected = cmd.ExecuteNonQuery();
+                            
+                            // Debug: Kaç kayıt güncellendi
+                            System.Diagnostics.Debug.WriteLine($"Yedek listesine alındı: {affected} kayıt güncellendi (OgrenciID: {ogrenciID})");
+                            
+                            // Güncelleme sonrası durumu kontrol et
+                            SqlCommand cmdCheckDurum2 = new SqlCommand("SELECT TOP 1 Durum FROM OgrenciBurslari WHERE OgrenciID = @id ORDER BY BaslangicTarihi DESC", conn);
+                            cmdCheckDurum2.Parameters.AddWithValue("@id", ogrenciID);
+                            object yeniDurumObj = cmdCheckDurum2.ExecuteScalar();
+                            int yeniDurum = -1;
+                            if (yeniDurumObj != null && yeniDurumObj != DBNull.Value)
+                            {
+                                if (yeniDurumObj is bool)
+                                    yeniDurum = ((bool)yeniDurumObj) ? 1 : 0;
+                                else
+                                    yeniDurum = Convert.ToInt32(yeniDurumObj);
+                            }
+                            System.Diagnostics.Debug.WriteLine($"Güncelleme sonrası durum (OgrenciID: {ogrenciID}): {yeniDurum} (tip: {yeniDurumObj?.GetType().Name})");
+                            
+                            if (affected == 0)
+                            {
+                                throw new Exception("Kayıt güncellenemedi. Lütfen tekrar deneyin.");
+                            }
+                            
+                            // Eğer durum hala 2 değilse, hata mesajı göster
+                            if (yeniDurum != 2)
+                            {
+                                string hataMesaji = $"Durum güncellenemedi. Beklenen: 2, Gerçek: {yeniDurum}.\n\n" +
+                                    $"Durum kolonu hala BIT tipinde olabilir. Lütfen SQL Server Management Studio'da şu komutu çalıştırın:\n\n" +
+                                    $"ALTER TABLE OgrenciBurslari ALTER COLUMN Durum INT\n\n" +
+                                    $"Bu komut çalıştıktan sonra tekrar deneyin.";
+                                throw new Exception(hataMesaji);
+                            }
                         }
                         else
                         {
-                            SqlCommand cmd = new SqlCommand("INSERT INTO OgrenciBurslari (OgrenciID, BursID, BaslangicTarihi, Durum) VALUES (@id, 1, @tarih, 2)", conn);
-                            cmd.Parameters.AddWithValue("@id", ogrenciID);
-                            cmd.Parameters.AddWithValue("@tarih", DateTime.Now);
-                            cmd.ExecuteNonQuery();
+                            // Kayıt yoksa yeni kayıt ekle
+                            if (mevcutBursID > 0)
+                            {
+                                SqlCommand cmd = new SqlCommand("INSERT INTO OgrenciBurslari (OgrenciID, BursID, BaslangicTarihi, Durum) VALUES (@id, @bursID, @tarih, 2)", conn);
+                                cmd.Parameters.AddWithValue("@id", ogrenciID);
+                                cmd.Parameters.AddWithValue("@bursID", mevcutBursID);
+                                cmd.Parameters.AddWithValue("@tarih", DateTime.Now);
+                                int inserted = cmd.ExecuteNonQuery();
+                                System.Diagnostics.Debug.WriteLine($"Yedek listesine yeni kayıt eklendi: {inserted} kayıt (OgrenciID: {ogrenciID}, BursID: {mevcutBursID})");
+                            }
+                            else
+                            {
+                                // Burs yoksa BursID olmadan ekle (eğer tablo izin veriyorsa)
+                                try
+                                {
+                                    SqlCommand cmd = new SqlCommand("INSERT INTO OgrenciBurslari (OgrenciID, BaslangicTarihi, Durum) VALUES (@id, @tarih, 2)", conn);
+                                    cmd.Parameters.AddWithValue("@id", ogrenciID);
+                                    cmd.Parameters.AddWithValue("@tarih", DateTime.Now);
+                                    int inserted = cmd.ExecuteNonQuery();
+                                    System.Diagnostics.Debug.WriteLine($"Yedek listesine yeni kayıt eklendi (BursID olmadan): {inserted} kayıt (OgrenciID: {ogrenciID})");
+                                }
+                                catch (Exception ex)
+                                {
+                                    // BursID zorunluysa hata mesajı göster
+                                    System.Diagnostics.Debug.WriteLine($"Yedek listesine ekleme hatası: {ex.Message}");
+                                    throw new Exception($"Sistemde aktif burs bulunamadı. Lütfen önce bir burs tanımlayın.\n\nHata: {ex.Message}");
+                                }
+                            }
                         }
                     }
 
                     MessageHelper.ShowSuccess($"{adSoyad} öğrencisi YEDEK LİSTEYE alındı.", "İşlem Başarılı");
                     DataChangedNotifier.NotifyOgrenciChanged();
                     DataChangedNotifier.NotifyBursChanged();
-                    Listele(GetCurrentFilter());
+                    Listele(cmbFiltre?.SelectedIndex >= 0 ? cmbFiltre.Properties.Items[cmbFiltre.SelectedIndex].ToString() : "Tüm Öğrenciler");
                 }
                 catch (Exception ex)
                 {
@@ -891,6 +1207,76 @@ namespace bursoto1.Modules
         private void memoAIsonuc_EditValueChanged(object sender, EventArgs e)
         {
 
+        }
+
+        private void btnBursReddet_Click_1(object sender, EventArgs e)
+        {
+
+        }
+
+        private void btnBursKabul_Click_1(object sender, EventArgs e)
+        {
+
+        }
+
+        // Satır renklendirmesi - Durum'a göre
+        private void GridView1_RowStyle(object sender, DevExpress.XtraGrid.Views.Grid.RowStyleEventArgs e)
+        {
+            GridView view = sender as GridView;
+            if (view == null) return;
+
+            DataRow row = view.GetDataRow(e.RowHandle);
+            if (row == null) return;
+
+            // Durum kolonunu kontrol et
+            if (row.Table.Columns.Contains("Durum"))
+            {
+                object durumObj = row["Durum"];
+                int durum = -1;
+                
+                if (durumObj != null && durumObj != DBNull.Value)
+                {
+                    try
+                    {
+                        durum = Convert.ToInt32(durumObj);
+                    }
+                    catch
+                    {
+                        durum = -1;
+                    }
+                }
+                
+                // Durum'a göre renklendir
+                switch (durum)
+                {
+                    case 1: // Bursu Kabul Edildi - Yeşil
+                        e.Appearance.BackColor = Color.FromArgb(39, 174, 96);
+                        e.Appearance.ForeColor = Color.White;
+                        e.Appearance.Options.UseBackColor = true;
+                        e.Appearance.Options.UseForeColor = true;
+                        break;
+                    case 2: // Yedek - Mavi
+                        e.Appearance.BackColor = Color.FromArgb(52, 152, 219);
+                        e.Appearance.ForeColor = Color.White;
+                        e.Appearance.Options.UseBackColor = true;
+                        e.Appearance.Options.UseForeColor = true;
+                        break;
+                    case 0: // Beklemede - Sarı
+                        e.Appearance.BackColor = Color.FromArgb(243, 156, 18);
+                        e.Appearance.ForeColor = Color.White;
+                        e.Appearance.Options.UseBackColor = true;
+                        e.Appearance.Options.UseForeColor = true;
+                        break;
+                    case -1: // Reddedildi (OgrenciBurslari'nda kayıt yok) - Kırmızı
+                        e.Appearance.BackColor = Color.FromArgb(231, 76, 60);
+                        e.Appearance.ForeColor = Color.White;
+                        e.Appearance.Options.UseBackColor = true;
+                        e.Appearance.Options.UseForeColor = true;
+                        break;
+                    default: // Diğer - Varsayılan renk
+                        break;
+                }
+            }
         }
     }
 }
