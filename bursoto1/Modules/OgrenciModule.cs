@@ -7,8 +7,9 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using System.Drawing;
-using System.Windows.Forms;
+using System.Text;
 using System.Text.RegularExpressions;
+using System.Windows.Forms;
 
 namespace bursoto1.Modules
 {
@@ -52,9 +53,9 @@ namespace bursoto1.Modules
             {
                 lblAIbaslik.Appearance.ForeColor = Color.FromArgb(200, 200, 200);
             }
-            if (lblAIsonuc != null)
+            if (memoAIsonuc != null)
             {
-                lblAIsonuc.Appearance.ForeColor = Color.FromArgb(180, 180, 180);
+                memoAIsonuc.Properties.Appearance.ForeColor = Color.FromArgb(180, 180, 180);
             }
 
             // Filtre label dark mode
@@ -155,7 +156,7 @@ namespace bursoto1.Modules
                                      FROM Ogrenciler o
                                      INNER JOIN OgrenciBurslari ob ON o.ID = ob.OgrenciID
                                      WHERE ob.Durum = 1
-                                     ORDER BY o.AD, o.SOYAD";
+                                     ORDER BY o.ID ASC";
                             break;
                         case "Beklemedeki Öğrenciler":
                             sorgu = @"SELECT DISTINCT o.ID, o.AD, o.SOYAD, o.BÖLÜMÜ, o.SINIF, o.AGNO, 
@@ -164,14 +165,14 @@ namespace bursoto1.Modules
                                      FROM Ogrenciler o
                                      INNER JOIN OgrenciBurslari ob ON o.ID = ob.OgrenciID
                                      WHERE ob.Durum = 0
-                                     ORDER BY o.AD, o.SOYAD";
+                                     ORDER BY o.ID ASC";
                             break;
                         default: // "Tüm Öğrenciler"
                             sorgu = @"SELECT ID, AD, SOYAD, BÖLÜMÜ, SINIF, AGNO, 
                                   [TOPLAM HANE GELİRİ] AS [Hane Geliri], [KARDEŞ SAYISI] AS [Kardeş], 
                                   ISNULL(AISkor, 0) AS [AI Puanı]
                                      FROM Ogrenciler
-                                     ORDER BY AD, SOYAD";
+                                     ORDER BY ID ASC";
                             break;
                     }
 
@@ -496,10 +497,10 @@ namespace bursoto1.Modules
             
             System.Diagnostics.Debug.WriteLine($"AI Analiz için veri (uzunluk: {ogrenciVerisi.Length}):\n{ogrenciVerisi}");
 
-            if (lblAIsonuc != null)
+            if (memoAIsonuc != null)
             {
-                lblAIsonuc.Text = "AI analiz yapılıyor, lütfen bekleyiniz...";
-                lblAIsonuc.ForeColor = Color.FromArgb(52, 152, 219);
+                memoAIsonuc.EditValue = "AI analiz yapılıyor, lütfen bekleyiniz...";
+                memoAIsonuc.Properties.Appearance.ForeColor = Color.FromArgb(52, 152, 219);
             }
             if (btnAIAnaliz != null)
                 btnAIAnaliz.Enabled = false;
@@ -524,21 +525,52 @@ namespace bursoto1.Modules
                 string uygunluk = aiSkor >= 70 ? "UYGUN" : aiSkor >= 40 ? "DEĞERLENDIR" : "UYGUN DEĞİL";
                 Color renk = aiSkor >= 70 ? Color.FromArgb(39, 174, 96) : aiSkor >= 40 ? Color.FromArgb(243, 156, 18) : Color.FromArgb(231, 76, 60);
 
-                if (lblAIsonuc != null)
+                try
                 {
-                    lblAIsonuc.Text = $"{ad} {soyad}\n\n{aiSkor}/100 - {uygunluk}\n\n{aiNotu}";
-                    lblAIsonuc.ForeColor = renk;
-                }
+                    if (memoAIsonuc != null)
+                    {
+                        // 1. Ayraç Çizgileri
+                        string thickLine = new string('━', 45); // Kalın ana ayraç
+                        string thinLine = new string('─', 45);  // İnce alt ayraç
+                        string n = Environment.NewLine;         // Yeni satır kısayolu
 
-                Listele(cmbFiltre?.SelectedIndex >= 0 ? cmbFiltre.Properties.Items[cmbFiltre.SelectedIndex].ToString() : "Tüm Öğrenciler");
-                DataChangedNotifier.NotifyOgrenciChanged();
-            }
-            catch (Exception ex)
-            {
-                if (lblAIsonuc != null)
+                        // 2. Ham metni temizle ve başlıkları boşluklu hale getir
+                        // Metinlerin çizgiye yapışmaması için her başlıktan sonra 2 satır atlıyoruz.
+                        string temizNot = aiNotu
+                            .Replace("ANALİZ:", $"{n}🔍  ANALİZ{n}{thinLine}{n}")
+                            .Replace("KİŞİLİK:", $"{n}{n}👤  KİŞİLİK ÖZETİ{n}{thinLine}{n}")
+                            .Replace("KARAR:", $"{n}{n}📌  SONUÇ VE KARAR{n}{thinLine}{n}");
+
+                        // 3. Raporu İnşa Et
+                        StringBuilder sb = new StringBuilder();
+                        sb.AppendLine($"         📋 AI DEĞERLENDİRME RAPORU");
+                        sb.AppendLine(thickLine);
+                        sb.AppendLine($"👤 Öğrenci  : {ad.ToUpper()} {soyad.ToUpper()}");
+                        sb.AppendLine($"🎯 Puanlama : {aiSkor} / 100");
+                        sb.AppendLine($"📢 Durum    : {(uygunluk.ToUpper().Contains("UYGUN") ? "✅ " : "❌ ")}{uygunluk.ToUpper()}");
+                        sb.AppendLine(thickLine);
+                        sb.AppendLine(temizNot);
+
+                        // 4. MemoEdit'e Bas
+                        memoAIsonuc.EditValue = sb.ToString();
+                        memoAIsonuc.Properties.Appearance.ForeColor = renk;
+
+                        // FONT ÇOK ÖNEMLİ: Eğer fontun kötüyse ne yapsan kötü durur. 
+                        // "Segoe UI" veya "Consolas" (kod gibi dursun istersen) öneririm.
+                        memoAIsonuc.Properties.Appearance.Font = new Font("Segoe UI Semibold", 10.5F);
+                    }
+
+                    // Filtreleme ve bildirim işlemleri
+                    Listele(cmbFiltre?.SelectedIndex >= 0 ? cmbFiltre.Properties.Items[cmbFiltre.SelectedIndex].ToString() : "Tüm Öğrenciler");
+                    DataChangedNotifier.NotifyOgrenciChanged();
+                }
+                catch (Exception ex)
                 {
-                    lblAIsonuc.Text = "AI analizi başarısız: " + ex.Message;
-                    lblAIsonuc.ForeColor = Color.FromArgb(231, 76, 60);
+                    if (memoAIsonuc != null)
+                    {
+                        memoAIsonuc.EditValue = "❌ HATA: AI analizi sırasında bir sorun oluştu.\r\n\r\nDetay: " + ex.Message;
+                        memoAIsonuc.Properties.Appearance.ForeColor = Color.Red;
+                    }
                 }
             }
             finally
@@ -852,6 +884,11 @@ namespace bursoto1.Modules
         }
 
         private void btnAIAnaliz_Click_1(object sender, EventArgs e)
+        {
+
+        }
+
+        private void memoAIsonuc_EditValueChanged(object sender, EventArgs e)
         {
 
         }

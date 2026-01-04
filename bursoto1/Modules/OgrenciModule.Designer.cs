@@ -39,7 +39,7 @@
             this.btnYedek = new DevExpress.XtraEditors.SimpleButton();
             this.btnBursReddet = new DevExpress.XtraEditors.SimpleButton();
             this.btnAIAnaliz = new DevExpress.XtraEditors.SimpleButton();
-            this.lblAIsonuc = new DevExpress.XtraEditors.LabelControl();
+            this.memoAIsonuc = new DevExpress.XtraEditors.MemoEdit();
             this.lblAIbaslik = new DevExpress.XtraEditors.LabelControl();
             this.lblFiltre = new DevExpress.XtraEditors.LabelControl();
             this.cmbFiltre = new DevExpress.XtraEditors.ComboBoxEdit();
@@ -47,6 +47,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.gridView1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.panelAI)).BeginInit();
             this.panelAI.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.memoAIsonuc.Properties)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.cmbFiltre.Properties)).BeginInit();
             this.SuspendLayout();
             // 
@@ -58,7 +59,7 @@
             this.gridControl1.Location = new System.Drawing.Point(23, 125);
             this.gridControl1.MainView = this.gridView1;
             this.gridControl1.Name = "gridControl1";
-            this.gridControl1.Size = new System.Drawing.Size(789, 429);
+            this.gridControl1.Size = new System.Drawing.Size(884, 429);
             this.gridControl1.TabIndex = 13;
             this.gridControl1.ViewCollection.AddRange(new DevExpress.XtraGrid.Views.Base.BaseView[] {
             this.gridView1});
@@ -105,11 +106,11 @@
             this.panelAI.Controls.Add(this.btnYedek);
             this.panelAI.Controls.Add(this.btnBursReddet);
             this.panelAI.Controls.Add(this.btnAIAnaliz);
-            this.panelAI.Controls.Add(this.lblAIsonuc);
+            this.panelAI.Controls.Add(this.memoAIsonuc);
             this.panelAI.Controls.Add(this.lblAIbaslik);
-            this.panelAI.Location = new System.Drawing.Point(932, 0);
+            this.panelAI.Location = new System.Drawing.Point(933, 0);
             this.panelAI.Name = "panelAI";
-            this.panelAI.Size = new System.Drawing.Size(499, 621);
+            this.panelAI.Size = new System.Drawing.Size(635, 621);
             this.panelAI.TabIndex = 17;
             // 
             // btnBursKabul
@@ -177,21 +178,20 @@
             this.btnAIAnaliz.Text = "🤖 AI Analiz Yap";
             this.btnAIAnaliz.Click += new System.EventHandler(this.btnAIAnaliz_Click_1);
             // 
-            // lblAIsonuc
+            // memoAIsonuc
             // 
-            this.lblAIsonuc.Appearance.Font = new System.Drawing.Font("Segoe UI", 10F);
-            this.lblAIsonuc.Appearance.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(52)))), ((int)(((byte)(73)))), ((int)(((byte)(94)))));
-            this.lblAIsonuc.Appearance.Options.UseFont = true;
-            this.lblAIsonuc.Appearance.Options.UseForeColor = true;
-            this.lblAIsonuc.Appearance.Options.UseTextOptions = true;
-            this.lblAIsonuc.Appearance.TextOptions.WordWrap = DevExpress.Utils.WordWrap.Wrap;
-            this.lblAIsonuc.AutoSizeMode = DevExpress.XtraEditors.LabelAutoSizeMode.None;
-            this.lblAIsonuc.Location = new System.Drawing.Point(15, 93);
-            this.lblAIsonuc.Name = "lblAIsonuc";
-            this.lblAIsonuc.Size = new System.Drawing.Size(290, 330);
-            this.lblAIsonuc.TabIndex = 1;
-            this.lblAIsonuc.Text = "Bir öğrenci seçip \"AI Analiz\" butonuna tıklayın.\n\nAI, öğrencinin burs uygunluğunu" +
+            this.memoAIsonuc.EditValue = "Bir öğrenci seçip \"AI Analiz\" butonuna tıklayın.\n\nAI, öğrencinin burs uygunluğunu" +
     " değerlendirecek ve puan verecektir.";
+            this.memoAIsonuc.Location = new System.Drawing.Point(15, 93);
+            this.memoAIsonuc.Name = "memoAIsonuc";
+            this.memoAIsonuc.Properties.Appearance.Font = new System.Drawing.Font("Segoe UI", 10F);
+            this.memoAIsonuc.Properties.Appearance.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(52)))), ((int)(((byte)(73)))), ((int)(((byte)(94)))));
+            this.memoAIsonuc.Properties.Appearance.Options.UseFont = true;
+            this.memoAIsonuc.Properties.Appearance.Options.UseForeColor = true;
+            this.memoAIsonuc.Properties.ReadOnly = true;
+            this.memoAIsonuc.Size = new System.Drawing.Size(615, 405);
+            this.memoAIsonuc.TabIndex = 1;
+            this.memoAIsonuc.EditValueChanged += new System.EventHandler(this.memoAIsonuc_EditValueChanged);
             // 
             // lblAIbaslik
             // 
@@ -243,13 +243,14 @@
             this.Controls.Add(this.panelAI);
             this.Controls.Add(this.lblFiltre);
             this.Name = "OgrenciModule";
-            this.Size = new System.Drawing.Size(1434, 741);
+            this.Size = new System.Drawing.Size(1571, 741);
             this.Load += new System.EventHandler(this.OgrenciModule_Load);
             ((System.ComponentModel.ISupportInitialize)(this.gridControl1)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridView1)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.panelAI)).EndInit();
             this.panelAI.ResumeLayout(false);
             this.panelAI.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.memoAIsonuc.Properties)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.cmbFiltre.Properties)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
@@ -263,7 +264,7 @@
         private DevExpress.XtraEditors.SimpleButton btnGoster;
         private DevExpress.DataAccess.Sql.SqlDataSource sqlDataSource1;
         private DevExpress.XtraEditors.PanelControl panelAI;
-        private DevExpress.XtraEditors.LabelControl lblAIsonuc;
+        private DevExpress.XtraEditors.MemoEdit memoAIsonuc;
         private DevExpress.XtraEditors.LabelControl lblAIbaslik;
         private DevExpress.XtraEditors.LabelControl lblFiltre;
         private DevExpress.XtraEditors.ComboBoxEdit cmbFiltre;

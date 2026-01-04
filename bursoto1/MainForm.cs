@@ -18,6 +18,7 @@ namespace bursoto1
         public MainForm()
         {
             InitializeComponent();
+            this.Width = 1600;
 
             // Modern Skin Ayarı
             DevExpress.LookAndFeel.UserLookAndFeel.Default.SetSkinStyle("WXI");

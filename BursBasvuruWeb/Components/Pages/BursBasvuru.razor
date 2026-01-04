@@ -279,6 +279,21 @@
                                   rows="4"
                                   @bind="kullanim"></textarea>
                     </div>
+
+                    <!-- Soru 4: Farklı Özellik -->
+                    <div class="space-y-2">
+                        <label class="block text-sm font-medium text-text-main dark:text-gray-300" for="farkliOzellik">
+                            4. Sizi diğer adaylardan ayıran nedir? <span class="text-red-500">*</span>
+                        </label>
+                        <p class="text-xs text-text-secondary dark:text-gray-500 mb-2">
+                            Kendinizi diğer adaylardan ayıran özelliklerinizi, başarılarınızı veya deneyimlerinizi paylaşınız.
+                        </p>
+                        <textarea class="block w-full rounded-lg border-input-border dark:border-gray-600 bg-background-light dark:bg-gray-800 text-text-main dark:text-white shadow-sm focus:border-primary focus:ring-primary sm:text-sm p-4 resize-none transition-colors" 
+                                  id="farkliOzellik" 
+                                  placeholder="Cevabınızı buraya yazın..." 
+                                  rows="4"
+                                  @bind="farkliOzellik"></textarea>
+                    </div>
                 </div>
 
                 <!-- Submission & Legal -->
@@ -330,6 +345,7 @@
     private string ihtiyac = "";
     private string hedefler = "";
     private string kullanim = "";
+    private string farkliOzellik = "";
     private bool kvkkOnay = false;
     private string mesaj = "";
 
@@ -762,6 +778,13 @@
             return;
         }
 
+        if (string.IsNullOrWhiteSpace(farkliOzellik))
+        {
+            mesaj = "Hata: Lütfen 'Sizi diğer adaylardan ayıran nedir?' sorusunu cevaplayınız.";
+            StateHasChanged();
+            return;
+        }
+
         if (!kvkkOnay)
         {
             mesaj = "Hata: Lütfen KVKK Aydınlatma Metni'ni onaylayınız.";
@@ -890,7 +913,7 @@
                     }
                     if (mevcutKolonlar.Contains("FarkliOzellik"))
                     {
-                        cmd.Parameters.AddWithValue($"@p{pIdx++}", ""); // Farklı özellik şimdilik boş
+                        cmd.Parameters.AddWithValue($"@p{pIdx++}", farkliOzellik.Trim());
                     }
 
                     // AINotu veya Motivasyon
@@ -903,7 +926,7 @@
                     else
                     {
                         // AINotu'na tüm bilgileri ekle
-                        string ainoNotu = $"[ÜNİVERSİTE]: {universite}\n[E-POSTA]: {eposta}\n[İHTİYAÇ]: {ihtiyac}\n[HEDEFLER]: {hedefler}\n[KULLANIM]: {kullanim}";
+                        string ainoNotu = $"[ÜNİVERSİTE]: {universite}\n[E-POSTA]: {eposta}\n[İHTİYAÇ]: {ihtiyac}\n[HEDEFLER]: {hedefler}\n[KULLANIM]: {kullanim}\n[FARK]: {farkliOzellik}";
                         cmd.Parameters.AddWithValue($"@p{pIdx++}", ainoNotu.Trim());
                     }
 
@@ -940,6 +963,7 @@
                 ihtiyac = "";
                 hedefler = "";
                 kullanim = "";
+                farkliOzellik = "";
                 kvkkOnay = false;
             }
         }

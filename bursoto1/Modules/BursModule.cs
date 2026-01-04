@@ -331,17 +331,39 @@ namespace bursoto1.Modules
 
             string bursAdi = gridView1.GetFocusedRowCellValue("BursAdı")?.ToString() ?? "Seçili Burs";
 
-            if (MessageHelper.ShowConfirm($"'{bursAdi}' bursunu silmek istiyor musunuz?", "Silme Onayı"))
+            if (MessageHelper.ShowConfirm($"'{bursAdi}' bursunu silmek istiyor musunuz?\n\n⚠️ Bu bursa ait tüm gider kayıtları ve öğrenci burs bağlantıları da silinecektir.", "Silme Onayı"))
             {
                 try
                 {
                     using (SqlConnection conn = bgl.baglanti())
                     {
-                        // Tespit edilen kolon adını kullan
-                        string deleteQuery = $"DELETE FROM Burslar WHERE {_idColumnName}=@p1";
-                        SqlCommand cmd = new SqlCommand(deleteQuery, conn);
-                        cmd.Parameters.AddWithValue("@p1", id);
-                        cmd.ExecuteNonQuery();
+                        // Transaction ile güvenli silme
+                        SqlTransaction transaction = conn.BeginTransaction();
+                        try
+                        {
+                            // 1. BursGiderleri'nden sil (FK constraint)
+                            SqlCommand cmdGider = new SqlCommand($"DELETE FROM BursGiderleri WHERE BursID=@p1", conn, transaction);
+                            cmdGider.Parameters.AddWithValue("@p1", id);
+                            cmdGider.ExecuteNonQuery();
+
+                            // 2. OgrenciBurslari'ndan sil (FK constraint)
+                            SqlCommand cmdBurs = new SqlCommand($"DELETE FROM OgrenciBurslari WHERE BursID=@p1", conn, transaction);
+                            cmdBurs.Parameters.AddWithValue("@p1", id);
+                            cmdBurs.ExecuteNonQuery();
+
+                            // 3. Son olarak bursu sil
+                            string deleteQuery = $"DELETE FROM Burslar WHERE {_idColumnName}=@p1";
+                            SqlCommand cmd = new SqlCommand(deleteQuery, conn, transaction);
+                            cmd.Parameters.AddWithValue("@p1", id);
+                            cmd.ExecuteNonQuery();
+
+                            transaction.Commit();
+                        }
+                        catch
+                        {
+                            transaction.Rollback();
+                            throw;
+                        }
                     }
                     FormuTemizle();
                     _editingBursID = null;
