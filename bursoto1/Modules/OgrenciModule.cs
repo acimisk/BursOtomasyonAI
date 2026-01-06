@@ -109,9 +109,13 @@ namespace bursoto1.Modules
             if (btnYedek != null)
                 btnYedek.Click += BtnYedek_Click;
 
-            // GridView CustomDrawCell event'i
+            // GridView event'leri
             if (gridView1 != null)
+            {
                 gridView1.CustomDrawCell += GridView1_CustomDrawCell;
+                // Satır değiştiğinde AI özetini ve tahmin bilgisini sağ panele yansıt
+                gridView1.FocusedRowChanged += GridView1_FocusedRowChanged;
+            }
         }
 
         private void CmbFiltre_SelectedIndexChanged(object sender, EventArgs e)
@@ -223,8 +227,8 @@ namespace bursoto1.Modules
                         ? string.Empty 
                         : $", o.[{universiteKolon}] AS [Üniversite]";
 
-                    // AIPotansiyelNotu kolonu SELECT'e eklenecek (varsa)
-                    string aiPotansiyelSelect = ", ISNULL(o.AIPotansiyelNotu, 0) AS [AIPotansiyelNotu]";
+                    // AIPotansiyelNotu ve AIPotansiyelYuzde kolonları SELECT'e eklenecek
+                    string aiPotansiyelSelect = ", ISNULL(o.AIPotansiyelNotu, 0) AS [AIPotansiyelNotu], ISNULL(o.AIPotansiyelYuzde, '') AS [AIPotansiyelYuzde]";
 
                     string sorgu;
                     
@@ -843,41 +847,18 @@ namespace bursoto1.Modules
                     }
                 }
 
-                string uygunluk = aiSkor >= 70 ? "UYGUN" : aiSkor >= 40 ? "DEĞERLENDIR" : "UYGUN DEĞİL";
-                Color renk = aiSkor >= 70 ? Color.FromArgb(39, 174, 96) : aiSkor >= 40 ? Color.FromArgb(243, 156, 18) : Color.FromArgb(231, 76, 60);
+                Color renk = GetAISkorColor(aiSkor);
 
                 try
                 {
                     if (memoAIsonuc != null)
                     {
-                        // 1. Ayraç Çizgileri
-                        string thickLine = new string('━', 45); // Kalın ana ayraç
-                        string thinLine = new string('─', 45);  // İnce alt ayraç
-                        string n = Environment.NewLine;         // Yeni satır kısayolu
+                        // Formatlanmış raporu oluştur
+                        string formattedReport = FormatAIReport(aiNotu, aiSkor, ad, soyad);
 
-                        // 2. Ham metni temizle ve başlıkları boşluklu hale getir
-                        // Metinlerin çizgiye yapışmaması için her başlıktan sonra 2 satır atlıyoruz.
-                        string temizNot = aiNotu
-                            .Replace("ANALİZ:", $"{n}🔍  ANALİZ{n}{thinLine}{n}")
-                            .Replace("KİŞİLİK:", $"{n}{n}👤  KİŞİLİK ÖZETİ{n}{thinLine}{n}")
-                            .Replace("KARAR:", $"{n}{n}📌  SONUÇ VE KARAR{n}{thinLine}{n}");
-
-                        // 3. Raporu İnşa Et
-                        StringBuilder sb = new StringBuilder();
-                        sb.AppendLine($"         📋 AI DEĞERLENDİRME RAPORU");
-                        sb.AppendLine(thickLine);
-                        sb.AppendLine($"👤 Öğrenci  : {ad.ToUpper()} {soyad.ToUpper()}");
-                        sb.AppendLine($"🎯 Puanlama : {aiSkor} / 100");
-                        sb.AppendLine($"📢 Durum    : {(uygunluk.ToUpper().Contains("UYGUN") ? "✅ " : "❌ ")}{uygunluk.ToUpper()}");
-                        sb.AppendLine(thickLine);
-                        sb.AppendLine(temizNot);
-
-                        // 4. MemoEdit'e Bas
-                        memoAIsonuc.EditValue = sb.ToString();
+                        // MemoEdit'e Bas
+                        memoAIsonuc.EditValue = formattedReport;
                         memoAIsonuc.Properties.Appearance.ForeColor = renk;
-
-                        // FONT ÇOK ÖNEMLİ: Eğer fontun kötüyse ne yapsan kötü durur. 
-                        // "Segoe UI" veya "Consolas" (kod gibi dursun istersen) öneririm.
                         memoAIsonuc.Properties.Appearance.Font = new Font("Segoe UI Semibold", 10.5F);
                     }
 
@@ -925,6 +906,63 @@ namespace bursoto1.Modules
             }
             catch { }
             return sonuc;
+        }
+
+        // AI Analiz Raporunu Formatla - Ortak metod
+        private string FormatAIReport(string rawText, int skor, string ad, string soyad)
+        {
+            try
+            {
+                // 1. Ayraç Çizgileri
+                string thickLine = new string('━', 45); // Kalın ana ayraç
+                string thinLine = new string('─', 45);  // İnce alt ayraç
+                string n = Environment.NewLine;         // Yeni satır kısayolu
+
+                // 2. Ham metni temizle
+                // SKOR satırını kaldır (zaten başlıkta gösteriyoruz)
+                string temizMetin = System.Text.RegularExpressions.Regex.Replace(
+                    rawText, 
+                    @"SKOR:\s*\d+.*?(\r?\n|$)", 
+                    "", 
+                    System.Text.RegularExpressions.RegexOptions.IgnoreCase | System.Text.RegularExpressions.RegexOptions.Multiline);
+
+                // Başlıkları formatla - Metinlerin çizgiye yapışmaması için her başlıktan sonra 2 satır atlıyoruz.
+                temizMetin = temizMetin
+                    .Replace("ANALİZ:", $"{n}🔍  ANALİZ{n}{thinLine}{n}")
+                    .Replace("KİŞİLİK:", $"{n}{n}👤  KİŞİLİK ÖZETİ{n}{thinLine}{n}")
+                    .Replace("KARAR:", $"{n}{n}📌  SONUÇ VE KARAR{n}{thinLine}{n}");
+
+                // 3. Uygunluk durumu
+                string uygunluk = skor >= 70 ? "UYGUN" : skor >= 40 ? "DEĞERLENDIR" : "UYGUN DEĞİL";
+
+                // 4. Raporu İnşa Et
+                StringBuilder sb = new StringBuilder();
+                sb.AppendLine($"         📋 AI DEĞERLENDİRME RAPORU");
+                sb.AppendLine(thickLine);
+                sb.AppendLine($"👤 Öğrenci  : {ad.ToUpper()} {soyad.ToUpper()}");
+                sb.AppendLine($"🎯 Puanlama : {skor} / 100");
+                sb.AppendLine($"📢 Durum    : {(uygunluk.ToUpper().Contains("UYGUN") ? "✅ " : "❌ ")}{uygunluk.ToUpper()}");
+                sb.AppendLine(thickLine);
+                sb.AppendLine(temizMetin);
+
+                return sb.ToString();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"FormatAIReport hatası: {ex.Message}");
+                return rawText; // Hata durumunda ham metni döndür
+            }
+        }
+
+        // Skora göre renk döndür
+        private Color GetAISkorColor(int skor)
+        {
+            if (skor >= 70)
+                return Color.FromArgb(39, 174, 96); // Yeşil
+            else if (skor >= 40)
+                return Color.FromArgb(243, 156, 18); // Turuncu
+            else
+                return Color.FromArgb(231, 76, 60); // Kırmızı
         }
 
         // Burs Kabul - Burs seçimi dialogu ile
@@ -1480,35 +1518,18 @@ namespace bursoto1.Modules
                 // Label'ı güncelle
                 if (lblTahminSonuc != null)
                 {
-                    // Temel metin
-                    string text = $"🤖 AI Başarı Projeksiyonu: {tahminEdilenPuan:F2}";
-
-                    // Eğer tahmini not mevcut AGNO'dan yüksekse, potansiyel artış mesajı ekle
+                    // Temel metin (3.52 ↑ formatını koru)
+                    string text = tahminEdilenPuan.ToString("F2");
                     bool potansiyelArtis = tahminEdilenPuan > mevcutAgno;
                     if (potansiyelArtis)
                     {
-                        text += " ↑ Potansiyel Artış Bekleniyor";
+                        text += " ↑";
                     }
 
-                    lblTahminSonuc.Text = text;
+                    lblTahminSonuc.Text = $"🤖 AI Başarı Projeksiyonu: {text}";
 
-                    // Renklendirme: Potansiyel artış varsa yeşil, yoksa turuncu
-                    if (potansiyelArtis)
-                    {
-                        lblTahminSonuc.Appearance.ForeColor = Color.FromArgb(39, 174, 96); // Yeşil
-                        if (progressBarTahmin != null)
-                        {
-                            progressBarTahmin.Properties.Appearance.ForeColor = Color.FromArgb(39, 174, 96);
-                        }
-                    }
-                    else
-                    {
-                        lblTahminSonuc.Appearance.ForeColor = Color.FromArgb(243, 156, 18); // Turuncu
-                        if (progressBarTahmin != null)
-                        {
-                            progressBarTahmin.Properties.Appearance.ForeColor = Color.FromArgb(243, 156, 18);
-                        }
-                    }
+                    // Yazı rengini sabit beyaz tut (kontrast için)
+                    lblTahminSonuc.Appearance.ForeColor = Color.White;
                     lblTahminSonuc.Appearance.Options.UseForeColor = true;
                 }
             }
@@ -1876,6 +1897,155 @@ namespace bursoto1.Modules
         private void memoAIsonuc_EditValueChanged(object sender, EventArgs e)
         {
 
+        }
+
+        // Satır değiştiğinde, daha önce yapılmış AI analizini ve ML tahminini sağ panele yansıt
+        private void GridView1_FocusedRowChanged(object sender, DevExpress.XtraGrid.Views.Base.FocusedRowChangedEventArgs e)
+        {
+            try
+            {
+                if (gridView1 == null)
+                    return;
+
+                DataRow dr = gridView1.GetDataRow(e.FocusedRowHandle);
+                if (dr == null)
+                {
+                    if (memoAIsonuc != null)
+                    {
+                        memoAIsonuc.EditValue = "Bu öğrenci için henüz AI analizi yapılmamıştır.";
+                        memoAIsonuc.Properties.Appearance.ForeColor = Color.FromArgb(180, 180, 180);
+                    }
+                    return;
+                }
+
+                // Temel alanlar
+                int ogrenciID = Convert.ToInt32(dr["ID"]);
+                float mevcutAgno = 0;
+                float.TryParse(dr["AGNO"]?.ToString() ?? "0", out mevcutAgno);
+
+                // ML.NET tahmini (AIPotansiyelNotu) ve yüzde
+                float tahminEdilenPuan = 0;
+                bool hasTahmin = false;
+                string potansiyelYuzde = string.Empty;
+
+                if (dr.Table.Columns.Contains("AIPotansiyelNotu") && dr["AIPotansiyelNotu"] != DBNull.Value)
+                {
+                    hasTahmin = float.TryParse(dr["AIPotansiyelNotu"].ToString(), out tahminEdilenPuan);
+                }
+                if (dr.Table.Columns.Contains("AIPotansiyelYuzde") && dr["AIPotansiyelYuzde"] != DBNull.Value)
+                {
+                    potansiyelYuzde = dr["AIPotansiyelYuzde"]?.ToString() ?? string.Empty;
+                }
+
+                // AISkor (grid'deki "AI Puanı" kolonu)
+                int aiSkor = 0;
+                bool hasSkor = false;
+                if (dr.Table.Columns.Contains("AI Puanı") && dr["AI Puanı"] != DBNull.Value)
+                {
+                    hasSkor = int.TryParse(dr["AI Puanı"].ToString(), out aiSkor);
+                }
+
+                // AINotu veritabanından oku (detaylı analiz metni)
+                string aiNotuDetay = string.Empty;
+                try
+                {
+                    using (SqlConnection conn = bgl.baglanti())
+                    {
+                        // Ogrenciler tablosundaki ID kolonunu dinamik tespit et
+                        string ogrenciIDKolonu = "ID";
+                        try
+                        {
+                            SqlCommand cmdKolon = new SqlCommand(@"SELECT TOP 1 COLUMN_NAME 
+                                FROM INFORMATION_SCHEMA.COLUMNS 
+                                WHERE TABLE_NAME = 'Ogrenciler' 
+                                AND COLUMN_NAME IN ('ID', 'OgrenciID')
+                                ORDER BY CASE COLUMN_NAME 
+                                    WHEN 'ID' THEN 1 
+                                    WHEN 'OgrenciID' THEN 2 
+                                    ELSE 3 END", conn);
+                            var kolonResult = cmdKolon.ExecuteScalar();
+                            if (kolonResult != null && kolonResult != DBNull.Value)
+                            {
+                                string kolonStr = kolonResult.ToString();
+                                if (!string.IsNullOrEmpty(kolonStr))
+                                    ogrenciIDKolonu = kolonStr;
+                            }
+                        }
+                        catch { }
+
+                        SqlCommand cmd = new SqlCommand($@"SELECT ISNULL(AINotu, '') 
+                                                           FROM Ogrenciler 
+                                                           WHERE [{ogrenciIDKolonu}] = @id", conn);
+                        cmd.Parameters.AddWithValue("@id", ogrenciID);
+                        object notResult = cmd.ExecuteScalar();
+                        if (notResult != null && notResult != DBNull.Value)
+                            aiNotuDetay = notResult.ToString();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"AINotu okunamadı: {ex.Message}");
+                }
+
+                bool analizVar = (!string.IsNullOrWhiteSpace(aiNotuDetay)) || hasSkor || hasTahmin;
+
+                // Henüz analiz yoksa bilgilendir
+                if (!analizVar)
+                {
+                    if (memoAIsonuc != null)
+                    {
+                        memoAIsonuc.EditValue = "Bu öğrenci için henüz AI analizi yapılmamıştır.";
+                        memoAIsonuc.Properties.Appearance.ForeColor = Color.FromArgb(180, 180, 180);
+                    }
+
+                    // Tahmin label ve progress bar'ı temizle
+                    if (lblTahminSonuc != null)
+                    {
+                        lblTahminSonuc.Text = "🤖 AI Başarı Projeksiyonu: -";
+                        lblTahminSonuc.Appearance.ForeColor = Color.White;
+                    }
+                    if (progressBarTahmin != null)
+                    {
+                        progressBarTahmin.Position = 0;
+                    }
+                    return;
+                }
+
+                // ML tahmin sonucu varsa, tahmin panelini güncelle
+                if (hasTahmin)
+                {
+                    ShowTahminSonucu(tahminEdilenPuan, mevcutAgno);
+                }
+
+                // AI analiz notunu ve skoruna göre rengi göster
+                if (memoAIsonuc != null)
+                {
+                    if (!string.IsNullOrWhiteSpace(aiNotuDetay))
+                    {
+                        // Formatlanmış raporu göster
+                        string ad = dr["AD"]?.ToString() ?? "";
+                        string soyad = dr["SOYAD"]?.ToString() ?? "";
+                        string formattedReport = FormatAIReport(aiNotuDetay, aiSkor, ad, soyad);
+                        memoAIsonuc.EditValue = formattedReport;
+                    }
+                    else
+                    {
+                        // Sadece skor varsa basit bilgi göster
+                        memoAIsonuc.EditValue = hasSkor
+                            ? $"Bu öğrenci için AI skoru: {aiSkor} / 100\n\nDetaylı analiz notu bulunamadı."
+                            : "Bu öğrenci için henüz AI analizi yapılmamıştır.";
+                    }
+
+                    // Skora göre renk (70+ Yeşil, 40+ Turuncu, altı Kırmızı)
+                    Color renk = GetAISkorColor(hasSkor ? aiSkor : 0);
+                    memoAIsonuc.Properties.Appearance.ForeColor = renk;
+                    memoAIsonuc.Properties.Appearance.Font = new Font("Segoe UI Semibold", 10.5F);
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"FocusedRowChanged işlenirken hata: {ex.Message}");
+            }
         }
 
         private void btnBursReddet_Click_1(object sender, EventArgs e)
