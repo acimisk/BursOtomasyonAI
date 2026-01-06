@@ -7,15 +7,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using System.Data.SqlClient; // Sql kütüphanesi yeterli
-using DevExpress.XtraEditors; // XtraMessageBox kullanabilmek için
-using bursoto1.Helpers; // MessageHelper için
+using System.Data.SqlClient;
+using DevExpress.XtraEditors;
+using bursoto1.Helpers;
 
 namespace bursoto1
 {
     public partial class Login : XtraForm
     {
-        // Kanka bağlantı sınıfımızı çağırdık
         public SqlBaglanti bgl = new SqlBaglanti();
 
         public Login()
@@ -25,20 +24,11 @@ namespace bursoto1
 
         private void ApplyModernStyling()
         {
-            // Form arka plan rengi - Ultra koyu antrasit
-            this.BackColor = Color.FromArgb(28, 28, 30);
+            // Form arka plan rengi - Koyu antrasit
+            this.BackColor = Color.FromArgb(30, 30, 30);
             
-            // Form köşelerini yuvarlat (Region) - Load event'inde çağrılacak
+            // Form köşelerini yuvarlat
             RoundFormCorners();
-            
-            // PanelControl'e gölge efekti ekle
-            if (panelLogin != null)
-            {
-                panelLogin.Appearance.BackColor = Color.FromArgb(40, 40, 45);
-                panelLogin.Appearance.BackColor2 = Color.FromArgb(35, 35, 40);
-                panelLogin.Appearance.GradientMode = System.Drawing.Drawing2D.LinearGradientMode.Vertical;
-                panelLogin.BorderStyle = DevExpress.XtraEditors.Controls.BorderStyles.NoBorder;
-            }
         }
 
         private void RoundFormCorners()
@@ -46,7 +36,7 @@ namespace bursoto1
             try
             {
                 System.Drawing.Drawing2D.GraphicsPath path = new System.Drawing.Drawing2D.GraphicsPath();
-                int radius = 15;
+                int radius = 20;
                 int width = this.Width;
                 int height = this.Height;
                 
@@ -65,15 +55,15 @@ namespace bursoto1
 
         private void btnCikis_Click(object sender, EventArgs e)
         {
-            Application.Exit();
+            // Uygulamayı güvenli şekilde kapat
+            this.Close();
         }
 
         private void btnGiris_Click(object sender, EventArgs e)
         {
             try
             {
-                // 1. ADIM: Bağlantıyı alıp komutu hazırlıyoruz
-                // bgl.baglanti() zaten açık bağlantı döndürüyor
+                // SQL bağlantı ve kontrol mantığı - DEĞİŞTİRİLMEDİ
                 using (SqlConnection conn = bgl.baglanti())
                 {
                     SqlCommand cmd = new SqlCommand("SELECT * FROM login WHERE K_adi=@p1 AND Sifre=@p2", conn);
@@ -82,13 +72,11 @@ namespace bursoto1
 
                     using (SqlDataReader dr = cmd.ExecuteReader())
                     {
-                        // 2. ADIM: Eğer kullanıcı varsa
                         if (dr.Read())
                         {
-                            // Giriş başarılıysa Ana Menü formunu açıyoruz
                             MainForm anaMenu = new MainForm();
                             anaMenu.Show();
-                            this.Hide(); // Login formunu gizle
+                            this.Hide();
                         }
                         else
                         {
@@ -105,36 +93,57 @@ namespace bursoto1
 
         private void Login_Load(object sender, EventArgs e)
         {
-            // Modern stil uygula (form boyutları hazır olduktan sonra)
+            // Modern stil uygula
             ApplyModernStyling();
+            
+            // Material Design alt çizgileri ekle
+            AddMaterialUnderlines();
+            
+            // Form kapanırken uygulamayı kapat
+            this.FormClosing += Login_FormClosing;
             
             // Form yüklendiğinde kullanıcı adı alanına odaklan
             txtKullaniciAdi.Focus();
-            
-            // SVG ikonları yükle
-            LoadSvgIcons();
         }
 
-        private void LoadSvgIcons()
+        private void Login_FormClosing(object sender, FormClosingEventArgs e)
         {
-            try
+            // Login formu kapatılırsa uygulamayı tamamen kapat
+            if (e.CloseReason == CloseReason.UserClosing)
             {
-                // DevExpress 25.1 için SVG yükleme
-                // SVG'ler resources dosyasına eklenebilir veya FromFile ile yüklenebilir
-                // Şimdilik SVG ikonları opsiyonel - görsel olarak ikonlar olmadan da çalışır
-                // İsterseniz SVG dosyalarını resources'a ekleyip şu şekilde yükleyebilirsiniz:
-                // svgPerson.SvgImage = DevExpress.Utils.Svg.SvgImage.FromResources("bursoto1.Resources.person.svg", typeof(Login).Assembly);
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"SVG yükleme hatası: {ex.Message}");
+                // Application.Exit() tüm formları otomatik kapatır, thread-safe
+                Application.Exit();
             }
         }
 
-        // Designer'da bağlı event handler'lar (boş bırakıldı)
+        private void AddMaterialUnderlines()
+        {
+            // Input alanlarının altına Material Design çizgileri ekle
+            if (txtKullaniciAdi != null)
+            {
+                txtKullaniciAdi.Paint += (s, e) =>
+                {
+                    using (Pen pen = new Pen(Color.FromArgb(100, 100, 100), 1))
+                    {
+                        e.Graphics.DrawLine(pen, 0, txtKullaniciAdi.Height - 1, txtKullaniciAdi.Width, txtKullaniciAdi.Height - 1);
+                    }
+                };
+            }
+
+            if (txtSifre != null)
+            {
+                txtSifre.Paint += (s, e) =>
+                {
+                    using (Pen pen = new Pen(Color.FromArgb(100, 100, 100), 1))
+                    {
+                        e.Graphics.DrawLine(pen, 0, txtSifre.Height - 1, txtSifre.Width, txtSifre.Height - 1);
+                    }
+                };
+            }
+        }
+
+        // Designer'da bağlı event handler'lar
         private void txtKullaniciAdi_EditValueChanged(object sender, EventArgs e) { }
         private void txtSifre_EditValueChanged(object sender, EventArgs e) { }
-        private void svgPerson_Click(object sender, EventArgs e) { }
-        private void svgKey_Click(object sender, EventArgs e) { }
     }
 }

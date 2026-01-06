@@ -28,6 +28,19 @@ namespace bursoto1
 
             // Ribbon butonlarını bağla
             WireRibbonButtons();
+            
+            // Form kapanırken uygulamayı kapat
+            this.FormClosing += MainForm_FormClosing;
+        }
+
+        private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            // MainForm kapatılırsa uygulamayı tamamen kapat
+            if (e.CloseReason == CloseReason.UserClosing)
+            {
+                // Application.Exit() tüm formları otomatik kapatır, thread-safe
+                Application.Exit();
+            }
         }
 
         void WireRibbonButtons()
