@@ -1,4 +1,4 @@
-# 🎓 Bursoto1 - Burs Yönetim Sistemi
+# 🎓 Burs Yönetim Sistemi
 
 Modern ve kapsamlı bir burs yönetim sistemi. Öğrenci başvurularını yönetir, AI destekli değerlendirme yapar ve ML.NET ile mezuniyet puanı tahmini sunar.
 
@@ -184,7 +184,7 @@ AI analiz özelliğini kullanmak için `bursoto1/GeminiAI.cs` dosyasına API ana
 
 - **Model Tipi**: Regression (Regresyon)
 - **Algoritma**: FastTree veya LightGBM
-- **R² Skoru**: ~0.66
+- **R² Skoru**: ~0.75
 - **Input Features**:
   - `MevcutAgno`: Mevcut akademik not ortalaması
   - `HaneGeliri`: Toplam hane geliri
