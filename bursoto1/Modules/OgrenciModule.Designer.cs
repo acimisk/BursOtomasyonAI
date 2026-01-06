@@ -29,10 +29,9 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            DevExpress.XtraGrid.GridLevelNode gridLevelNode2 = new DevExpress.XtraGrid.GridLevelNode();
+            DevExpress.XtraGrid.GridLevelNode gridLevelNode1 = new DevExpress.XtraGrid.GridLevelNode();
             this.gridControl1 = new DevExpress.XtraGrid.GridControl();
             this.gridView1 = new DevExpress.XtraGrid.Views.Grid.GridView();
-            this.btnGoster = new DevExpress.XtraEditors.SimpleButton();
             this.sqlDataSource1 = new DevExpress.DataAccess.Sql.SqlDataSource(this.components);
             this.panelAI = new DevExpress.XtraEditors.PanelControl();
             this.panelTahmin = new DevExpress.XtraEditors.PanelControl();
@@ -61,13 +60,13 @@
             // 
             // gridControl1
             // 
-            gridLevelNode2.RelationName = "Level1";
+            gridLevelNode1.RelationName = "Level1";
             this.gridControl1.LevelTree.Nodes.AddRange(new DevExpress.XtraGrid.GridLevelNode[] {
-            gridLevelNode2});
+            gridLevelNode1});
             this.gridControl1.Location = new System.Drawing.Point(23, 113);
             this.gridControl1.MainView = this.gridView1;
             this.gridControl1.Name = "gridControl1";
-            this.gridControl1.Size = new System.Drawing.Size(1262, 429);
+            this.gridControl1.Size = new System.Drawing.Size(1262, 508);
             this.gridControl1.TabIndex = 13;
             this.gridControl1.ViewCollection.AddRange(new DevExpress.XtraGrid.Views.Base.BaseView[] {
             this.gridView1});
@@ -84,22 +83,6 @@
             this.gridView1.OptionsSelection.MultiSelectMode = DevExpress.XtraGrid.Views.Grid.GridMultiSelectMode.CheckBoxRowSelect;
             this.gridView1.OptionsView.ShowGroupPanel = false;
             this.gridView1.DoubleClick += new System.EventHandler(this.gridView1_DoubleClick);
-            // 
-            // btnGoster
-            // 
-            this.btnGoster.Appearance.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(108)))), ((int)(((byte)(117)))), ((int)(((byte)(125)))));
-            this.btnGoster.Appearance.Font = new System.Drawing.Font("Segoe UI", 9.5F, System.Drawing.FontStyle.Bold);
-            this.btnGoster.Appearance.ForeColor = System.Drawing.Color.White;
-            this.btnGoster.Appearance.Options.UseBackColor = true;
-            this.btnGoster.Appearance.Options.UseFont = true;
-            this.btnGoster.Appearance.Options.UseForeColor = true;
-            this.btnGoster.AppearancePressed.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(73)))), ((int)(((byte)(80)))), ((int)(((byte)(87)))));
-            this.btnGoster.AppearancePressed.Options.UseBackColor = true;
-            this.btnGoster.Location = new System.Drawing.Point(354, 580);
-            this.btnGoster.Name = "btnGoster";
-            this.btnGoster.Size = new System.Drawing.Size(126, 39);
-            this.btnGoster.TabIndex = 14;
-            this.btnGoster.Text = "Profil Göster";
             // 
             // sqlDataSource1
             // 
@@ -309,7 +292,6 @@
             // OgrenciModule
             // 
             this.Controls.Add(this.cmbFiltre);
-            this.Controls.Add(this.btnGoster);
             this.Controls.Add(this.gridControl1);
             this.Controls.Add(this.panelAI);
             this.Controls.Add(this.lblFiltre);
@@ -336,7 +318,6 @@
 
         public DevExpress.XtraGrid.GridControl gridControl1;
         public DevExpress.XtraGrid.Views.Grid.GridView gridView1;
-        private DevExpress.XtraEditors.SimpleButton btnGoster;
         private DevExpress.DataAccess.Sql.SqlDataSource sqlDataSource1;
         private DevExpress.XtraEditors.PanelControl panelAI;
         private DevExpress.XtraEditors.MemoEdit memoAIsonuc;

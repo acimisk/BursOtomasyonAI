@@ -95,9 +95,6 @@ namespace bursoto1.Modules
             if (cmbFiltre != null)
                 cmbFiltre.SelectedIndexChanged += CmbFiltre_SelectedIndexChanged;
 
-            // Profil göster butonu
-            if (btnGoster != null)
-                btnGoster.Click += BtnGoster_Click;
 
             // AI Analiz butonları
             if (btnAIAnaliz != null)
@@ -1528,8 +1525,17 @@ namespace bursoto1.Modules
 
                     lblTahminSonuc.Text = $"🤖 AI Başarı Projeksiyonu: {text}";
 
-                    // Yazı rengini sabit beyaz tut (kontrast için)
-                    lblTahminSonuc.Appearance.ForeColor = Color.White;
+                    // Renklendirme: Artış varsa modern yeşil, düşükse kırmızı
+                    if (potansiyelArtis)
+                    {
+                        // Modern yeşil tonu (güzel ve göze hoş)
+                        lblTahminSonuc.Appearance.ForeColor = Color.FromArgb(46, 204, 113); // Modern yeşil
+                    }
+                    else
+                    {
+                        // Kırmızı tonu (düşük performans)
+                        lblTahminSonuc.Appearance.ForeColor = Color.FromArgb(231, 76, 60); // Kırmızı
+                    }
                     lblTahminSonuc.Appearance.Options.UseForeColor = true;
                 }
             }
@@ -2103,28 +2109,7 @@ namespace bursoto1.Modules
                     cellText = $"{tahminEdilenPuan:F2} ↑ %{artisInt}";
                 }
 
-                // Renk ve stil
-                if (tahminEdilenPuan >= 3.50f)
-                {
-                    // Yüksek potansiyel: yeşil arka plan + beyaz kalın yazı
-                    e.Appearance.BackColor = Color.PaleGreen;
-                    e.Appearance.ForeColor = Color.White;
-                    if (e.Appearance.Font != null)
-                        e.Appearance.Font = new Font(e.Appearance.Font, FontStyle.Bold);
-                    else
-                        e.Appearance.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
-                    e.Appearance.Options.UseBackColor = true;
-                    e.Appearance.Options.UseFont = true;
-                    e.Appearance.Options.UseForeColor = true;
-                }
-                else if (hasIncrease)
-                {
-                    // Artış var ama 3.50 altı: yeşil yazı
-                    e.Appearance.ForeColor = Color.FromArgb(39, 174, 96);
-                    e.Appearance.Options.UseForeColor = true;
-                }
-
-                // Metni güncelle (ok ve yüzde dahil)
+                // Sadece metni güncelle (renklendirme yok, default görünüm)
                 e.DisplayText = cellText;
             }
             catch (Exception ex)
