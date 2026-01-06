@@ -21,8 +21,46 @@ namespace bursoto1
         public Login()
         {
             InitializeComponent();
-            // Dark mode: XtraForm ve WXI skin otomatik uygulanacak
-            // Arka plan rengini manuel ayarlamaya gerek yok - skin bunu yapacak
+        }
+
+        private void ApplyModernStyling()
+        {
+            // Form arka plan rengi - Ultra koyu antrasit
+            this.BackColor = Color.FromArgb(28, 28, 30);
+            
+            // Form köşelerini yuvarlat (Region) - Load event'inde çağrılacak
+            RoundFormCorners();
+            
+            // PanelControl'e gölge efekti ekle
+            if (panelLogin != null)
+            {
+                panelLogin.Appearance.BackColor = Color.FromArgb(40, 40, 45);
+                panelLogin.Appearance.BackColor2 = Color.FromArgb(35, 35, 40);
+                panelLogin.Appearance.GradientMode = System.Drawing.Drawing2D.LinearGradientMode.Vertical;
+                panelLogin.BorderStyle = DevExpress.XtraEditors.Controls.BorderStyles.NoBorder;
+            }
+        }
+
+        private void RoundFormCorners()
+        {
+            try
+            {
+                System.Drawing.Drawing2D.GraphicsPath path = new System.Drawing.Drawing2D.GraphicsPath();
+                int radius = 15;
+                int width = this.Width;
+                int height = this.Height;
+                
+                path.AddArc(0, 0, radius * 2, radius * 2, 180, 90);
+                path.AddArc(width - radius * 2, 0, radius * 2, radius * 2, 270, 90);
+                path.AddArc(width - radius * 2, height - radius * 2, radius * 2, radius * 2, 0, 90);
+                path.AddArc(0, height - radius * 2, radius * 2, radius * 2, 90, 90);
+                path.CloseAllFigures();
+                this.Region = new Region(path);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Köşe yuvarlatma hatası: {ex.Message}");
+            }
         }
 
         private void btnCikis_Click(object sender, EventArgs e)
@@ -67,15 +105,35 @@ namespace bursoto1
 
         private void Login_Load(object sender, EventArgs e)
         {
+            // Modern stil uygula (form boyutları hazır olduktan sonra)
+            ApplyModernStyling();
+            
             // Form yüklendiğinde kullanıcı adı alanına odaklan
             txtKullaniciAdi.Focus();
+            
+            // SVG ikonları yükle
+            LoadSvgIcons();
+        }
+
+        private void LoadSvgIcons()
+        {
+            try
+            {
+                // DevExpress 25.1 için SVG yükleme
+                // SVG'ler resources dosyasına eklenebilir veya FromFile ile yüklenebilir
+                // Şimdilik SVG ikonları opsiyonel - görsel olarak ikonlar olmadan da çalışır
+                // İsterseniz SVG dosyalarını resources'a ekleyip şu şekilde yükleyebilirsiniz:
+                // svgPerson.SvgImage = DevExpress.Utils.Svg.SvgImage.FromResources("bursoto1.Resources.person.svg", typeof(Login).Assembly);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"SVG yükleme hatası: {ex.Message}");
+            }
         }
 
         // Designer'da bağlı event handler'lar (boş bırakıldı)
         private void txtKullaniciAdi_EditValueChanged(object sender, EventArgs e) { }
         private void txtSifre_EditValueChanged(object sender, EventArgs e) { }
-        private void labelKullaniciAdi_Click(object sender, EventArgs e) { }
-        private void labelSifre_Click(object sender, EventArgs e) { }
         private void svgPerson_Click(object sender, EventArgs e) { }
         private void svgKey_Click(object sender, EventArgs e) { }
     }

@@ -1,4 +1,9 @@
 ﻿using System;
+using System.Drawing;
+using System.Drawing.Drawing2D;
+using System.Windows.Forms;
+using DevExpress.XtraEditors;
+using DevExpress.Utils.Svg;
 
 namespace bursoto1
 {
@@ -31,152 +36,218 @@ namespace bursoto1
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Login));
+            this.panelLogin = new DevExpress.XtraEditors.PanelControl();
+            this.lblBaslik = new DevExpress.XtraEditors.LabelControl();
+            this.lblAciklama = new DevExpress.XtraEditors.LabelControl();
             this.txtKullaniciAdi = new DevExpress.XtraEditors.TextEdit();
             this.txtSifre = new DevExpress.XtraEditors.TextEdit();
-            this.labelKullaniciAdi = new DevExpress.XtraEditors.LabelControl();
-            this.labelSifre = new DevExpress.XtraEditors.LabelControl();
             this.btnGiris = new DevExpress.XtraEditors.SimpleButton();
-            this.svgKey = new DevExpress.XtraEditors.SvgImageBox();
-            this.svgPerson = new DevExpress.XtraEditors.SvgImageBox();
             this.btnCikis = new DevExpress.XtraEditors.SimpleButton();
+            this.svgPerson = new DevExpress.XtraEditors.SvgImageBox();
+            this.svgKey = new DevExpress.XtraEditors.SvgImageBox();
+            ((System.ComponentModel.ISupportInitialize)(this.panelLogin)).BeginInit();
+            this.panelLogin.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.txtKullaniciAdi.Properties)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.txtSifre.Properties)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.svgKey)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.svgPerson)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.svgKey)).BeginInit();
             this.SuspendLayout();
+            // 
+            // panelLogin
+            // 
+            this.panelLogin.Appearance.BackColor = Color.FromArgb(40, 40, 45);
+            this.panelLogin.Appearance.BackColor2 = Color.FromArgb(35, 35, 40);
+            this.panelLogin.Appearance.GradientMode = LinearGradientMode.Vertical;
+            this.panelLogin.Appearance.Options.UseBackColor = true;
+            this.panelLogin.BorderStyle = DevExpress.XtraEditors.Controls.BorderStyles.NoBorder;
+            this.panelLogin.Controls.Add(this.lblBaslik);
+            this.panelLogin.Controls.Add(this.lblAciklama);
+            this.panelLogin.Controls.Add(this.txtKullaniciAdi);
+            this.panelLogin.Controls.Add(this.txtSifre);
+            this.panelLogin.Controls.Add(this.btnGiris);
+            this.panelLogin.Controls.Add(this.svgPerson);
+            this.panelLogin.Controls.Add(this.svgKey);
+            this.panelLogin.Location = new Point(50, 50);
+            this.panelLogin.Name = "panelLogin";
+            this.panelLogin.Size = new Size(450, 500);
+            this.panelLogin.TabIndex = 0;
+            // 
+            // lblBaslik
+            // 
+            this.lblBaslik.Appearance.Font = new Font("Segoe UI Semibold", 24F, FontStyle.Bold, GraphicsUnit.Point, ((byte)(162)));
+            this.lblBaslik.Appearance.ForeColor = Color.FromArgb(255, 255, 255);
+            this.lblBaslik.Appearance.Options.UseFont = true;
+            this.lblBaslik.Appearance.Options.UseForeColor = true;
+            this.lblBaslik.Location = new Point(125, 60);
+            this.lblBaslik.Name = "lblBaslik";
+            this.lblBaslik.Size = new Size(200, 54);
+            this.lblBaslik.TabIndex = 0;
+            this.lblBaslik.Text = "BURSOTO V1.0";
+            // 
+            // lblAciklama
+            // 
+            this.lblAciklama.Appearance.Font = new Font("Segoe UI Semibold", 11F, FontStyle.Regular, GraphicsUnit.Point, ((byte)(162)));
+            this.lblAciklama.Appearance.ForeColor = Color.FromArgb(180, 180, 180);
+            this.lblAciklama.Appearance.Options.UseFont = true;
+            this.lblAciklama.Appearance.Options.UseForeColor = true;
+            this.lblAciklama.Location = new Point(90, 120);
+            this.lblAciklama.Name = "lblAciklama";
+            this.lblAciklama.Size = new Size(270, 25);
+            this.lblAciklama.TabIndex = 1;
+            this.lblAciklama.Text = "Yönetim Paneline Hoş Geldiniz";
             // 
             // txtKullaniciAdi
             // 
             this.txtKullaniciAdi.EditValue = "";
-            this.txtKullaniciAdi.Location = new System.Drawing.Point(209, 72);
+            this.txtKullaniciAdi.Location = new Point(80, 200);
             this.txtKullaniciAdi.Name = "txtKullaniciAdi";
-            this.txtKullaniciAdi.Size = new System.Drawing.Size(125, 22);
-            this.txtKullaniciAdi.TabIndex = 0;
+            this.txtKullaniciAdi.Properties.Appearance.BackColor = Color.FromArgb(50, 50, 55);
+            this.txtKullaniciAdi.Properties.Appearance.BorderColor = Color.FromArgb(80, 80, 85);
+            this.txtKullaniciAdi.Properties.Appearance.Font = new Font("Segoe UI Semibold", 11F, FontStyle.Regular, GraphicsUnit.Point, ((byte)(162)));
+            this.txtKullaniciAdi.Properties.Appearance.ForeColor = Color.White;
+            this.txtKullaniciAdi.Properties.Appearance.Options.UseBackColor = true;
+            this.txtKullaniciAdi.Properties.Appearance.Options.UseBorderColor = true;
+            this.txtKullaniciAdi.Properties.Appearance.Options.UseFont = true;
+            this.txtKullaniciAdi.Properties.Appearance.Options.UseForeColor = true;
+            this.txtKullaniciAdi.Properties.AppearanceFocused.BackColor = Color.FromArgb(55, 55, 60);
+            this.txtKullaniciAdi.Properties.AppearanceFocused.BorderColor = Color.FromArgb(100, 149, 237);
+            this.txtKullaniciAdi.Properties.AppearanceFocused.Options.UseBackColor = true;
+            this.txtKullaniciAdi.Properties.AppearanceFocused.Options.UseBorderColor = true;
+            this.txtKullaniciAdi.Properties.BorderStyle = DevExpress.XtraEditors.Controls.BorderStyles.Simple;
+            this.txtKullaniciAdi.Properties.NullValuePrompt = "Kullanıcı Adı";
+            this.txtKullaniciAdi.Properties.NullValuePromptShowForEmptyValue = true;
+            this.txtKullaniciAdi.Size = new Size(290, 40);
+            this.txtKullaniciAdi.TabIndex = 2;
             this.txtKullaniciAdi.EditValueChanged += new System.EventHandler(this.txtKullaniciAdi_EditValueChanged);
             // 
             // txtSifre
             // 
             this.txtSifre.EditValue = "";
-            this.txtSifre.Location = new System.Drawing.Point(209, 113);
+            this.txtSifre.Location = new Point(80, 270);
             this.txtSifre.Name = "txtSifre";
+            this.txtSifre.Properties.Appearance.BackColor = Color.FromArgb(50, 50, 55);
+            this.txtSifre.Properties.Appearance.BorderColor = Color.FromArgb(80, 80, 85);
+            this.txtSifre.Properties.Appearance.Font = new Font("Segoe UI Semibold", 11F, FontStyle.Regular, GraphicsUnit.Point, ((byte)(162)));
+            this.txtSifre.Properties.Appearance.ForeColor = Color.White;
+            this.txtSifre.Properties.Appearance.Options.UseBackColor = true;
+            this.txtSifre.Properties.Appearance.Options.UseBorderColor = true;
+            this.txtSifre.Properties.Appearance.Options.UseFont = true;
+            this.txtSifre.Properties.Appearance.Options.UseForeColor = true;
+            this.txtSifre.Properties.AppearanceFocused.BackColor = Color.FromArgb(55, 55, 60);
+            this.txtSifre.Properties.AppearanceFocused.BorderColor = Color.FromArgb(100, 149, 237);
+            this.txtSifre.Properties.AppearanceFocused.Options.UseBackColor = true;
+            this.txtSifre.Properties.AppearanceFocused.Options.UseBorderColor = true;
+            this.txtSifre.Properties.BorderStyle = DevExpress.XtraEditors.Controls.BorderStyles.Simple;
+            this.txtSifre.Properties.NullValuePrompt = "Şifre";
+            this.txtSifre.Properties.NullValuePromptShowForEmptyValue = true;
             this.txtSifre.Properties.UseSystemPasswordChar = true;
-            this.txtSifre.Size = new System.Drawing.Size(125, 22);
-            this.txtSifre.TabIndex = 1;
+            this.txtSifre.Size = new Size(290, 40);
+            this.txtSifre.TabIndex = 3;
             this.txtSifre.EditValueChanged += new System.EventHandler(this.txtSifre_EditValueChanged);
-            // 
-            // labelKullaniciAdi
-            // 
-            this.labelKullaniciAdi.Appearance.Font = new System.Drawing.Font("Tahoma", 12F, System.Drawing.FontStyle.Bold);
-            this.labelKullaniciAdi.Appearance.Options.UseFont = true;
-            this.labelKullaniciAdi.Location = new System.Drawing.Point(15, 48);
-            this.labelKullaniciAdi.Name = "labelKullaniciAdi";
-            this.labelKullaniciAdi.Size = new System.Drawing.Size(126, 24);
-            this.labelKullaniciAdi.TabIndex = 2;
-            this.labelKullaniciAdi.Text = "Kullanıcı Adı";
-            this.labelKullaniciAdi.Click += new System.EventHandler(this.labelKullaniciAdi_Click);
-            // 
-            // labelSifre
-            // 
-            this.labelSifre.Appearance.Font = new System.Drawing.Font("Tahoma", 12F, System.Drawing.FontStyle.Bold);
-            this.labelSifre.Appearance.Options.UseFont = true;
-            this.labelSifre.Location = new System.Drawing.Point(92, 89);
-            this.labelSifre.Name = "labelSifre";
-            this.labelSifre.Size = new System.Drawing.Size(48, 24);
-            this.labelSifre.TabIndex = 3;
-            this.labelSifre.Text = "Şifre";
-            this.labelSifre.Click += new System.EventHandler(this.labelSifre_Click);
             // 
             // btnGiris
             // 
-            this.btnGiris.Appearance.Font = new System.Drawing.Font("Tahoma", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
+            this.btnGiris.Appearance.BackColor = Color.FromArgb(65, 105, 225);
+            this.btnGiris.Appearance.BackColor2 = Color.FromArgb(100, 149, 237);
+            this.btnGiris.Appearance.Font = new Font("Segoe UI Semibold", 12F, FontStyle.Bold, GraphicsUnit.Point, ((byte)(162)));
+            this.btnGiris.Appearance.ForeColor = Color.White;
+            this.btnGiris.Appearance.GradientMode = LinearGradientMode.Vertical;
+            this.btnGiris.Appearance.Options.UseBackColor = true;
             this.btnGiris.Appearance.Options.UseFont = true;
+            this.btnGiris.Appearance.Options.UseForeColor = true;
+            this.btnGiris.AppearanceHovered.BackColor = Color.FromArgb(100, 149, 237);
+            this.btnGiris.AppearanceHovered.BackColor2 = Color.FromArgb(65, 105, 225);
+            this.btnGiris.AppearanceHovered.Options.UseBackColor = true;
+            this.btnGiris.AppearancePressed.BackColor = Color.FromArgb(30, 144, 255);
+            this.btnGiris.AppearancePressed.Options.UseBackColor = true;
             this.btnGiris.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.btnGiris.ImageOptions.Image = ((System.Drawing.Image)(resources.GetObject("btnGiris.ImageOptions.Image")));
-            this.btnGiris.Location = new System.Drawing.Point(164, 167);
+            this.btnGiris.Location = new Point(80, 350);
             this.btnGiris.Name = "btnGiris";
-            this.btnGiris.Size = new System.Drawing.Size(108, 46);
+            this.btnGiris.Size = new Size(290, 50);
             this.btnGiris.TabIndex = 4;
-            this.btnGiris.Text = "Giriş";
+            this.btnGiris.Text = "Giriş Yap";
             this.btnGiris.Click += new System.EventHandler(this.btnGiris_Click);
-            // 
-            // svgKey
-            // 
-            this.svgKey.Location = new System.Drawing.Point(177, 112);
-            this.svgKey.Name = "svgKey";
-            this.svgKey.Size = new System.Drawing.Size(26, 24);
-            this.svgKey.SizeMode = DevExpress.XtraEditors.SvgImageSizeMode.Squeeze;
-            this.svgKey.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("svgKey.SvgImage")));
-            this.svgKey.TabIndex = 5;
-            this.svgKey.Text = "svgImageBox1";
-            this.svgKey.Click += new System.EventHandler(this.svgKey_Click);
-            // 
-            // svgPerson
-            // 
-            this.svgPerson.Location = new System.Drawing.Point(179, 72);
-            this.svgPerson.Name = "svgPerson";
-            this.svgPerson.Size = new System.Drawing.Size(27, 24);
-            this.svgPerson.SizeMode = DevExpress.XtraEditors.SvgImageSizeMode.Squeeze;
-            this.svgPerson.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("svgPerson.SvgImage")));
-            this.svgPerson.TabIndex = 6;
-            this.svgPerson.Text = "svgImageBox2";
-            this.svgPerson.Click += new System.EventHandler(this.svgPerson_Click);
             // 
             // btnCikis
             // 
+            this.btnCikis.Appearance.BackColor = Color.Transparent;
+            this.btnCikis.Appearance.Font = new Font("Segoe UI Semibold", 16F, FontStyle.Bold, GraphicsUnit.Point, ((byte)(162)));
+            this.btnCikis.Appearance.ForeColor = Color.FromArgb(180, 180, 180);
+            this.btnCikis.Appearance.Options.UseBackColor = true;
+            this.btnCikis.Appearance.Options.UseFont = true;
+            this.btnCikis.Appearance.Options.UseForeColor = true;
+            this.btnCikis.AppearanceHovered.BackColor = Color.FromArgb(231, 76, 60);
+            this.btnCikis.AppearanceHovered.ForeColor = Color.White;
+            this.btnCikis.AppearanceHovered.Options.UseBackColor = true;
+            this.btnCikis.AppearanceHovered.Options.UseForeColor = true;
             this.btnCikis.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.btnCikis.ImageOptions.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("btnCikis.ImageOptions.SvgImage")));
-            this.btnCikis.Location = new System.Drawing.Point(344, 12);
+            this.btnCikis.Location = new Point(500, 10);
             this.btnCikis.Name = "btnCikis";
             this.btnCikis.PaintStyle = DevExpress.XtraEditors.Controls.PaintStyles.Light;
-            this.btnCikis.Size = new System.Drawing.Size(55, 50);
-            this.btnCikis.TabIndex = 0;
+            this.btnCikis.Size = new Size(40, 40);
+            this.btnCikis.TabIndex = 5;
+            this.btnCikis.Text = "✕";
             this.btnCikis.Click += new System.EventHandler(this.btnCikis_Click);
+            // 
+            // svgPerson
+            // 
+            this.svgPerson.Location = new Point(40, 200);
+            this.svgPerson.Name = "svgPerson";
+            this.svgPerson.Size = new Size(30, 40);
+            this.svgPerson.SizeMode = DevExpress.XtraEditors.SvgImageSizeMode.Squeeze;
+            this.svgPerson.TabIndex = 6;
+            this.svgPerson.TabStop = false;
+            this.svgPerson.Click += new System.EventHandler(this.svgPerson_Click);
+            // 
+            // svgKey
+            // 
+            this.svgKey.Location = new Point(40, 270);
+            this.svgKey.Name = "svgKey";
+            this.svgKey.Size = new Size(30, 40);
+            this.svgKey.SizeMode = DevExpress.XtraEditors.SvgImageSizeMode.Squeeze;
+            this.svgKey.TabIndex = 7;
+            this.svgKey.TabStop = false;
+            this.svgKey.Click += new System.EventHandler(this.svgKey_Click);
             // 
             // Login
             // 
             this.AcceptButton = this.btnGiris;
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
+            this.AutoScaleDimensions = new SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.BackColor = Color.FromArgb(28, 28, 30);
             this.CancelButton = this.btnCikis;
-            this.ClientSize = new System.Drawing.Size(406, 262);
+            this.ClientSize = new Size(550, 600);
             this.ControlBox = false;
             this.Controls.Add(this.btnCikis);
-            this.Controls.Add(this.svgPerson);
-            this.Controls.Add(this.svgKey);
-            this.Controls.Add(this.btnGiris);
-            this.Controls.Add(this.labelSifre);
-            this.Controls.Add(this.labelKullaniciAdi);
-            this.Controls.Add(this.txtSifre);
-            this.Controls.Add(this.txtKullaniciAdi);
+            this.Controls.Add(this.panelLogin);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
-            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "Login";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "Login Page";
+            this.Text = "BURSOTO - Giriş";
             this.Load += new System.EventHandler(this.Login_Load);
+            ((System.ComponentModel.ISupportInitialize)(this.panelLogin)).EndInit();
+            this.panelLogin.ResumeLayout(false);
+            this.panelLogin.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.txtKullaniciAdi.Properties)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.txtSifre.Properties)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.svgKey)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.svgPerson)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.svgKey)).EndInit();
             this.ResumeLayout(false);
-            this.PerformLayout();
 
         }
 
-        
-
         #endregion
 
+        private DevExpress.XtraEditors.PanelControl panelLogin;
+        private DevExpress.XtraEditors.LabelControl lblBaslik;
+        private DevExpress.XtraEditors.LabelControl lblAciklama;
         private DevExpress.XtraEditors.TextEdit txtKullaniciAdi;
         private DevExpress.XtraEditors.TextEdit txtSifre;
-        private DevExpress.XtraEditors.LabelControl labelKullaniciAdi;
-        private DevExpress.XtraEditors.LabelControl labelSifre;
         private DevExpress.XtraEditors.SimpleButton btnGiris;
-        private DevExpress.XtraEditors.SvgImageBox svgKey;
-        private DevExpress.XtraEditors.SvgImageBox svgPerson;
         private DevExpress.XtraEditors.SimpleButton btnCikis;
+        private DevExpress.XtraEditors.SvgImageBox svgPerson;
+        private DevExpress.XtraEditors.SvgImageBox svgKey;
     }
 }

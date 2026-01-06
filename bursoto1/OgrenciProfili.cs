@@ -36,17 +36,20 @@ namespace bursoto1
                 }
 
                 GeminiAI ai = new GeminiAI();
-                string veri = $"AD: {txtOgrAd.Text}, AGNO: {txtAgno.Text}, GELIR: {txtHaneGeliri.Text}, KARDES: {txtOgrKardesSayisi.Text}";
+                string ad = txtOgrAd?.Text ?? string.Empty;
+                string agno = txtAgno?.Text ?? string.Empty;
+                string gelir = txtHaneGeliri?.Text ?? string.Empty;
+                string kardes = txtOgrKardesSayisi?.Text ?? string.Empty;
+                string veri = $"AD: {ad}, AGNO: {agno}, GELIR: {gelir}, KARDES: {kardes}";
 
-                rtbAnalizSonuc.EditValue = "Gemini analiz ediyor...";
-                string sonuc = await ai.BursAnaliziYap(veri);
-                rtbAnalizSonuc.EditValue = sonuc;
+                // Not: OgrenciProfili formunda rtbAnalizSonuc kontrolü yok, bu yüzden sadece veritabanına kaydediyoruz
+                string sonuc = await ai.BursAnaliziYap(veri).ConfigureAwait(false);
 
-                var match = Regex.Match(sonuc, @"SKOR:\s*(\d+)");
+                var match = Regex.Match(sonuc ?? string.Empty, @"SKOR:\s*(\d+)");
                 if (match.Success)
                 {
                     int puan = int.Parse(match.Groups[1].Value);
-                    txtAISkor.Text = puan.ToString();
+                    // Not: txtAISkor kontrolü bu formda yok, sadece veritabanına kaydediyoruz
 
                     using (SqlConnection conn = bgl.baglanti())
                     {
@@ -95,14 +98,14 @@ namespace bursoto1
             else
             {
                 // Manuel atanan değerleri kullan
-                txtOgrAd.Text = ad;
-                txtOgrSoyad.Text = soyad;
-                txtHaneGeliri.Text = haneGeliri;
-                txtAgno.Text = agno;
-                txtBolum.Text = bolum;
-                txtOgrKardesSayisi.Text = kardesSayisi;
-                txtSinif.Text = sinif;
-                txtTelNo.Text = telNo;
+                if (txtOgrAd != null) txtOgrAd.Text = ad ?? string.Empty;
+                if (txtOgrSoyad != null) txtOgrSoyad.Text = soyad ?? string.Empty;
+                if (txtHaneGeliri != null) txtHaneGeliri.Text = haneGeliri ?? string.Empty;
+                if (txtAgno != null) txtAgno.Text = agno ?? string.Empty;
+                if (txtBolum != null) txtBolum.Text = bolum ?? string.Empty;
+                if (txtOgrKardesSayisi != null) txtOgrKardesSayisi.Text = kardesSayisi ?? string.Empty;
+                if (txtSinif != null) txtSinif.Text = sinif ?? string.Empty;
+                if (txtTelNo != null) txtTelNo.Text = telNo ?? string.Empty;
             }
 
             this.Text = (ad ?? "") + " " + (soyad ?? "") + " - Öğrenci Profili";
@@ -226,24 +229,24 @@ namespace bursoto1
                     {
                         if (reader.Read())
                         {
-                            ad = reader["AD"]?.ToString();
-                            soyad = reader["SOYAD"]?.ToString();
-                            haneGeliri = reader["TOPLAM HANE GELİRİ"]?.ToString();
-                            fotoYolu = reader["FOTO"]?.ToString();
-                            telNo = reader["TELEFON"]?.ToString();
-                            bolum = reader["BÖLÜMÜ"]?.ToString();
-                            sinif = reader["SINIF"]?.ToString();
-                            kardesSayisi = reader["KARDEŞ SAYISI"]?.ToString();
-                            agno = reader["AGNO"]?.ToString();
+                            ad = reader["AD"]?.ToString() ?? string.Empty;
+                            soyad = reader["SOYAD"]?.ToString() ?? string.Empty;
+                            haneGeliri = reader["TOPLAM HANE GELİRİ"]?.ToString() ?? string.Empty;
+                            fotoYolu = reader["FOTO"]?.ToString() ?? string.Empty;
+                            telNo = reader["TELEFON"]?.ToString() ?? string.Empty;
+                            bolum = reader["BÖLÜMÜ"]?.ToString() ?? string.Empty;
+                            sinif = reader["SINIF"]?.ToString() ?? string.Empty;
+                            kardesSayisi = reader["KARDEŞ SAYISI"]?.ToString() ?? string.Empty;
+                            agno = reader["AGNO"]?.ToString() ?? string.Empty;
 
-                            txtOgrAd.Text = ad;
-                            txtOgrSoyad.Text = soyad;
-                            txtHaneGeliri.Text = haneGeliri;
-                            txtAgno.Text = agno;
-                            txtBolum.Text = bolum;
-                            txtOgrKardesSayisi.Text = kardesSayisi;
-                            txtSinif.Text = sinif;
-                            txtTelNo.Text = telNo;
+                            if (txtOgrAd != null) txtOgrAd.Text = ad;
+                            if (txtOgrSoyad != null) txtOgrSoyad.Text = soyad;
+                            if (txtHaneGeliri != null) txtHaneGeliri.Text = haneGeliri;
+                            if (txtAgno != null) txtAgno.Text = agno;
+                            if (txtBolum != null) txtBolum.Text = bolum;
+                            if (txtOgrKardesSayisi != null) txtOgrKardesSayisi.Text = kardesSayisi;
+                            if (txtSinif != null) txtSinif.Text = sinif;
+                            if (txtTelNo != null) txtTelNo.Text = telNo;
 
                             // Fotoğrafı yükle
                             if (!string.IsNullOrEmpty(fotoYolu))
@@ -253,10 +256,8 @@ namespace bursoto1
                                     pictureEdit1.EditValue = resim;
                             }
 
-                            // AI Skorunu yükle
-                            object aiSkor = reader["AISkor"];
-                            if (aiSkor != DBNull.Value && aiSkor != null)
-                                txtAISkor.Text = aiSkor.ToString();
+                            // AI Skorunu yükle (Not: txtAISkor kontrolü bu formda yok, sadece veritabanından okunuyor)
+                            // AI Skor bilgisi veritabanında saklanıyor, formda gösterilmiyor
                         }
                     }
                 }
@@ -269,21 +270,9 @@ namespace bursoto1
 
         void LoadAISkor()
         {
-            if (secilenOgrenciID > 0)
-            {
-                try
-                {
-                    using (SqlConnection conn = bgl.baglanti())
-                    {
-                        SqlCommand cmd = new SqlCommand("SELECT AISkor FROM Ogrenciler WHERE ID = @id", conn);
-                        cmd.Parameters.AddWithValue("@id", secilenOgrenciID);
-                        object result = cmd.ExecuteScalar();
-                        if (result != DBNull.Value && result != null)
-                            txtAISkor.Text = result.ToString();
-                    }
-                }
-                catch { }
-            }
+            // Not: txtAISkor kontrolü bu formda yok
+            // AI Skor bilgisi veritabanında saklanıyor, formda gösterilmiyor
+            // Bu metod şimdilik boş bırakıldı, gelecekte bir kontrol eklendiğinde kullanılabilir
         }
 
         public OgrenciProfili()
