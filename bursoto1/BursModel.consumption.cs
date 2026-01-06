@@ -16,26 +16,42 @@ namespace Bursoto1
         public class ModelInput
         {
             [LoadColumn(0)]
-            [ColumnName(@"MevcutAgno")]
-            public float MevcutAgno { get; set; }
+            [ColumnName(@"OgrenciAd")]
+            public string OgrenciAd { get; set; }
 
             [LoadColumn(1)]
-            [ColumnName(@"HaneGeliri")]
-            public float HaneGeliri { get; set; }
+            [ColumnName(@"Sehir")]
+            public string Sehir { get; set; }
 
             [LoadColumn(2)]
-            [ColumnName(@"KardesSayisi")]
-            public float KardesSayisi { get; set; }
-
-            [LoadColumn(3)]
             [ColumnName(@"SehirMaliyet")]
             public float SehirMaliyet { get; set; }
 
+            [LoadColumn(3)]
+            [ColumnName(@"Universite")]
+            public string Universite { get; set; }
+
             [LoadColumn(4)]
+            [ColumnName(@"Bolum")]
+            public string Bolum { get; set; }
+
+            [LoadColumn(5)]
             [ColumnName(@"BolumZorluk")]
             public float BolumZorluk { get; set; }
 
-            [LoadColumn(5)]
+            [LoadColumn(6)]
+            [ColumnName(@"MevcutAgno")]
+            public float MevcutAgno { get; set; }
+
+            [LoadColumn(7)]
+            [ColumnName(@"HaneGeliri")]
+            public float HaneGeliri { get; set; }
+
+            [LoadColumn(8)]
+            [ColumnName(@"KardesSayisi")]
+            public float KardesSayisi { get; set; }
+
+            [LoadColumn(9)]
             [ColumnName(@"MezuniyetPuani")]
             public float MezuniyetPuani { get; set; }
 
@@ -49,6 +65,24 @@ namespace Bursoto1
         #region model output class
         public class ModelOutput
         {
+            [ColumnName(@"OgrenciAd")]
+            public float[] OgrenciAd { get; set; }
+
+            [ColumnName(@"Sehir")]
+            public float[] Sehir { get; set; }
+
+            [ColumnName(@"SehirMaliyet")]
+            public float SehirMaliyet { get; set; }
+
+            [ColumnName(@"Universite")]
+            public float[] Universite { get; set; }
+
+            [ColumnName(@"Bolum")]
+            public float[] Bolum { get; set; }
+
+            [ColumnName(@"BolumZorluk")]
+            public float BolumZorluk { get; set; }
+
             [ColumnName(@"MevcutAgno")]
             public float MevcutAgno { get; set; }
 
@@ -57,12 +91,6 @@ namespace Bursoto1
 
             [ColumnName(@"KardesSayisi")]
             public float KardesSayisi { get; set; }
-
-            [ColumnName(@"SehirMaliyet")]
-            public float SehirMaliyet { get; set; }
-
-            [ColumnName(@"BolumZorluk")]
-            public float BolumZorluk { get; set; }
 
             [ColumnName(@"MezuniyetPuani")]
             public float MezuniyetPuani { get; set; }

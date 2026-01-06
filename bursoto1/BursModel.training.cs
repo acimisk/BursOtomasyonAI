@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using Microsoft.ML;
 using Microsoft.ML.Data;
 using Microsoft.ML.Trainers;
-using Microsoft.ML.Trainers.FastTree;
+using Microsoft.ML.Trainers.LightGbm;
 
 namespace Bursoto1
 {
@@ -90,9 +90,13 @@ namespace Bursoto1
         public static IEstimator<ITransformer> BuildPipeline(MLContext mlContext)
         {
             // Data process configuration with pipeline data transformations
-            var pipeline = mlContext.Transforms.ReplaceMissingValues(new []{new InputOutputColumnPair(@"MevcutAgno", @"MevcutAgno"),new InputOutputColumnPair(@"HaneGeliri", @"HaneGeliri"),new InputOutputColumnPair(@"KardesSayisi", @"KardesSayisi"),new InputOutputColumnPair(@"SehirMaliyet", @"SehirMaliyet"),new InputOutputColumnPair(@"BolumZorluk", @"BolumZorluk")})      
-                                    .Append(mlContext.Transforms.Concatenate(@"Features", new []{@"MevcutAgno",@"HaneGeliri",@"KardesSayisi",@"SehirMaliyet",@"BolumZorluk"}))      
-                                    .Append(mlContext.Regression.Trainers.FastTree(new FastTreeRegressionTrainer.Options(){NumberOfLeaves=4,MinimumExampleCountPerLeaf=3,NumberOfTrees=42,MaximumBinCountPerFeature=123,FeatureFraction=0.99999999,LearningRate=0.46718116434891377,LabelColumnName=@"MezuniyetPuani",FeatureColumnName=@"Features",DiskTranspose=false}));
+            var pipeline = mlContext.Transforms.ReplaceMissingValues(new []{new InputOutputColumnPair(@"SehirMaliyet", @"SehirMaliyet"),new InputOutputColumnPair(@"BolumZorluk", @"BolumZorluk"),new InputOutputColumnPair(@"MevcutAgno", @"MevcutAgno"),new InputOutputColumnPair(@"HaneGeliri", @"HaneGeliri"),new InputOutputColumnPair(@"KardesSayisi", @"KardesSayisi")})      
+                                    .Append(mlContext.Transforms.Text.FeaturizeText(inputColumnName:@"OgrenciAd",outputColumnName:@"OgrenciAd"))      
+                                    .Append(mlContext.Transforms.Text.FeaturizeText(inputColumnName:@"Sehir",outputColumnName:@"Sehir"))      
+                                    .Append(mlContext.Transforms.Text.FeaturizeText(inputColumnName:@"Universite",outputColumnName:@"Universite"))      
+                                    .Append(mlContext.Transforms.Text.FeaturizeText(inputColumnName:@"Bolum",outputColumnName:@"Bolum"))      
+                                    .Append(mlContext.Transforms.Concatenate(@"Features", new []{@"SehirMaliyet",@"BolumZorluk",@"MevcutAgno",@"HaneGeliri",@"KardesSayisi",@"OgrenciAd",@"Sehir",@"Universite",@"Bolum"}))      
+                                    .Append(mlContext.Regression.Trainers.LightGbm(new LightGbmRegressionTrainer.Options(){NumberOfLeaves=4,NumberOfIterations=7813,MinimumExampleCountPerLeaf=20,LearningRate=0.0004501019866823315,LabelColumnName=@"MezuniyetPuani",FeatureColumnName=@"Features",Booster=new GradientBooster.Options(){SubsampleFraction=0.12776695224236706,FeatureFraction=0.99999999,L1Regularization=1.0027919505023338E-09,L2Regularization=0.4106524756995293},MaximumBinCountPerFeature=438}));
 
             return pipeline;
         }

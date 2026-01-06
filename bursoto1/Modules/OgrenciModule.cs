@@ -10,6 +10,7 @@ using System.Drawing;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
+using System.Globalization;
 // BursModel sınıfı bursoto1 namespace'inde tanımlı
 
 namespace bursoto1.Modules
@@ -194,6 +195,29 @@ namespace bursoto1.Modules
                     }
                     catch { }
 
+                    // Üniversite kolonu adını dinamik tespit et
+                    string universiteKolon = null;
+                    try
+                    {
+                        SqlCommand cmdUniKolon = new SqlCommand(@"SELECT TOP 1 COLUMN_NAME 
+                            FROM INFORMATION_SCHEMA.COLUMNS 
+                            WHERE TABLE_NAME = 'Ogrenciler' 
+                            AND COLUMN_NAME LIKE N'%niversite%'", conn);
+                        var uniKolonResult = cmdUniKolon.ExecuteScalar();
+                        if (uniKolonResult != null && uniKolonResult != DBNull.Value)
+                        {
+                            string uniKolonStr = uniKolonResult.ToString() ?? string.Empty;
+                            if (!string.IsNullOrEmpty(uniKolonStr))
+                                universiteKolon = uniKolonStr;
+                        }
+                    }
+                    catch { }
+
+                    // Üniversite kolonu SELECT'e eklenecek (varsa)
+                    string universiteSelect = string.IsNullOrWhiteSpace(universiteKolon) 
+                        ? string.Empty 
+                        : $", o.[{universiteKolon}] AS [Üniversite]";
+
                     string sorgu;
                     
                     switch (filtreTipi)
@@ -201,7 +225,7 @@ namespace bursoto1.Modules
                         case "Burs Alanlar":
                             sorgu = $@"SELECT DISTINCT o.[{ogrenciIDKolonu}] AS ID, o.AD, o.SOYAD, o.BÖLÜMÜ, o.SINIF, o.AGNO, 
                                      o.[TOPLAM HANE GELİRİ] AS [Hane Geliri], o.[KARDEŞ SAYISI] AS [Kardeş], 
-                                     ISNULL(o.AISkor, 0) AS [AI Puanı],
+                                     ISNULL(o.AISkor, 0) AS [AI Puanı]{universiteSelect},
                                      ISNULL(ob.Durum, -1) AS [Durum],
                                      CASE 
                                          WHEN ob.Durum = 1 THEN 'Kabul Edildi'
@@ -217,7 +241,7 @@ namespace bursoto1.Modules
                         case "Beklemedeki Öğrenciler":
                             sorgu = $@"SELECT DISTINCT o.[{ogrenciIDKolonu}] AS ID, o.AD, o.SOYAD, o.BÖLÜMÜ, o.SINIF, o.AGNO, 
                                      o.[TOPLAM HANE GELİRİ] AS [Hane Geliri], o.[KARDEŞ SAYISI] AS [Kardeş], 
-                                     ISNULL(o.AISkor, 0) AS [AI Puanı],
+                                     ISNULL(o.AISkor, 0) AS [AI Puanı]{universiteSelect},
                                      ISNULL(ob.Durum, -1) AS [Durum],
                                      CASE 
                                          WHEN ob.Durum = 1 THEN 'Kabul Edildi'
@@ -233,7 +257,7 @@ namespace bursoto1.Modules
                         case "Yedek Listesi":
                             sorgu = $@"SELECT DISTINCT o.[{ogrenciIDKolonu}] AS ID, o.AD, o.SOYAD, o.BÖLÜMÜ, o.SINIF, o.AGNO, 
                                      o.[TOPLAM HANE GELİRİ] AS [Hane Geliri], o.[KARDEŞ SAYISI] AS [Kardeş], 
-                                     ISNULL(o.AISkor, 0) AS [AI Puanı],
+                                     ISNULL(o.AISkor, 0) AS [AI Puanı]{universiteSelect},
                                      ISNULL(ob.Durum, -1) AS [Durum],
                                      CASE 
                                          WHEN ob.Durum = 1 THEN 'Kabul Edildi'
@@ -249,7 +273,7 @@ namespace bursoto1.Modules
                         case "Reddedilen Öğrenciler":
                             sorgu = $@"SELECT o.[{ogrenciIDKolonu}] AS ID, o.AD, o.SOYAD, o.BÖLÜMÜ, o.SINIF, o.AGNO, 
                                      o.[TOPLAM HANE GELİRİ] AS [Hane Geliri], o.[KARDEŞ SAYISI] AS [Kardeş], 
-                                     ISNULL(o.AISkor, 0) AS [AI Puanı],
+                                     ISNULL(o.AISkor, 0) AS [AI Puanı]{universiteSelect},
                                      -1 AS [Durum],
                                      'Reddedildi' AS [Durum Metni]
                                      FROM Ogrenciler o
@@ -260,7 +284,7 @@ namespace bursoto1.Modules
                             string orderByClause = ogrenciBurslariIDVar ? "BaslangicTarihi DESC, ID DESC" : "BaslangicTarihi DESC";
                             sorgu = $@"SELECT o.[{ogrenciIDKolonu}] AS ID, o.AD, o.SOYAD, o.BÖLÜMÜ, o.SINIF, o.AGNO, 
                                   o.[TOPLAM HANE GELİRİ] AS [Hane Geliri], o.[KARDEŞ SAYISI] AS [Kardeş], 
-                                  ISNULL(o.AISkor, 0) AS [AI Puanı],
+                                  ISNULL(o.AISkor, 0) AS [AI Puanı]{universiteSelect},
                                   CASE 
                                       WHEN ob.Durum IS NULL THEN -1
                                       WHEN ob.Durum = 1 THEN 1
@@ -1275,6 +1299,7 @@ namespace bursoto1.Modules
                 string gelirStr = dr["Hane Geliri"]?.ToString() ?? "0";
                 string kardesStr = dr["Kardeş"]?.ToString() ?? "0";
                 string bolum = dr["BÖLÜMÜ"]?.ToString() ?? string.Empty;
+                int ogrenciID = Convert.ToInt32(dr["ID"]);
 
                 // String değerleri float'a çevir
                 if (!float.TryParse(agnoStr, out float mevcutAgno))
@@ -1295,9 +1320,15 @@ namespace bursoto1.Modules
                     return;
                 }
 
-                // SehirMaliyet ve BolumZorluk değerlerini hesapla veya varsayılan değerler kullan
-                float sehirMaliyet = GetSehirMaliyet(); // Varsayılan: 1.0 (orta seviye)
-                float bolumZorluk = GetBolumZorluk(bolum); // Bölüme göre zorluk (0.5-2.0 arası)
+                // Üniversite bilgisini grid'den veya veritabanından güvenli şekilde al
+                string universiteAdi = GetUniversiteAdiSafe(dr, ogrenciID);
+
+                // Şehir maliyeti ve bölüm zorluğunu otomatik eşle
+                float sehirMaliyet = MapSehirMaliyet(universiteAdi);
+                float bolumZorluk = MapBolumZorluk(bolum);
+
+                // Debug: mapping çıktılarını kontrol et
+                Console.WriteLine($"[AI] Universite='{universiteAdi}' Bolum='{bolum}' => SehirMaliyet={sehirMaliyet}, BolumZorluk={bolumZorluk}");
 
                 // ModelInput oluştur
                 Bursoto1.BursModel.ModelInput input = new Bursoto1.BursModel.ModelInput
@@ -1313,8 +1344,11 @@ namespace bursoto1.Modules
                 Bursoto1.BursModel.ModelOutput output = Bursoto1.BursModel.Predict(input);
                 float tahminEdilenPuan = output.Score;
 
-                // Sonucu göster
-                ShowTahminSonucu(tahminEdilenPuan);
+                // Sonucu göster (mevcut AGNO ile karşılaştır)
+                ShowTahminSonucu(tahminEdilenPuan, mevcutAgno);
+
+                // Tahmini veritabanına kaydet
+                UpdateAIPotansiyelNotu(ogrenciID, tahminEdilenPuan);
             }
             catch (Exception ex)
             {
@@ -1322,50 +1356,8 @@ namespace bursoto1.Modules
             }
         }
 
-        // Şehir maliyetini al (varsayılan: 1.0)
-        private float GetSehirMaliyet()
-        {
-            // TODO: Veritabanından öğrencinin şehir bilgisini al ve maliyet hesapla
-            // Şimdilik varsayılan değer kullanıyoruz
-            return 1.0f; // Orta seviye maliyet
-        }
-
-        // Bölüm zorluğunu hesapla
-        private float GetBolumZorluk(string bolum)
-        {
-            if (string.IsNullOrWhiteSpace(bolum))
-                return 1.0f; // Varsayılan orta zorluk
-
-            // Bölüm adına göre zorluk seviyesi belirle
-            string bolumLower = bolum.ToLower();
-            
-            // Zor bölümler (2.0)
-            if (bolumLower.Contains("mühendislik") || bolumLower.Contains("tıp") || 
-                bolumLower.Contains("hukuk") || bolumLower.Contains("mimarlık"))
-            {
-                return 2.0f;
-            }
-            
-            // Orta zorluk (1.5)
-            if (bolumLower.Contains("işletme") || bolumLower.Contains("ekonomi") || 
-                bolumLower.Contains("eğitim") || bolumLower.Contains("fen"))
-            {
-                return 1.5f;
-            }
-            
-            // Kolay bölümler (0.5)
-            if (bolumLower.Contains("sosyal") || bolumLower.Contains("güzel sanatlar") || 
-                bolumLower.Contains("spor"))
-            {
-                return 0.5f;
-            }
-
-            // Varsayılan orta zorluk
-            return 1.0f;
-        }
-
         // Tahmin sonucunu görsel olarak göster
-        private void ShowTahminSonucu(float tahminEdilenPuan)
+        private void ShowTahminSonucu(float tahminEdilenPuan, float mevcutAgno)
         {
             try
             {
@@ -1382,10 +1374,20 @@ namespace bursoto1.Modules
                 // Label'ı güncelle
                 if (lblTahminSonuc != null)
                 {
-                    lblTahminSonuc.Text = $"Tahmin: {tahminEdilenPuan:F2} / 4.00";
-                    
-                    // Renklendirme: 3.00 üzeri yeşil, altı turuncu
-                    if (tahminEdilenPuan >= 3.0f)
+                    // Temel metin
+                    string text = $"🤖 AI Başarı Projeksiyonu: {tahminEdilenPuan:F2}";
+
+                    // Eğer tahmini not mevcut AGNO'dan yüksekse, potansiyel artış mesajı ekle
+                    bool potansiyelArtis = tahminEdilenPuan > mevcutAgno;
+                    if (potansiyelArtis)
+                    {
+                        text += " ↑ Potansiyel Artış Bekleniyor";
+                    }
+
+                    lblTahminSonuc.Text = text;
+
+                    // Renklendirme: Potansiyel artış varsa yeşil, yoksa turuncu
+                    if (potansiyelArtis)
                     {
                         lblTahminSonuc.Appearance.ForeColor = Color.FromArgb(39, 174, 96); // Yeşil
                         if (progressBarTahmin != null)
@@ -1407,6 +1409,305 @@ namespace bursoto1.Modules
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"Tahmin sonucu gösterilirken hata: {ex.Message}");
+            }
+        }
+
+        // --- Üniversite ve Bölüm için Otomatik Mapping ---
+
+        // Önce grid satırından, yoksa veritabanından üniversite adını al
+        private string GetUniversiteAdiSafe(DataRow dr, int ogrenciID)
+        {
+            try
+            {
+                // 1) Grid'deki kolonlardan universite bilgisini dene
+                if (dr != null && dr.Table != null)
+                {
+                    // Önce "Üniversite" kolonunu dene (tam eşleşme)
+                    if (dr.Table.Columns.Contains("Üniversite"))
+                    {
+                        var val = dr["Üniversite"];
+                        if (val != null && val != DBNull.Value)
+                        {
+                            string uni = val.ToString();
+                            if (!string.IsNullOrWhiteSpace(uni))
+                            {
+                                Console.WriteLine($"[AI] Grid'den Üniversite kolonu okundu: '{uni}'");
+                                return uni;
+                            }
+                        }
+                    }
+
+                    // Sonra "Universite" kolonunu dene (İngilizce karakter)
+                    if (dr.Table.Columns.Contains("Universite"))
+                    {
+                        var val = dr["Universite"];
+                        if (val != null && val != DBNull.Value)
+                        {
+                            string uni = val.ToString();
+                            if (!string.IsNullOrWhiteSpace(uni))
+                            {
+                                Console.WriteLine($"[AI] Grid'den Universite kolonu okundu: '{uni}'");
+                                return uni;
+                            }
+                        }
+                    }
+
+                    // Son olarak kolon adı içinde "NIVERSITE" geçen herhangi bir kolonu dene
+                    foreach (DataColumn col in dr.Table.Columns)
+                    {
+                        var colName = col.ColumnName ?? string.Empty;
+                        if (colName.ToUpperInvariant().Contains("NIVERSITE"))
+                        {
+                            var val = dr[col];
+                            if (val != null && val != DBNull.Value)
+                            {
+                                string uni = val.ToString();
+                                if (!string.IsNullOrWhiteSpace(uni))
+                                {
+                                    Console.WriteLine($"[AI] Grid'den '{colName}' kolonu okundu: '{uni}'");
+                                    return uni;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Grid'den universite okuma hatası: {ex.Message}");
+            }
+
+            // 2) Grid'de yoksa veritabanından çek
+            Console.WriteLine($"[AI] Grid'de üniversite bulunamadı, veritabanından çekiliyor (OgrenciID: {ogrenciID})");
+            return GetUniversiteAdiFromDb(ogrenciID);
+        }
+
+        // Öğrencinin üniversite adını veritabanından al
+        private string GetUniversiteAdiFromDb(int ogrenciID)
+        {
+            try
+            {
+                using (SqlConnection conn = bgl.baglanti())
+                {
+                    // Ogrenciler tablosundaki ID kolonunu dinamik tespit et
+                    string ogrenciIDKolonu = "ID";
+                    try
+                    {
+                        SqlCommand cmdKolon = new SqlCommand(@"SELECT TOP 1 COLUMN_NAME 
+                            FROM INFORMATION_SCHEMA.COLUMNS 
+                            WHERE TABLE_NAME = 'Ogrenciler' 
+                            AND COLUMN_NAME IN ('ID', 'OgrenciID')
+                            ORDER BY CASE COLUMN_NAME 
+                                WHEN 'ID' THEN 1 
+                                WHEN 'OgrenciID' THEN 2 
+                                ELSE 3 END", conn);
+                        var kolonResult = cmdKolon.ExecuteScalar();
+                        if (kolonResult != null && kolonResult != DBNull.Value)
+                        {
+                            string kolonStr = kolonResult.ToString() ?? string.Empty;
+                            if (!string.IsNullOrEmpty(kolonStr))
+                                ogrenciIDKolonu = kolonStr;
+                        }
+                    }
+                    catch { }
+
+                    // Üniversite kolonu adını tespit et (Üniversite / Universite / UNIVERSITE ...)
+                    string universiteKolon = null;
+                    try
+                    {
+                        SqlCommand cmdUniKolon = new SqlCommand(@"SELECT TOP 1 COLUMN_NAME 
+                            FROM INFORMATION_SCHEMA.COLUMNS 
+                            WHERE TABLE_NAME = 'Ogrenciler' 
+                            AND (COLUMN_NAME LIKE N'%niversite%' OR COLUMN_NAME LIKE N'%NIVERSITE%')", conn);
+                        var uniKolonResult = cmdUniKolon.ExecuteScalar();
+                        if (uniKolonResult != null && uniKolonResult != DBNull.Value)
+                        {
+                            string uniKolonStr = uniKolonResult.ToString() ?? string.Empty;
+                            if (!string.IsNullOrEmpty(uniKolonStr))
+                                universiteKolon = uniKolonStr;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"Üniversite kolonu tespit hatası: {ex.Message}");
+                    }
+
+                    if (string.IsNullOrWhiteSpace(universiteKolon))
+                    {
+                        Console.WriteLine("[AI] Veritabanında üniversite kolonu bulunamadı.");
+                        return string.Empty;
+                    }
+
+                    SqlCommand cmd = new SqlCommand(
+                        $"SELECT TOP 1 [{universiteKolon}] FROM Ogrenciler WHERE [{ogrenciIDKolonu}] = @id", conn);
+                    cmd.Parameters.AddWithValue("@id", ogrenciID);
+                    object result = cmd.ExecuteScalar();
+                    string uniResult = result?.ToString() ?? string.Empty;
+                    Console.WriteLine($"[AI] Veritabanından '{universiteKolon}' kolonu okundu: '{uniResult}'");
+                    return uniResult;
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Üniversite bilgisi alınırken hata: {ex.Message}");
+                return string.Empty;
+            }
+        }
+
+        // Üniversite adına göre şehir maliyeti mapping
+        private float MapSehirMaliyet(string universiteAdi)
+        {
+            if (string.IsNullOrWhiteSpace(universiteAdi))
+                return 0.7f;
+
+            string uni = universiteAdi.ToUpper(new CultureInfo("tr-TR"));
+
+            // İstanbul ve üst seviye özel/vakıf üniversiteleri
+            if (uni.Contains("İSTANBUL") || uni.Contains("İTÜ") || uni.Contains("İSTANBUL TEKNİK") ||
+                uni.Contains("BOĞAZİÇİ") || uni.Contains("KOÇ") ||
+                uni.Contains("ITU") || uni.Contains("İTU"))
+            {
+                return 1.0f;
+            }
+
+            // Ankara ve benzeri yüksek maliyetli şehir üniversiteleri
+            if (uni.Contains("ANKARA") || uni.Contains("ODTÜ") || uni.Contains("ORTA DOĞU TEKNİK") ||
+                uni.Contains("HACETTEPE"))
+            {
+                return 0.9f;
+            }
+
+            // Düşük maliyet: Yozgat / Bozok
+            if (uni.Contains("YOZGAT") || uni.Contains("BOZOK"))
+            {
+                return 0.5f;
+            }
+
+            // Diğer tüm üniversiteler
+            return 0.7f;
+        }
+
+        // Bölüm adına göre bölüm zorluğu mapping
+        private float MapBolumZorluk(string bolumAdi)
+        {
+            if (string.IsNullOrWhiteSpace(bolumAdi))
+                return 2.5f;
+
+            // Türkçe karakter uyumlu normalize et:
+            // - 'İ' ve 'ı' karakterlerini 'I' yap
+            // - Ardından Turkish culture ile büyük harfe çevir
+            string bolum = bolumAdi
+                .Replace('İ', 'I')
+                .Replace('ı', 'I')
+                .ToUpper(new CultureInfo("tr-TR"));
+
+            // En zor bölümler
+            // TIP ayrı ele alınır (maksimum zorluk)
+            if (bolum.Contains("TIP"))
+            {
+                return 5.0f;
+            }
+
+            // MÜHENDIS (noktasız I) - mühendislik türevleri
+            if (bolum.Contains("MÜHENDIS") || bolum.Contains("MUHENDIS"))
+            {
+                return 4.8f;
+            }
+
+            // Zor bölümler
+            if (bolum.Contains("HUKUK") || bolum.Contains("MİMAR") ||
+                bolum.Contains("FEN") || bolum.Contains("MATEMATİK"))
+            {
+                return 4.0f;
+            }
+
+            // Orta zorluk
+            if (bolum.Contains("İŞLETME") || bolum.Contains("İKTİSAT") ||
+                bolum.Contains("ÖĞRETMEN"))
+            {
+                return 3.0f;
+            }
+
+            // Daha düşük zorluk
+            // TARIH ve TARİH kontrolü - Replace("İ", "I") yapıldığı için TARIH kontrolü yeterli
+            if (bolum.Contains("EDEBİYAT") || bolum.Contains("TARIH") ||
+                bolum.Contains("ARKEOLOJİ") || bolum.Contains("SPOR"))
+            {
+                return 2.0f;
+            }
+
+            // Diğerleri için
+            return 2.5f;
+        }
+
+        // Tahmin edilen puanı Ogrenciler.AIPotansiyelNotu kolonuna kaydet
+        private void UpdateAIPotansiyelNotu(int ogrenciID, float tahminEdilenPuan)
+        {
+            try
+            {
+                using (SqlConnection conn = bgl.baglanti())
+                {
+                    // Ogrenciler tablosundaki ID kolonunu dinamik tespit et
+                    string ogrenciIDKolonu = "ID";
+                    try
+                    {
+                        SqlCommand cmdKolon = new SqlCommand(@"SELECT TOP 1 COLUMN_NAME 
+                            FROM INFORMATION_SCHEMA.COLUMNS 
+                            WHERE TABLE_NAME = 'Ogrenciler' 
+                            AND COLUMN_NAME IN ('ID', 'OgrenciID')
+                            ORDER BY CASE COLUMN_NAME 
+                                WHEN 'ID' THEN 1 
+                                WHEN 'OgrenciID' THEN 2 
+                                ELSE 3 END", conn);
+                        var kolonResult = cmdKolon.ExecuteScalar();
+                        if (kolonResult != null && kolonResult != DBNull.Value)
+                        {
+                            string kolonStr = kolonResult.ToString() ?? string.Empty;
+                            if (!string.IsNullOrEmpty(kolonStr))
+                                ogrenciIDKolonu = kolonStr;
+                        }
+                    }
+                    catch { }
+
+                    // AIPotansiyelNotu kolonu var mı kontrol et
+                    bool hasAIPotansiyelNotu = false;
+                    try
+                    {
+                        SqlCommand cmdCheck = new SqlCommand(@"SELECT COUNT(*) 
+                            FROM INFORMATION_SCHEMA.COLUMNS 
+                            WHERE TABLE_NAME = 'Ogrenciler' AND COLUMN_NAME = 'AIPotansiyelNotu'", conn);
+                        hasAIPotansiyelNotu = Convert.ToInt32(cmdCheck.ExecuteScalar()) > 0;
+                    }
+                    catch { }
+
+                    // Kolon yoksa otomatik oluştur
+                    if (!hasAIPotansiyelNotu)
+                    {
+                        try
+                        {
+                            SqlCommand cmdAlter = new SqlCommand(@"ALTER TABLE Ogrenciler 
+                                ADD AIPotansiyelNotu FLOAT NULL", conn);
+                            cmdAlter.ExecuteNonQuery();
+                            System.Diagnostics.Debug.WriteLine("AIPotansiyelNotu kolonu otomatik olarak oluşturuldu.");
+                            hasAIPotansiyelNotu = true;
+                        }
+                        catch (Exception alterEx)
+                        {
+                            System.Diagnostics.Debug.WriteLine($"AIPotansiyelNotu kolonu oluşturulamadı: {alterEx.Message}");
+                            return;
+                        }
+                    }
+
+                    SqlCommand cmd = new SqlCommand(
+                        $"UPDATE Ogrenciler SET AIPotansiyelNotu = @puan WHERE [{ogrenciIDKolonu}] = @id", conn);
+                    cmd.Parameters.AddWithValue("@puan", tahminEdilenPuan);
+                    cmd.Parameters.AddWithValue("@id", ogrenciID);
+                    cmd.ExecuteNonQuery();
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"AIPotansiyelNotu güncellenirken hata: {ex.Message}");
             }
         }
 

@@ -830,7 +830,7 @@
                 }
 
                 // Üniversite kolonu
-                string universiteKolon = mevcutKolonlar.Contains("Üniversite") ? "Üniversite" : (mevcutKolonlar.Contains("Universite") ? "Universite" : null);
+                string universiteKolon = mevcutKolonlar.Contains("UNIVERSITE") ? "UNIVERSITE" : (mevcutKolonlar.Contains("UNIVERSITE") ? "UNIVERSITE" : null);
                 if (universiteKolon != null)
                 {
                     kolonlar.Add(universiteKolon);
@@ -926,7 +926,7 @@
                     else
                     {
                         // AINotu'na tüm bilgileri ekle
-                        string ainoNotu = $"[ÜNİVERSİTE]: {universite}\n[E-POSTA]: {eposta}\n[İHTİYAÇ]: {ihtiyac}\n[HEDEFLER]: {hedefler}\n[KULLANIM]: {kullanim}\n[FARK]: {farkliOzellik}";
+                        string ainoNotu = $"[UNIVERSITE]: {universite}\n[E-POSTA]: {eposta}\n[İHTİYAÇ]: {ihtiyac}\n[HEDEFLER]: {hedefler}\n[KULLANIM]: {kullanim}\n[FARK]: {farkliOzellik}";
                         cmd.Parameters.AddWithValue($"@p{pIdx++}", ainoNotu.Trim());
                     }
 
