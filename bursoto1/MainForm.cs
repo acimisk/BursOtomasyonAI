@@ -107,7 +107,7 @@ namespace bursoto1
             {
                 frm.Text = "Yeni Kayıt Ekle";
                 frm.Size = new System.Drawing.Size(350, 200);
-                frm.StartPosition = FormStartPosition.CenterParent;
+                frm.StartPosition = FormStartPosition.CenterScreen;
                 frm.FormBorderStyle = FormBorderStyle.FixedDialog;
                 frm.MaximizeBox = false;
                 frm.MinimizeBox = false;
@@ -313,7 +313,7 @@ namespace bursoto1
             {
                 frm.Text = "💰 Burs Ödemesi Yap";
                 frm.Size = new System.Drawing.Size(750, 550);
-                frm.StartPosition = FormStartPosition.CenterParent;
+                frm.StartPosition = FormStartPosition.CenterScreen;
                 frm.FormBorderStyle = FormBorderStyle.FixedDialog;
                 frm.MaximizeBox = false;
                 frm.MinimizeBox = false;

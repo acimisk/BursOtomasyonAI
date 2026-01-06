@@ -258,6 +258,7 @@
             this.ClientSize = new System.Drawing.Size(1544, 539);
             this.Controls.Add(this.groupControl1);
             this.Name = "Ara";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Ara";
             this.Load += new System.EventHandler(this.Ara_Load);
             ((System.ComponentModel.ISupportInitialize)(this.groupControl1)).EndInit();

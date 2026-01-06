@@ -161,7 +161,7 @@ namespace bursoto1.Modules
             gridControl1.BackColor = Color.FromArgb(32, 32, 32);
         }
 
-        public void Listele(string filtreTipi = "Tüm Öğrenciler")
+        public void Listele(string filtreTipi = "Tüm Öğrenciler", int? selectedOgrenciID = null)
         {
             try
             {
@@ -352,10 +352,39 @@ namespace bursoto1.Modules
                 // Satır renklendirmesi için event handler ekle (ApplyDarkGrid'den sonra)
                 gridView1.RowStyle -= GridView1_RowStyle;
                 gridView1.RowStyle += GridView1_RowStyle;
+                
+                // NOT: Seçili öğrenciyi geri yükleme işlemi Listele() içinden kaldırıldı
+                // Çünkü FocusedRowChanged içinden Listele() çağrılırsa sonsuz döngüye neden olabilir
+                // Odak geri yükleme sadece btnTahmin_Click ve BtnAIAnaliz_Click içinde yapılmalı
             }
             catch (Exception ex)
             {
                 MessageHelper.ShowException(ex, "Listeleme Hatası");
+            }
+        }
+
+        // Seçili öğrenciyi ID'ye göre bul ve tekrar seç
+        private void RestoreSelectedOgrenci(int ogrenciID)
+        {
+            try
+            {
+                if (gridView1 == null) return;
+                
+                // LocateByValue ile ID'ye göre satırı bul (field name string olarak)
+                int foundHandle = gridView1.LocateByValue("ID", ogrenciID);
+                
+                if (foundHandle >= 0)
+                {
+                    // Satırı seçili yap (bu otomatik olarak FocusedRowChanged event'ini tetikler)
+                    gridView1.FocusedRowHandle = foundHandle;
+                    
+                    // Grid'i görünür alana kaydır
+                    gridView1.MakeRowVisible(foundHandle);
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Seçili öğrenci geri yüklenirken hata: {ex.Message}");
             }
         }
 
@@ -601,7 +630,7 @@ namespace bursoto1.Modules
             string gelir = dr["Hane Geliri"]?.ToString() ?? "0";
             string kardes = dr["Kardeş"]?.ToString() ?? "0";
 
-            // Öğrencinin ek bilgilerini çek (motivasyon, ihtiyaç cevapları vb.)
+            // Öğrencinin ek bilgilerini çek - ÖNCE GRID'DEN, SONRA VERİTABANINDAN
             string motivasyon = "";
             string ihtiyac = "";
             string hedefler = "";
@@ -610,6 +639,42 @@ namespace bursoto1.Modules
             string aiPotansiyelNotu = "";
             string aiPotansiyelYuzde = "";
             
+            // 1. ÖNCELİK: Grid'den veri okumaya çalış (ekranda görünen veriler)
+            try
+            {
+                // Grid'deki kolon isimlerini kontrol et (farklı varyasyonlar olabilir)
+                var gridColumns = dr.Table.Columns;
+                
+                // Hedefler için farklı kolon isimlerini dene
+                if (gridColumns.Contains("Hedefler"))
+                    hedefler = dr["Hedefler"]?.ToString() ?? "";
+                else if (gridColumns.Contains("HEDEFLER"))
+                    hedefler = dr["HEDEFLER"]?.ToString() ?? "";
+                
+                // BursKullanim için
+                if (gridColumns.Contains("BursKullanim"))
+                    kullanim = dr["BursKullanim"]?.ToString() ?? "";
+                else if (gridColumns.Contains("Kullanim"))
+                    kullanim = dr["Kullanim"]?.ToString() ?? "";
+                
+                // FarkliOzellik için
+                if (gridColumns.Contains("FarkliOzellik"))
+                    fark = dr["FarkliOzellik"]?.ToString() ?? "";
+                else if (gridColumns.Contains("Fark"))
+                    fark = dr["Fark"]?.ToString() ?? "";
+                
+                // AIPotansiyelNotu ve AIPotansiyelYuzde grid'den
+                if (gridColumns.Contains("AIPotansiyelNotu") && dr["AIPotansiyelNotu"] != DBNull.Value)
+                    aiPotansiyelNotu = dr["AIPotansiyelNotu"]?.ToString() ?? "";
+                if (gridColumns.Contains("AIPotansiyelYuzde") && dr["AIPotansiyelYuzde"] != DBNull.Value)
+                    aiPotansiyelYuzde = dr["AIPotansiyelYuzde"]?.ToString() ?? "";
+            }
+            catch (Exception exGrid)
+            {
+                System.Diagnostics.Debug.WriteLine($"[GRID OKUMA] Grid'den veri okunurken hata: {exGrid.Message}");
+            }
+            
+            // 2. FALLBACK: Grid'de bulunamayan verileri veritabanından çek
             try
             {
                 using (SqlConnection conn = bgl.baglanti())
@@ -675,15 +740,16 @@ namespace bursoto1.Modules
                     {
                         if (reader.Read())
                         {
-                            if (kolonlar.Contains("Motivasyon"))
+                            // Sadece grid'de bulunamayan verileri veritabanından doldur
+                            if (string.IsNullOrWhiteSpace(motivasyon) && kolonlar.Contains("Motivasyon"))
                                 motivasyon = reader["Motivasyon"]?.ToString() ?? "";
-                            if (kolonlar.Contains("Ihtiyac"))
+                            if (string.IsNullOrWhiteSpace(ihtiyac) && kolonlar.Contains("Ihtiyac"))
                                 ihtiyac = reader["Ihtiyac"]?.ToString() ?? "";
-                            if (kolonlar.Contains("Hedefler"))
+                            if (string.IsNullOrWhiteSpace(hedefler) && kolonlar.Contains("Hedefler"))
                                 hedefler = reader["Hedefler"]?.ToString() ?? "";
-                            if (kolonlar.Contains("BursKullanim"))
+                            if (string.IsNullOrWhiteSpace(kullanim) && kolonlar.Contains("BursKullanim"))
                                 kullanim = reader["Kullanim"]?.ToString() ?? "";
-                            if (kolonlar.Contains("FarkliOzellik"))
+                            if (string.IsNullOrWhiteSpace(fark) && kolonlar.Contains("FarkliOzellik"))
                                 fark = reader["Fark"]?.ToString() ?? "";
                             
                             // AINotu varsa ve diğerleri boşsa onu kullan
@@ -696,8 +762,8 @@ namespace bursoto1.Modules
                                 }
                             }
                             
-                            // ML.NET tahmin verilerini çek
-                            if (kolonlar.Contains("AIPotansiyelNotu"))
+                            // ML.NET tahmin verilerini çek (grid'de yoksa)
+                            if (string.IsNullOrWhiteSpace(aiPotansiyelNotu) && kolonlar.Contains("AIPotansiyelNotu"))
                             {
                                 object potansiyelNotuObj = reader["AIPotansiyelNotu"];
                                 if (potansiyelNotuObj != null && potansiyelNotuObj != DBNull.Value)
@@ -705,7 +771,7 @@ namespace bursoto1.Modules
                                     aiPotansiyelNotu = potansiyelNotuObj.ToString();
                                 }
                             }
-                            if (kolonlar.Contains("AIPotansiyelYuzde"))
+                            if (string.IsNullOrWhiteSpace(aiPotansiyelYuzde) && kolonlar.Contains("AIPotansiyelYuzde"))
                             {
                                 aiPotansiyelYuzde = reader["AIPotansiyelYuzde"]?.ToString() ?? "";
                             }
@@ -715,8 +781,17 @@ namespace bursoto1.Modules
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Motivasyon sütunları okunamadı: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"[VERİTABANI OKUMA] Veritabanından veri okunurken hata: {ex.Message}");
             }
+            
+            // Debug: Tüm verileri konsola yazdır
+            System.Diagnostics.Debug.WriteLine($"[AI ANALİZ VERİ] OgrenciID: {ogrenciID}, Ad: {ad} {soyad}");
+            System.Diagnostics.Debug.WriteLine($"[AI ANALİZ VERİ] Hedefler: '{hedefler}' (uzunluk: {hedefler?.Length ?? 0})");
+            System.Diagnostics.Debug.WriteLine($"[AI ANALİZ VERİ] Kullanim: '{kullanim}' (uzunluk: {kullanim?.Length ?? 0})");
+            System.Diagnostics.Debug.WriteLine($"[AI ANALİZ VERİ] Fark: '{fark}' (uzunluk: {fark?.Length ?? 0})");
+            System.Diagnostics.Debug.WriteLine($"[AI ANALİZ VERİ] Ihtiyac: '{ihtiyac}' (uzunluk: {ihtiyac?.Length ?? 0})");
+            System.Diagnostics.Debug.WriteLine($"[AI ANALİZ VERİ] Motivasyon: '{motivasyon}' (uzunluk: {motivasyon?.Length ?? 0})");
+            System.Diagnostics.Debug.WriteLine($"[AI ANALİZ VERİ] AIPotansiyelNotu: '{aiPotansiyelNotu}', AIPotansiyelYuzde: '{aiPotansiyelYuzde}'");
 
             // AI için detaylı veri hazırla - boş değilse gönder
             string ogrenciVerisi = $"Ad Soyad: {ad} {soyad}\n" +
@@ -859,8 +934,14 @@ namespace bursoto1.Modules
                         memoAIsonuc.Properties.Appearance.Font = new Font("Segoe UI Semibold", 10.5F);
                     }
 
-                    // Filtreleme ve bildirim işlemleri
-                    Listele(cmbFiltre?.SelectedIndex >= 0 ? cmbFiltre.Properties.Items[cmbFiltre.SelectedIndex].ToString() : "Tüm Öğrenciler");
+                    // Filtreleme ve bildirim işlemleri - Seçili öğrenciyi koru
+                    string filtreTipi = cmbFiltre?.SelectedIndex >= 0 
+                        ? cmbFiltre.Properties.Items[cmbFiltre.SelectedIndex].ToString() 
+                        : "Tüm Öğrenciler";
+                    
+                    // Listele() çağrısından sonra seçili öğrenciyi geri yükle
+                    Listele(filtreTipi);
+                    RestoreSelectedOgrenci(ogrenciID);
                     DataChangedNotifier.NotifyOgrenciChanged();
                 }
                 catch (Exception ex)
@@ -988,7 +1069,7 @@ namespace bursoto1.Modules
             {
                 frm.Text = $"Burs Seç - {adSoyad}";
                 frm.Size = new System.Drawing.Size(450, 350);
-                frm.StartPosition = FormStartPosition.CenterParent;
+                frm.StartPosition = FormStartPosition.CenterScreen;
                 frm.FormBorderStyle = FormBorderStyle.FixedDialog;
                 frm.MaximizeBox = false;
                 frm.MinimizeBox = false;
@@ -1488,8 +1569,14 @@ namespace bursoto1.Modules
                 // Tahmini veritabanına kaydet (not ve yüzde ile birlikte)
                 UpdateAIPotansiyelNotu(ogrenciID, tahminEdilenPuan, mevcutAgno);
                 
-                // Grid'i otomatik yenile
-                Listele();
+                // Grid'i otomatik yenile ve seçili öğrenciyi koru
+                string filtreTipi = cmbFiltre?.SelectedIndex >= 0 
+                    ? cmbFiltre.Properties.Items[cmbFiltre.SelectedIndex].ToString() 
+                    : "Tüm Öğrenciler";
+                
+                // Listele() çağrısından sonra seçili öğrenciyi geri yükle
+                Listele(filtreTipi);
+                RestoreSelectedOgrenci(ogrenciID);
             }
             catch (Exception ex)
             {

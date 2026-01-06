@@ -287,6 +287,7 @@ namespace bursoto1
             this.ClientSize = new System.Drawing.Size(700, 550);
             this.Controls.Add(this.groupControl1);
             this.Name = "FrmOgrenciEkle";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Yeni Öğrenci Ekle";
             this.Load += new System.EventHandler(this.FrmOgrenciEkle_Load);
             ((System.ComponentModel.ISupportInitialize)(this.groupControl1)).EndInit();

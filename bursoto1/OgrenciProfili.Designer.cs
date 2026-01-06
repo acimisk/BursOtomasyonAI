@@ -345,7 +345,7 @@
             this.Controls.Add(this.xtraTabControl1);
             this.IconOptions.ShowIcon = false;
             this.Name = "OgrenciProfili";
-            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Öğrenci Profili";
             this.Load += new System.EventHandler(this.OgrenciProfili_Load);
             this.tabBurs.ResumeLayout(false);

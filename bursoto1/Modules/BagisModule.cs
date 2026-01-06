@@ -329,7 +329,7 @@ namespace bursoto1.Modules
             {
                 frm.Text = "Yeni Bağışçı Ekle";
                 frm.Size = new System.Drawing.Size(450, 350);
-                frm.StartPosition = FormStartPosition.CenterParent;
+                frm.StartPosition = FormStartPosition.CenterScreen;
                 frm.FormBorderStyle = FormBorderStyle.FixedDialog;
                 frm.MaximizeBox = false;
                 frm.MinimizeBox = false;
