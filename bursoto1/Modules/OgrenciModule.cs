@@ -639,6 +639,9 @@ namespace bursoto1.Modules
             string aiPotansiyelNotu = "";
             string aiPotansiyelYuzde = "";
             
+            // NOT: Veritabanında Ihtiyac, Hedefler, BursKullanim, FarkliOzellik kolonları yok
+            // Bu yüzden bu veriler AINotu içinde saklanmış olabilir veya hiç kaydedilmemiş olabilir
+            
             // 1. ÖNCELİK: Grid'den veri okumaya çalış (ekranda görünen veriler)
             try
             {
@@ -651,15 +654,27 @@ namespace bursoto1.Modules
                 else if (gridColumns.Contains("HEDEFLER"))
                     hedefler = dr["HEDEFLER"]?.ToString() ?? "";
                 
-                // BursKullanim için
+                // Ihtiyac için
+                if (gridColumns.Contains("Ihtiyac"))
+                    ihtiyac = dr["Ihtiyac"]?.ToString() ?? "";
+                else if (gridColumns.Contains("İhtiyaç"))
+                    ihtiyac = dr["İhtiyaç"]?.ToString() ?? "";
+                
+                // BursKullanim için - tüm varyasyonları kontrol et
                 if (gridColumns.Contains("BursKullanim"))
                     kullanim = dr["BursKullanim"]?.ToString() ?? "";
+                else if (gridColumns.Contains("Burs Kullanım"))
+                    kullanim = dr["Burs Kullanım"]?.ToString() ?? "";
                 else if (gridColumns.Contains("Kullanim"))
                     kullanim = dr["Kullanim"]?.ToString() ?? "";
+                else if (gridColumns.Contains("Kullanım"))
+                    kullanim = dr["Kullanım"]?.ToString() ?? "";
                 
-                // FarkliOzellik için
+                // FarkliOzellik için - tüm varyasyonları kontrol et
                 if (gridColumns.Contains("FarkliOzellik"))
                     fark = dr["FarkliOzellik"]?.ToString() ?? "";
+                else if (gridColumns.Contains("Farklı Özellik"))
+                    fark = dr["Farklı Özellik"]?.ToString() ?? "";
                 else if (gridColumns.Contains("Fark"))
                     fark = dr["Fark"]?.ToString() ?? "";
                 
@@ -679,11 +694,37 @@ namespace bursoto1.Modules
             {
                 using (SqlConnection conn = bgl.baglanti())
                 {
-                    // Önce kolonları kontrol et
+                    // Önce kolonları kontrol et - TÜM olası kolon isimlerini kontrol et
                     SqlCommand cmdCheck = new SqlCommand(@"SELECT COLUMN_NAME 
                         FROM INFORMATION_SCHEMA.COLUMNS 
                         WHERE TABLE_NAME = 'Ogrenciler' 
-                        AND COLUMN_NAME IN ('Motivasyon', 'Ihtiyac', 'Hedefler', 'BursKullanim', 'FarkliOzellik', 'AINotu', 'AIPotansiyelNotu', 'AIPotansiyelYuzde')", conn);
+                        AND (COLUMN_NAME IN ('Motivasyon', 'Ihtiyac', 'Hedefler', 'BursKullanim', 'FarkliOzellik', 'AINotu', 'AIPotansiyelNotu', 'AIPotansiyelYuzde')
+                             OR COLUMN_NAME LIKE '%Kullanim%'
+                             OR COLUMN_NAME LIKE '%Kullanım%'
+                             OR COLUMN_NAME LIKE '%Fark%'
+                             OR COLUMN_NAME LIKE '%Ozellik%'
+                             OR COLUMN_NAME LIKE '%İhtiyaç%'
+                             OR COLUMN_NAME LIKE '%Hedef%')", conn);
+                    
+                    // Eksik kolonları otomatik oluştur
+                    try
+                    {
+                        SqlCommand cmdCreateCols = new SqlCommand(@"
+                            IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'Ogrenciler' AND COLUMN_NAME = 'Ihtiyac')
+                                ALTER TABLE Ogrenciler ADD Ihtiyac NVARCHAR(MAX) NULL;
+                            IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'Ogrenciler' AND COLUMN_NAME = 'Hedefler')
+                                ALTER TABLE Ogrenciler ADD Hedefler NVARCHAR(MAX) NULL;
+                            IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'Ogrenciler' AND COLUMN_NAME = 'BursKullanim')
+                                ALTER TABLE Ogrenciler ADD BursKullanim NVARCHAR(MAX) NULL;
+                            IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'Ogrenciler' AND COLUMN_NAME = 'FarkliOzellik')
+                                ALTER TABLE Ogrenciler ADD FarkliOzellik NVARCHAR(MAX) NULL;", conn);
+                        cmdCreateCols.ExecuteNonQuery();
+                        System.Diagnostics.Debug.WriteLine("[VERİTABANI] Eksik kolonlar oluşturuldu (varsa)");
+                    }
+                    catch (Exception exCreate)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"[VERİTABANI KOLON OLUŞTURMA] Hata: {exCreate.Message}");
+                    }
                     var kolonlar = new List<string>();
                     using (var reader = cmdCheck.ExecuteReader())
                     {
@@ -699,6 +740,9 @@ namespace bursoto1.Modules
                             }
                         }
                     }
+                    
+                    // Debug: Bulunan kolonları yazdır
+                    System.Diagnostics.Debug.WriteLine($"[VERİTABANI KOLONLAR] Bulunan kolonlar: {string.Join(", ", kolonlar)}");
 
                     // Ogrenciler tablosundaki ID kolonunu dinamik tespit et
                     string ogrenciIDKolonu = "ID";
@@ -722,16 +766,43 @@ namespace bursoto1.Modules
                     }
                     catch { }
 
+                    // Kullanım kolonunu bul (farklı isimlerle olabilir)
+                    string kullanimKolonu = null;
+                    foreach (string kolon in kolonlar)
+                    {
+                        if (kolon.Equals("BursKullanim", StringComparison.OrdinalIgnoreCase) ||
+                            kolon.Contains("Kullanim") || kolon.Contains("Kullanım"))
+                        {
+                            kullanimKolonu = kolon;
+                            break;
+                        }
+                    }
+                    
+                    // Fark kolonunu bul
+                    string farkKolonu = null;
+                    foreach (string kolon in kolonlar)
+                    {
+                        if (kolon.Equals("FarkliOzellik", StringComparison.OrdinalIgnoreCase) ||
+                            kolon.Contains("Fark") || kolon.Contains("Ozellik"))
+                        {
+                            farkKolonu = kolon;
+                            break;
+                        }
+                    }
+                    
                     // Mevcut kolonları kullanarak sorgu oluştur
                     string selectColumns = $"[{ogrenciIDKolonu}]";
                     if (kolonlar.Contains("Motivasyon")) selectColumns += ", ISNULL(Motivasyon, '') as Motivasyon";
                     if (kolonlar.Contains("Ihtiyac")) selectColumns += ", ISNULL(Ihtiyac, '') as Ihtiyac";
                     if (kolonlar.Contains("Hedefler")) selectColumns += ", ISNULL(Hedefler, '') as Hedefler";
-                    if (kolonlar.Contains("BursKullanim")) selectColumns += ", ISNULL(BursKullanim, '') as Kullanim";
-                    if (kolonlar.Contains("FarkliOzellik")) selectColumns += ", ISNULL(FarkliOzellik, '') as Fark";
+                    if (!string.IsNullOrEmpty(kullanimKolonu)) selectColumns += $", ISNULL([{kullanimKolonu}], '') as Kullanim";
+                    if (!string.IsNullOrEmpty(farkKolonu)) selectColumns += $", ISNULL([{farkKolonu}], '') as Fark";
                     if (kolonlar.Contains("AINotu")) selectColumns += ", ISNULL(AINotu, '') as AINotu";
                     if (kolonlar.Contains("AIPotansiyelNotu")) selectColumns += ", ISNULL(AIPotansiyelNotu, 0) as AIPotansiyelNotu";
                     if (kolonlar.Contains("AIPotansiyelYuzde")) selectColumns += ", ISNULL(AIPotansiyelYuzde, '') as AIPotansiyelYuzde";
+
+                    System.Diagnostics.Debug.WriteLine($"[VERİTABANI SORGUSU] Kullanim kolonu: '{kullanimKolonu}', Fark kolonu: '{farkKolonu}'");
+                    System.Diagnostics.Debug.WriteLine($"[VERİTABANI SORGUSU] SELECT: {selectColumns}");
 
                     SqlCommand cmd = new SqlCommand($"SELECT {selectColumns} FROM Ogrenciler WHERE [{ogrenciIDKolonu}] = @id", conn);
                     cmd.Parameters.AddWithValue("@id", ogrenciID);
@@ -740,25 +811,116 @@ namespace bursoto1.Modules
                     {
                         if (reader.Read())
                         {
-                            // Sadece grid'de bulunamayan verileri veritabanından doldur
-                            if (string.IsNullOrWhiteSpace(motivasyon) && kolonlar.Contains("Motivasyon"))
-                                motivasyon = reader["Motivasyon"]?.ToString() ?? "";
-                            if (string.IsNullOrWhiteSpace(ihtiyac) && kolonlar.Contains("Ihtiyac"))
-                                ihtiyac = reader["Ihtiyac"]?.ToString() ?? "";
-                            if (string.IsNullOrWhiteSpace(hedefler) && kolonlar.Contains("Hedefler"))
-                                hedefler = reader["Hedefler"]?.ToString() ?? "";
-                            if (string.IsNullOrWhiteSpace(kullanim) && kolonlar.Contains("BursKullanim"))
-                                kullanim = reader["Kullanim"]?.ToString() ?? "";
-                            if (string.IsNullOrWhiteSpace(fark) && kolonlar.Contains("FarkliOzellik"))
-                                fark = reader["Fark"]?.ToString() ?? "";
+                            // ÖNCE veritabanından oku, SONRA grid'deki verilerle override et (eğer grid'de varsa)
+                            if (kolonlar.Contains("Motivasyon"))
+                            {
+                                string dbMotivasyon = reader["Motivasyon"]?.ToString() ?? "";
+                                if (!string.IsNullOrWhiteSpace(dbMotivasyon))
+                                    motivasyon = dbMotivasyon;
+                            }
+                            if (kolonlar.Contains("Ihtiyac"))
+                            {
+                                string dbIhtiyac = reader["Ihtiyac"]?.ToString() ?? "";
+                                if (!string.IsNullOrWhiteSpace(dbIhtiyac))
+                                    ihtiyac = dbIhtiyac;
+                            }
+                            if (kolonlar.Contains("Hedefler"))
+                            {
+                                string dbHedefler = reader["Hedefler"]?.ToString() ?? "";
+                                if (!string.IsNullOrWhiteSpace(dbHedefler))
+                                    hedefler = dbHedefler;
+                            }
+                            if (!string.IsNullOrEmpty(kullanimKolonu))
+                            {
+                                try
+                                {
+                                    string dbKullanim = reader["Kullanim"]?.ToString() ?? "";
+                                    System.Diagnostics.Debug.WriteLine($"[VERİTABANI OKUMA] Kullanim veritabanından: '{dbKullanim}' (uzunluk: {dbKullanim?.Length ?? 0})");
+                                    if (!string.IsNullOrWhiteSpace(dbKullanim))
+                                        kullanim = dbKullanim;
+                                }
+                                catch (Exception exKullanim)
+                                {
+                                    System.Diagnostics.Debug.WriteLine($"[VERİTABANI OKUMA HATASI] Kullanim okunamadı: {exKullanim.Message}");
+                                }
+                            }
+                            if (!string.IsNullOrEmpty(farkKolonu))
+                            {
+                                try
+                                {
+                                    string dbFark = reader["Fark"]?.ToString() ?? "";
+                                    System.Diagnostics.Debug.WriteLine($"[VERİTABANI OKUMA] Fark veritabanından: '{dbFark}' (uzunluk: {dbFark?.Length ?? 0})");
+                                    if (!string.IsNullOrWhiteSpace(dbFark))
+                                        fark = dbFark;
+                                }
+                                catch (Exception exFark)
+                                {
+                                    System.Diagnostics.Debug.WriteLine($"[VERİTABANI OKUMA HATASI] Fark okunamadı: {exFark.Message}");
+                                }
+                            }
                             
-                            // AINotu varsa ve diğerleri boşsa onu kullan
+                            // AINotu varsa ve içinde başvuru cevapları varsa parse et
+                            // NOT: Veritabanında Ihtiyac, Hedefler, BursKullanim, FarkliOzellik kolonları yok
+                            // Bu yüzden bu veriler başka bir yerde saklanmış olabilir veya hiç kaydedilmemiş
                             if (kolonlar.Contains("AINotu"))
                             {
                                 string aiNotu = reader["AINotu"]?.ToString() ?? "";
-                                if (string.IsNullOrWhiteSpace(ihtiyac) && string.IsNullOrWhiteSpace(motivasyon) && !string.IsNullOrWhiteSpace(aiNotu))
+                                System.Diagnostics.Debug.WriteLine($"[AINOTU OKUMA] AINotu uzunluk: {aiNotu?.Length ?? 0}, içerik başlangıcı: {(aiNotu?.Length > 100 ? aiNotu.Substring(0, 100) : aiNotu)}");
+                                
+                                // Eğer AINotu içinde başvuru cevapları varsa (eski format), parse et
+                                // Ama sadece gerçek başvuru cevapları varsa, AI analiz sonucu değilse
+                                if (!string.IsNullOrWhiteSpace(aiNotu) && !aiNotu.Contains("SKOR:") && !aiNotu.Contains("ANALİZ:"))
                                 {
-                                    motivasyon = aiNotu; // Fallback olarak kullan
+                                    // Eski format: [İHTİYAÇ], [HEDEFLER], [KULLANIM], [FARK] içeren metin
+                                    try
+                                    {
+                                        // [İHTİYAÇ] ve [HEDEFLER] arasındaki metni al
+                                        int ihtiyacStart = aiNotu.IndexOf("[İHTİYAÇ]");
+                                        int hedeflerStart = aiNotu.IndexOf("[HEDEFLER]");
+                                        if (ihtiyacStart >= 0 && hedeflerStart > ihtiyacStart)
+                                        {
+                                            string ihtiyacMetni = aiNotu.Substring(ihtiyacStart + 10, hedeflerStart - ihtiyacStart - 10).Trim();
+                                            if (string.IsNullOrWhiteSpace(ihtiyac) && !string.IsNullOrWhiteSpace(ihtiyacMetni) && !ihtiyacMetni.Contains("SKOR:"))
+                                                ihtiyac = ihtiyacMetni;
+                                        }
+                                        
+                                        // [HEDEFLER] ve [KULLANIM] arasındaki metni al
+                                        int kullanimStart = aiNotu.IndexOf("[KULLANIM]");
+                                        if (hedeflerStart >= 0 && kullanimStart > hedeflerStart)
+                                        {
+                                            string hedeflerMetni = aiNotu.Substring(hedeflerStart + 11, kullanimStart - hedeflerStart - 11).Trim();
+                                            if (string.IsNullOrWhiteSpace(hedefler) && !string.IsNullOrWhiteSpace(hedeflerMetni) && !hedeflerMetni.Contains("SKOR:"))
+                                                hedefler = hedeflerMetni;
+                                        }
+                                        
+                                        // [KULLANIM] ve [FARK] arasındaki metni al
+                                        int farkStart = aiNotu.IndexOf("[FARK]");
+                                        if (kullanimStart >= 0 && farkStart > kullanimStart)
+                                        {
+                                            string kullanimMetni = aiNotu.Substring(kullanimStart + 11, farkStart - kullanimStart - 11).Trim();
+                                            if (string.IsNullOrWhiteSpace(kullanim) && !string.IsNullOrWhiteSpace(kullanimMetni) && !kullanimMetni.Contains("SKOR:"))
+                                                kullanim = kullanimMetni;
+                                        }
+                                        
+                                        // [FARK] sonrası metni al
+                                        if (farkStart >= 0)
+                                        {
+                                            string farkMetni = aiNotu.Substring(farkStart + 7).Trim();
+                                            // SKOR: veya ANALİZ: gibi kelimelerden önceki kısmı al
+                                            int skorIndex = farkMetni.IndexOf("SKOR:");
+                                            int analizIndex = farkMetni.IndexOf("ANALİZ:");
+                                            int minIndex = Math.Min(skorIndex >= 0 ? skorIndex : int.MaxValue, analizIndex >= 0 ? analizIndex : int.MaxValue);
+                                            if (minIndex < int.MaxValue && minIndex > 0)
+                                                farkMetni = farkMetni.Substring(0, minIndex).Trim();
+                                            
+                                            if (string.IsNullOrWhiteSpace(fark) && !string.IsNullOrWhiteSpace(farkMetni) && !farkMetni.Contains("SKOR:"))
+                                                fark = farkMetni;
+                                        }
+                                    }
+                                    catch (Exception exParse)
+                                    {
+                                        System.Diagnostics.Debug.WriteLine($"[AINOTU PARSE] Hata: {exParse.Message}");
+                                    }
                                 }
                             }
                             
@@ -785,31 +947,62 @@ namespace bursoto1.Modules
             }
             
             // Debug: Tüm verileri konsola yazdır
+            System.Diagnostics.Debug.WriteLine($"[AI ANALİZ VERİ] ========================================");
             System.Diagnostics.Debug.WriteLine($"[AI ANALİZ VERİ] OgrenciID: {ogrenciID}, Ad: {ad} {soyad}");
-            System.Diagnostics.Debug.WriteLine($"[AI ANALİZ VERİ] Hedefler: '{hedefler}' (uzunluk: {hedefler?.Length ?? 0})");
-            System.Diagnostics.Debug.WriteLine($"[AI ANALİZ VERİ] Kullanim: '{kullanim}' (uzunluk: {kullanim?.Length ?? 0})");
-            System.Diagnostics.Debug.WriteLine($"[AI ANALİZ VERİ] Fark: '{fark}' (uzunluk: {fark?.Length ?? 0})");
-            System.Diagnostics.Debug.WriteLine($"[AI ANALİZ VERİ] Ihtiyac: '{ihtiyac}' (uzunluk: {ihtiyac?.Length ?? 0})");
-            System.Diagnostics.Debug.WriteLine($"[AI ANALİZ VERİ] Motivasyon: '{motivasyon}' (uzunluk: {motivasyon?.Length ?? 0})");
+            System.Diagnostics.Debug.WriteLine($"[AI ANALİZ VERİ] AGNO: {agno}, Gelir: {gelir} TL, Kardeş: {kardes}");
+            System.Diagnostics.Debug.WriteLine($"[AI ANALİZ VERİ] Ihtiyac: '{(string.IsNullOrWhiteSpace(ihtiyac) ? "BOŞ" : (ihtiyac.Length > 50 ? ihtiyac.Substring(0, 50) + "..." : ihtiyac))}' (uzunluk: {ihtiyac?.Length ?? 0})");
+            System.Diagnostics.Debug.WriteLine($"[AI ANALİZ VERİ] Hedefler: '{(string.IsNullOrWhiteSpace(hedefler) ? "BOŞ" : (hedefler.Length > 50 ? hedefler.Substring(0, 50) + "..." : hedefler))}' (uzunluk: {hedefler?.Length ?? 0})");
+            System.Diagnostics.Debug.WriteLine($"[AI ANALİZ VERİ] Kullanim: '{(string.IsNullOrWhiteSpace(kullanim) ? "BOŞ" : (kullanim.Length > 50 ? kullanim.Substring(0, 50) + "..." : kullanim))}' (uzunluk: {kullanim?.Length ?? 0})");
+            System.Diagnostics.Debug.WriteLine($"[AI ANALİZ VERİ] Fark: '{(string.IsNullOrWhiteSpace(fark) ? "BOŞ" : (fark.Length > 50 ? fark.Substring(0, 50) + "..." : fark))}' (uzunluk: {fark?.Length ?? 0})");
+            System.Diagnostics.Debug.WriteLine($"[AI ANALİZ VERİ] Motivasyon: '{(string.IsNullOrWhiteSpace(motivasyon) ? "BOŞ" : (motivasyon.Length > 50 ? motivasyon.Substring(0, 50) + "..." : motivasyon))}' (uzunluk: {motivasyon?.Length ?? 0})");
             System.Diagnostics.Debug.WriteLine($"[AI ANALİZ VERİ] AIPotansiyelNotu: '{aiPotansiyelNotu}', AIPotansiyelYuzde: '{aiPotansiyelYuzde}'");
+            System.Diagnostics.Debug.WriteLine($"[AI ANALİZ VERİ] ========================================");
 
-            // AI için detaylı veri hazırla - boş değilse gönder
-            string ogrenciVerisi = $"Ad Soyad: {ad} {soyad}\n" +
-                                   $"Bölüm: {bolum}, Sınıf: {sinif}\n" +
-                                   $"AGNO: {agno}\n" +
-                                   $"Hane Geliri: {gelir} TL\n" +
-                                   $"Kardeş Sayısı: {kardes}\n";
+            // Kişi başı gelir hesapla (AI için önemli)
+            decimal haneGeliriDecimal = 0;
+            int kardesSayisiInt = 0;
+            decimal.TryParse(gelir, out haneGeliriDecimal);
+            int.TryParse(kardes, out kardesSayisiInt);
+            decimal kisiBasiGelir = (kardesSayisiInt + 2) > 0 ? haneGeliriDecimal / (kardesSayisiInt + 2) : 0;
+            
+            // AGNO'yu float'a çevir
+            float agnoFloat = 0;
+            float.TryParse(agno, out agnoFloat);
+            
+            // AI için detaylı ve benzersiz veri hazırla
+            string ogrenciVerisi = $"═══════════════════════════════════════\n";
+            ogrenciVerisi += $"ÖĞRENCİ BİLGİLERİ (ID: {ogrenciID})\n";
+            ogrenciVerisi += $"═══════════════════════════════════════\n";
+            ogrenciVerisi += $"Ad Soyad: {ad} {soyad}\n";
+            ogrenciVerisi += $"Bölüm: {bolum}\n";
+            ogrenciVerisi += $"Sınıf: {sinif}\n";
+            ogrenciVerisi += $"AGNO: {agnoFloat:F2} / 4.00\n";
+            ogrenciVerisi += $"Hane Geliri: {haneGeliriDecimal:N0} TL\n";
+            ogrenciVerisi += $"Kardeş Sayısı: {kardesSayisiInt}\n";
+            ogrenciVerisi += $"Kişi Başı Gelir: {kisiBasiGelir:N0} TL (Hane Geliri / (Kardeş + 2))\n";
+            ogrenciVerisi += $"═══════════════════════════════════════\n\n";
             
             // ML.NET tahmin verilerini ekle (varsa)
             if (!string.IsNullOrWhiteSpace(aiPotansiyelNotu) && float.TryParse(aiPotansiyelNotu, out float potansiyelNotu))
             {
-                ogrenciVerisi += $"[ML.NET TAHMİNİ]: {potansiyelNotu:F2}\n";
+                ogrenciVerisi += $"🤖 ML.NET MEZUNİYET TAHMİNİ:\n";
+                ogrenciVerisi += $"   Tahmini Mezuniyet Puanı: {potansiyelNotu:F2} / 4.00\n";
+                if (agnoFloat > 0)
+                {
+                    float artis = potansiyelNotu - agnoFloat;
+                    float artisYuzde = (artis / agnoFloat) * 100;
+                    ogrenciVerisi += $"   Mevcut AGNO'dan Fark: {artis:+#0.00;-#0.00} ({artisYuzde:+#0.0;-#0.0}%)\n";
+                }
                 if (!string.IsNullOrWhiteSpace(aiPotansiyelYuzde))
                 {
-                    ogrenciVerisi += $"[ÖNGÖRÜLEN ARTIŞ]: {aiPotansiyelYuzde}\n";
+                    ogrenciVerisi += $"   Öngörülen Artış: {aiPotansiyelYuzde}\n";
                 }
+                ogrenciVerisi += $"\n";
             }
-            ogrenciVerisi += "\n";
+            
+            ogrenciVerisi += $"═══════════════════════════════════════\n";
+            ogrenciVerisi += $"BAŞVURU CEVAPLARI\n";
+            ogrenciVerisi += $"═══════════════════════════════════════\n\n";
 
             // Sadece dolu olan cevapları ekle
             if (!string.IsNullOrWhiteSpace(ihtiyac))
