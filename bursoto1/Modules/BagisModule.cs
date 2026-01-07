@@ -28,9 +28,10 @@ namespace bursoto1.Modules
                 gridView1.OptionsBehavior.Editable = false;
                 gridView1.OptionsView.ShowGroupPanel = false;
                 gridView1.OptionsSelection.MultiSelect = false;
+                gridView1.OptionsSelection.EnableAppearanceFocusedRow = false; // FocusedRow renklendirmesini devre dışı bırak
                 
-                // Row style event'i bağla (renklendirme için)
-                gridView1.RowStyle += GridView1_RowStyle;
+                // RowCellStyle event'i bağla (hücre bazlı renklendirme - daha stabil)
+                gridView1.RowCellStyle += GridView1_RowCellStyle;
             }
 
             // Filtre ComboBox event'i
@@ -66,11 +67,15 @@ namespace bursoto1.Modules
         // Dark Mode Grid Ayarları
         private void ApplyDarkGrid(GridView gv)
         {
-            // SATIRLAR
+            // SATIRLAR - RowStyle event handler'ına izin vermek için UseBackColor false olmalı
             gv.Appearance.Row.BackColor = Color.FromArgb(32, 32, 32);
             gv.Appearance.Row.ForeColor = Color.White;
-            gv.Appearance.Row.Options.UseBackColor = true;
-            gv.Appearance.Row.Options.UseForeColor = true;
+            gv.Appearance.Row.Options.UseBackColor = false; // RowStyle event handler'ına izin ver
+            gv.Appearance.Row.Options.UseForeColor = false; // RowStyle event handler'ına izin ver
+            
+            // RowStyle'in çalışması için önemli
+            gv.OptionsView.EnableAppearanceEvenRow = false;
+            gv.OptionsView.EnableAppearanceOddRow = false;
 
             // BAŞLIK
             gv.Appearance.HeaderPanel.BackColor = Color.FromArgb(45, 45, 48);
@@ -78,16 +83,16 @@ namespace bursoto1.Modules
             gv.Appearance.HeaderPanel.Options.UseBackColor = true;
             gv.Appearance.HeaderPanel.Options.UseForeColor = true;
 
-            // SEÇİLİ SATIR
+            // SEÇİLİ SATIR - RowStyle'in önceliğini korumak için devre dışı bırak
             gv.Appearance.FocusedRow.BackColor = Color.FromArgb(70, 70, 70);
             gv.Appearance.FocusedRow.ForeColor = Color.White;
-            gv.Appearance.FocusedRow.Options.UseBackColor = true;
-            gv.Appearance.FocusedRow.Options.UseForeColor = true;
+            gv.Appearance.FocusedRow.Options.UseBackColor = false; // RowStyle'e izin ver
+            gv.Appearance.FocusedRow.Options.UseForeColor = false; // RowStyle'e izin ver
 
             gv.Appearance.SelectedRow.BackColor = Color.FromArgb(60, 60, 60);
             gv.Appearance.SelectedRow.ForeColor = Color.White;
-            gv.Appearance.SelectedRow.Options.UseBackColor = true;
-            gv.Appearance.SelectedRow.Options.UseForeColor = true;
+            gv.Appearance.SelectedRow.Options.UseBackColor = false; // RowStyle'e izin ver
+            gv.Appearance.SelectedRow.Options.UseForeColor = false; // RowStyle'e izin ver
 
             // BOŞ ALAN
             gv.Appearance.Empty.BackColor = Color.FromArgb(32, 32, 32);
@@ -122,29 +127,51 @@ namespace bursoto1.Modules
                 gridControl1.ContextMenuStrip = sagTik;
         }
 
-        // Renklendirme (Dark Mode uyumlu)
-        private void GridView1_RowStyle(object sender, RowStyleEventArgs e)
+        // Renklendirme - RowCellStyle event'i ile (hücre bazlı renklendirme - daha stabil ve güçlü)
+        private void GridView1_RowCellStyle(object sender, DevExpress.XtraGrid.Views.Grid.RowCellStyleEventArgs e)
         {
             if (e.RowHandle >= 0)
             {
-                string durum = gridView1.GetRowCellDisplayText(e.RowHandle, "Durum");
-                if (durum == "Onaylandı")
+                try
                 {
-                    // Dark mode yeşil
-                    e.Appearance.BackColor = Color.FromArgb(30, 80, 50);
-                    e.Appearance.ForeColor = Color.FromArgb(150, 255, 150);
+                    // 1. Veriyi Güvenli Al
+                    object durumObj = gridView1.GetRowCellValue(e.RowHandle, "Durum");
+                    if (durumObj == null || durumObj == DBNull.Value) return;
+
+                    // 2. Türkçe Karakterlere Karşı En Güvenli Büyük Harf Dönüşümü
+                    string durum = durumObj.ToString().ToUpper(new System.Globalization.CultureInfo("tr-TR")).Trim();
+
+                    // Debug: Output penceresinden mutlaka kontrol et!
+                    System.Diagnostics.Debug.WriteLine($"[ANALIZ] Satır: {e.RowHandle}, Gelen Metin: {durum}");
+
+                    // 3. Karşılaştırma (Sadece 'ONAY' geçmesi yeterli)
+                    if (durum.Contains("ONAY"))
+                    {
+                        e.Appearance.BackColor = Color.FromArgb(39, 174, 96); // Modern Yeşil
+                        e.Appearance.ForeColor = Color.White;
+                        e.Appearance.Font = new Font(e.Appearance.Font, FontStyle.Bold);
+                        e.Appearance.Options.UseBackColor = true;
+                        e.Appearance.Options.UseForeColor = true;
+                        e.Appearance.Options.UseFont = true;
+                    }
+                    else if (durum.Contains("BEKLE") || string.IsNullOrEmpty(durum))
+                    {
+                        e.Appearance.BackColor = Color.Orange;
+                        e.Appearance.ForeColor = Color.White;
+                        e.Appearance.Options.UseBackColor = true;
+                        e.Appearance.Options.UseForeColor = true;
+                    }
+                    else // Reddedildi vb.
+                    {
+                        e.Appearance.BackColor = Color.FromArgb(45, 45, 48); // Koyu Gri
+                        e.Appearance.ForeColor = Color.White;
+                        e.Appearance.Options.UseBackColor = true;
+                        e.Appearance.Options.UseForeColor = true;
+                    }
                 }
-                else if (durum == "Beklemede")
+                catch (Exception ex)
                 {
-                    // Dark mode sarı/turuncu
-                    e.Appearance.BackColor = Color.FromArgb(80, 70, 30);
-                    e.Appearance.ForeColor = Color.FromArgb(255, 220, 100);
-                }
-                else
-                {
-                    // Default dark
-                    e.Appearance.BackColor = Color.FromArgb(32, 32, 32);
-                    e.Appearance.ForeColor = Color.White;
+                    System.Diagnostics.Debug.WriteLine("Renk Hatası: " + ex.Message);
                 }
             }
         }
@@ -169,6 +196,7 @@ namespace bursoto1.Modules
                             AdSoyad NVARCHAR(100),
                             Telefon NVARCHAR(20),
                             Mail NVARCHAR(100),
+                            KurumAdı NVARCHAR(100) NULL,
                             BagisMiktari DECIMAL(18,2),
                             Aciklama NVARCHAR(500),
                             Durum NVARCHAR(20) DEFAULT 'Beklemede',
@@ -190,6 +218,18 @@ namespace bursoto1.Modules
                             cmdTarihCheck.ExecuteNonQuery();
                         }
                         catch { }
+                        
+                        // KurumAdı kolonu yoksa ekle
+                        try
+                        {
+                            SqlCommand cmdKurumCheck = new SqlCommand(@"IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.COLUMNS 
+                                WHERE TABLE_NAME = 'BursVerenler' AND COLUMN_NAME = 'KurumAdı')
+                                BEGIN
+                                    ALTER TABLE BursVerenler ADD KurumAdı NVARCHAR(100) NULL
+                                END", conn);
+                            cmdKurumCheck.ExecuteNonQuery();
+                        }
+                        catch { }
                     }
 
                     // Önce kolon isimlerini kontrol et
@@ -208,6 +248,16 @@ namespace bursoto1.Modules
                         var kolonResult = cmdKolon.ExecuteScalar();
                         if (kolonResult != null && kolonResult != DBNull.Value)
                             tarihKolonu = kolonResult.ToString();
+                    }
+                    catch { }
+
+                    // KurumAdı kolonunu kontrol et
+                    bool kurumAdiVarMi = false;
+                    try
+                    {
+                        SqlCommand cmdKurum = new SqlCommand(@"SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS 
+                            WHERE TABLE_NAME = 'BursVerenler' AND COLUMN_NAME = 'KurumAdı'", conn);
+                        kurumAdiVarMi = Convert.ToInt32(cmdKurum.ExecuteScalar()) > 0;
                     }
                     catch { }
 
@@ -249,9 +299,20 @@ namespace bursoto1.Modules
                     gridView1.Columns["Aciklama"].Caption = "Açıklama";
                 if (gridView1.Columns["Eposta"] != null)
                     gridView1.Columns["Eposta"].Caption = "E-posta";
+                if (gridView1.Columns["KurumAdı"] != null)
+                {
+                    gridView1.Columns["KurumAdı"].Caption = "Kurum / Şirket";
+                    gridView1.Columns["KurumAdı"].Visible = true; // Kurum kolonunu görünür yap
+                }
+                if (gridView1.Columns["Mail"] != null)
+                    gridView1.Columns["Mail"].Caption = "E-posta";
                     
                 gridView1.BestFitColumns();
                 ApplyDarkGrid(gridView1);
+                
+                // RowCellStyle event'ini tekrar bağla (ApplyDarkGrid'den sonra)
+                gridView1.RowCellStyle -= GridView1_RowCellStyle;
+                gridView1.RowCellStyle += GridView1_RowCellStyle;
             }
             catch (Exception ex)
             {
@@ -268,7 +329,7 @@ namespace bursoto1.Modules
             {
                 frm.Text = "Yeni Bağışçı Ekle";
                 frm.Size = new System.Drawing.Size(450, 350);
-                frm.StartPosition = FormStartPosition.CenterParent;
+                frm.StartPosition = FormStartPosition.CenterScreen;
                 frm.FormBorderStyle = FormBorderStyle.FixedDialog;
                 frm.MaximizeBox = false;
                 frm.MinimizeBox = false;
@@ -332,16 +393,48 @@ namespace bursoto1.Modules
                             }
                             catch { }
 
+                            // KurumAdı kolonunu kontrol et
+                            bool kurumAdiVarMi = false;
+                            try
+                            {
+                                SqlCommand cmdKurum = new SqlCommand(@"SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS 
+                                    WHERE TABLE_NAME = 'BursVerenler' AND COLUMN_NAME = 'KurumAdı'", conn);
+                                kurumAdiVarMi = Convert.ToInt32(cmdKurum.ExecuteScalar()) > 0;
+                            }
+                            catch { }
+
                             // Mail kolonu kullan (DB şemasına uygun)
-                            SqlCommand cmd = new SqlCommand($@"INSERT INTO BursVerenler 
-                                (AdSoyad, Telefon, Eposta, BagisMiktari, Aciklama, Durum, {tarihKolonu}) 
-                                VALUES (@p1, @p2, @p3, @p4, @p5, 'Beklemede', @p6)", conn);
+                            string insertQuery = "";
+                            if (kurumAdiVarMi)
+                            {
+                                insertQuery = $@"INSERT INTO BursVerenler 
+                                    (AdSoyad, Telefon, Eposta, KurumAdı, BagisMiktari, Aciklama, Durum, {tarihKolonu}) 
+                                    VALUES (@p1, @p2, @p3, @p4, @p5, @p6, 'Beklemede', @p7)";
+                            }
+                            else
+                            {
+                                insertQuery = $@"INSERT INTO BursVerenler 
+                                    (AdSoyad, Telefon, Eposta, BagisMiktari, Aciklama, Durum, {tarihKolonu}) 
+                                    VALUES (@p1, @p2, @p3, @p4, @p5, 'Beklemede', @p6)";
+                            }
+                            
+                            SqlCommand cmd = new SqlCommand(insertQuery, conn);
                             cmd.Parameters.AddWithValue("@p1", txtAd.Text.Trim());
                             cmd.Parameters.AddWithValue("@p2", txtTel.Text.Trim());
                             cmd.Parameters.AddWithValue("@p3", txtEmail.Text.Trim());
-                            cmd.Parameters.AddWithValue("@p4", Convert.ToDecimal(txtMiktar.EditValue));
-                            cmd.Parameters.AddWithValue("@p5", txtAciklama.Text.Trim());
-                            cmd.Parameters.AddWithValue("@p6", DateTime.Now);
+                            if (kurumAdiVarMi)
+                            {
+                                cmd.Parameters.AddWithValue("@p4", ""); // KurumAdı boş (manuel ekleme için)
+                                cmd.Parameters.AddWithValue("@p5", Convert.ToDecimal(txtMiktar.EditValue));
+                                cmd.Parameters.AddWithValue("@p6", txtAciklama.Text.Trim());
+                                cmd.Parameters.AddWithValue("@p7", DateTime.Now);
+                            }
+                            else
+                            {
+                                cmd.Parameters.AddWithValue("@p4", Convert.ToDecimal(txtMiktar.EditValue));
+                                cmd.Parameters.AddWithValue("@p5", txtAciklama.Text.Trim());
+                                cmd.Parameters.AddWithValue("@p6", DateTime.Now);
+                            }
                             cmd.ExecuteNonQuery();
                         }
 

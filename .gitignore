@@ -488,3 +488,4 @@ bursoto1/App.config
 
 # Ama taslak dosyasını göndermesine izin ver
 !App.config.example
+__dummy__

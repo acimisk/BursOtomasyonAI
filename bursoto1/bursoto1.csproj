@@ -170,12 +170,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Anasayfa.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Anasayfa.Designer.cs">
-      <DependentUpon>Anasayfa.cs</DependentUpon>
-    </Compile>
     <Compile Include="Ara.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -186,24 +180,6 @@
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>bursOtoDeneme1DataSet.xsd</DependentUpon>
-    </Compile>
-    <Compile Include="FrmBursVerenler.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="FrmBursVerenler.Designer.cs">
-      <DependentUpon>FrmBursVerenler.cs</DependentUpon>
-    </Compile>
-    <Compile Include="FrmAylikBurs.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="FrmAylikBurs.Designer.cs">
-      <DependentUpon>FrmAylikBurs.cs</DependentUpon>
-    </Compile>
-    <Compile Include="FrmOgrenciler.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="FrmOgrenciler.Designer.cs">
-      <DependentUpon>FrmOgrenciler.cs</DependentUpon>
     </Compile>
     <Compile Include="FrmOgrenciEkle.cs">
       <SubType>Form</SubType>
@@ -263,20 +239,8 @@
     <Compile Include="Helpers\MessageHelper.cs" />
     <Compile Include="Helpers\ImageHelper.cs" />
     <Compile Include="Helpers\DataChangedNotifier.cs" />
-    <EmbeddedResource Include="Anasayfa.resx">
-      <DependentUpon>Anasayfa.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="Ara.resx">
       <DependentUpon>Ara.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="FrmBursVerenler.resx">
-      <DependentUpon>FrmBursVerenler.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="FrmAylikBurs.resx">
-      <DependentUpon>FrmAylikBurs.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="FrmOgrenciler.resx">
-      <DependentUpon>FrmOgrenciler.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="FrmOgrenciEkle.resx">
       <DependentUpon>FrmOgrenciEkle.cs</DependentUpon>

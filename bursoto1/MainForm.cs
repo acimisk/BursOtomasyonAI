@@ -28,6 +28,19 @@ namespace bursoto1
 
             // Ribbon butonlarını bağla
             WireRibbonButtons();
+            
+            // Form kapanırken uygulamayı kapat
+            this.FormClosing += MainForm_FormClosing;
+        }
+
+        private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            // MainForm kapatılırsa uygulamayı tamamen kapat
+            if (e.CloseReason == CloseReason.UserClosing)
+            {
+                // Application.Exit() tüm formları otomatik kapatır, thread-safe
+                Application.Exit();
+            }
         }
 
         void WireRibbonButtons()
@@ -94,7 +107,7 @@ namespace bursoto1
             {
                 frm.Text = "Yeni Kayıt Ekle";
                 frm.Size = new System.Drawing.Size(350, 200);
-                frm.StartPosition = FormStartPosition.CenterParent;
+                frm.StartPosition = FormStartPosition.CenterScreen;
                 frm.FormBorderStyle = FormBorderStyle.FixedDialog;
                 frm.MaximizeBox = false;
                 frm.MinimizeBox = false;
@@ -300,7 +313,7 @@ namespace bursoto1
             {
                 frm.Text = "💰 Burs Ödemesi Yap";
                 frm.Size = new System.Drawing.Size(750, 550);
-                frm.StartPosition = FormStartPosition.CenterParent;
+                frm.StartPosition = FormStartPosition.CenterScreen;
                 frm.FormBorderStyle = FormBorderStyle.FixedDialog;
                 frm.MaximizeBox = false;
                 frm.MinimizeBox = false;

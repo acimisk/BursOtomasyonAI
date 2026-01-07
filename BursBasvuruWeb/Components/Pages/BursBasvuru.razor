@@ -1,7 +1,9 @@
 @page "/burs-basvuru"
 @using Microsoft.AspNetCore.Components.Web
+@using Microsoft.AspNetCore.Components.Forms
 @using Microsoft.Data.SqlClient
 @using System.Linq
+@using System.IO
 @inject NavigationManager NavManager
 @rendermode InteractiveServer
 
@@ -35,7 +37,7 @@
         <!-- Page Header -->
         <div class="mb-8 text-center">
             <h2 class="text-3xl sm:text-4xl font-black text-text-main dark:text-white tracking-tight mb-4">
-                2024-2025 Dönemi Burs Başvurusu
+                2025-2026 Dönemi Burs Başvurusu
             </h2>
             <p class="text-text-secondary dark:text-gray-400 text-lg leading-relaxed max-w-lg mx-auto">
                 Geleceğinize yatırım yapmak için ilk adımı atın. Lütfen aşağıdaki formu eksiksiz ve doğru bilgilerle doldurunuz.
@@ -111,6 +113,31 @@
                                    maxlength="15"
                                    value="@telefon"
                                    @oninput="OnPhoneInput" />
+                        </div>
+                    </div>
+                    <!-- Photo Upload Field (Optional) -->
+                    <div class="space-y-1.5">
+                        <label class="block text-sm font-medium text-text-main dark:text-gray-300" for="photo">
+                            Profil Fotoğrafı (Opsiyonel)
+                        </label>
+                        <p class="text-xs text-text-secondary dark:text-gray-500 mb-2">
+                            JPG, PNG veya JPEG formatında, maksimum 5MB boyutunda bir fotoğraf yükleyebilirsiniz.
+                        </p>
+                        <div class="flex items-center gap-4">
+                            <InputFile OnChange="HandlePhotoUpload" accept="image/jpeg,image/jpg,image/png" style="display: none;" id="photoInput" />
+                            <label for="photoInput" class="cursor-pointer inline-flex items-center gap-2 px-4 py-2 border border-input-border dark:border-gray-600 rounded-lg bg-background-light dark:bg-gray-800 text-text-main dark:text-white hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                                <span class="material-symbols-outlined text-lg">photo_camera</span>
+                                <span>Fotoğraf Seç</span>
+                            </label>
+                            @if (!string.IsNullOrEmpty(fotoBase64))
+                            {
+                                <div class="flex items-center gap-2">
+                                    <img src="@fotoBase64" alt="Önizleme" class="w-16 h-16 object-cover rounded-lg border border-gray-300 dark:border-gray-600" />
+                                    <button type="button" @onclick="RemovePhoto" class="text-red-500 hover:text-red-700 dark:hover:text-red-400 transition-colors">
+                                        <span class="material-symbols-outlined text-lg">close</span>
+                                    </button>
+                                </div>
+                            }
                         </div>
                     </div>
                 </div>
@@ -348,6 +375,8 @@
     private string farkliOzellik = "";
     private bool kvkkOnay = false;
     private string mesaj = "";
+    private string fotoBase64 = "";
+    private string fotoFileName = "";
 
     // Bölümler için
     private List<BolumItem> bolumler = new List<BolumItem>();
@@ -691,6 +720,61 @@
         NavManager.NavigateTo("/");
     }
 
+    // Fotoğraf yükleme işlemi
+    private async Task HandlePhotoUpload(InputFileChangeEventArgs e)
+    {
+        try
+        {
+            var file = e.File;
+            
+            // Dosya boyutu kontrolü (5MB)
+            if (file.Size > 5 * 1024 * 1024)
+            {
+                mesaj = "Hata: Fotoğraf boyutu 5MB'dan büyük olamaz.";
+                StateHasChanged();
+                return;
+            }
+
+            // Dosya tipi kontrolü
+            var allowedTypes = new[] { "image/jpeg", "image/jpg", "image/png" };
+            if (!allowedTypes.Contains(file.ContentType))
+            {
+                mesaj = "Hata: Sadece JPG, JPEG veya PNG formatında fotoğraf yükleyebilirsiniz.";
+                StateHasChanged();
+                return;
+            }
+
+            // Dosyayı oku ve base64'e çevir
+            using (var memoryStream = new MemoryStream())
+            {
+                await file.OpenReadStream(maxAllowedSize: 5 * 1024 * 1024).CopyToAsync(memoryStream);
+                byte[] imageBytes = memoryStream.ToArray();
+                string base64String = Convert.ToBase64String(imageBytes);
+                
+                // MIME type'a göre data URI oluştur
+                string mimeType = file.ContentType;
+                fotoBase64 = $"data:{mimeType};base64,{base64String}";
+                fotoFileName = file.Name;
+            }
+
+            mesaj = ""; // Başarılı olduğunda hata mesajını temizle
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            mesaj = $"Hata: Fotoğraf yüklenirken bir sorun oluştu: {ex.Message}";
+            StateHasChanged();
+        }
+    }
+
+    // Fotoğrafı kaldır
+    private void RemovePhoto()
+    {
+        fotoBase64 = "";
+        fotoFileName = "";
+        StateHasChanged();
+    }
+
     private async Task HandleSubmit()
     {
         // Validasyon - Tüm zorunlu alanlar
@@ -799,11 +883,11 @@
                 conn.Open();
 
                 // Kolonların varlığını kontrol et
-                var mevcutKolonlar = new HashSet<string>();
+                var mevcutKolonlar = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
                 try
                 {
                     using (SqlCommand checkCmd = new SqlCommand(
-                        "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'Ogrenciler' AND COLUMN_NAME IN ('Email', 'Mail', 'Eposta', 'Üniversite', 'Universite', 'Ihtiyac', 'Hedefler', 'BursKullanim', 'FarkliOzellik', 'Motivasyon')", conn))
+                        "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'Ogrenciler' AND (COLUMN_NAME IN ('Email', 'Mail', 'Eposta', 'Üniversite', 'Universite', 'UNIVERSITE', 'Ihtiyac', 'Hedefler', 'BursKullanim', 'FarkliOzellik', 'Motivasyon') OR COLUMN_NAME LIKE '%niversite%')", conn))
                     {
                         using (var reader = checkCmd.ExecuteReader())
                         {
@@ -821,6 +905,24 @@
                 var degerler = new List<string> { "@p1", "@p2", "@p3", "@p4", "@p5", "@p6", "@p7", "@p8" };
                 int paramIndex = 9;
 
+                // FOTO kolonu kontrolü ve ekleme (opsiyonel)
+                bool hasFotoKolon = false;
+                try
+                {
+                    using (SqlCommand checkFotoCmd = new SqlCommand(
+                        "SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'Ogrenciler' AND COLUMN_NAME = 'FOTO'", conn))
+                    {
+                        hasFotoKolon = Convert.ToInt32(checkFotoCmd.ExecuteScalar()) > 0;
+                    }
+                }
+                catch { }
+
+                if (hasFotoKolon && !string.IsNullOrEmpty(fotoBase64))
+                {
+                    kolonlar.Add("FOTO");
+                    degerler.Add($"@p{paramIndex++}");
+                }
+
                 // Email kolonu
                 string emailKolon = mevcutKolonlar.Contains("Email") ? "Email" : (mevcutKolonlar.Contains("Mail") ? "Mail" : (mevcutKolonlar.Contains("Eposta") ? "Eposta" : null));
                 if (emailKolon != null)
@@ -829,11 +931,24 @@
                     degerler.Add($"@p{paramIndex++}");
                 }
 
-                // Üniversite kolonu
-                string universiteKolon = mevcutKolonlar.Contains("UNIVERSITE") ? "UNIVERSITE" : (mevcutKolonlar.Contains("UNIVERSITE") ? "UNIVERSITE" : null);
+                // Üniversite kolonu - SQL'de [UNIVERSITE] veya UNIVERSITE olarak geçebilir
+                string universiteKolon = null;
+                foreach (var kolon in mevcutKolonlar)
+                {
+                    // Kolon adından köşeli parantezleri temizle
+                    string temizKolon = kolon.Replace("[", "").Replace("]", "");
+                    string kolonUpper = temizKolon.ToUpperInvariant();
+                    if (kolonUpper.Contains("NIVERSITE") || kolonUpper == "UNIVERSITE" || kolonUpper == "ÜNİVERSİTE")
+                    {
+                        universiteKolon = temizKolon; // Gerçek kolon adını kullan (köşeli parantez olmadan)
+                        break;
+                    }
+                }
+                
                 if (universiteKolon != null)
                 {
-                    kolonlar.Add(universiteKolon);
+                    // INSERT sorgusunda köşeli parantezli kullan
+                    kolonlar.Add($"[{universiteKolon}]");
                     degerler.Add($"@p{paramIndex++}");
                 }
 
@@ -885,6 +1000,18 @@
                     cmd.Parameters.AddWithValue($"@p{pIdx++}", sinif);
                     cmd.Parameters.AddWithValue($"@p{pIdx++}", agno);
                     cmd.Parameters.AddWithValue($"@p{pIdx++}", telefon.Trim());
+
+                    // Fotoğraf (opsiyonel) - Kolonlar listesindeki sıraya göre önce ekleniyor
+                    if (hasFotoKolon && !string.IsNullOrEmpty(fotoBase64))
+                    {
+                        // data:image/png;base64, prefix'ini kaldır, sadece base64 string'i kaydet
+                        string cleanBase64 = fotoBase64;
+                        if (fotoBase64.Contains(","))
+                        {
+                            cleanBase64 = fotoBase64.Substring(fotoBase64.IndexOf(",") + 1);
+                        }
+                        cmd.Parameters.AddWithValue($"@p{pIdx++}", cleanBase64);
+                    }
 
                     // Email
                     if (emailKolon != null)
@@ -1014,6 +1141,8 @@
                 kullanim = "";
                 farkliOzellik = "";
                 kvkkOnay = false;
+                fotoBase64 = "";
+                fotoFileName = "";
             }
         }
         catch (Exception ex)

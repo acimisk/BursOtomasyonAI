@@ -32,7 +32,6 @@
             DevExpress.XtraGrid.GridLevelNode gridLevelNode1 = new DevExpress.XtraGrid.GridLevelNode();
             this.gridControl1 = new DevExpress.XtraGrid.GridControl();
             this.gridView1 = new DevExpress.XtraGrid.Views.Grid.GridView();
-            this.btnGoster = new DevExpress.XtraEditors.SimpleButton();
             this.sqlDataSource1 = new DevExpress.DataAccess.Sql.SqlDataSource(this.components);
             this.panelAI = new DevExpress.XtraEditors.PanelControl();
             this.panelTahmin = new DevExpress.XtraEditors.PanelControl();
@@ -64,10 +63,10 @@
             gridLevelNode1.RelationName = "Level1";
             this.gridControl1.LevelTree.Nodes.AddRange(new DevExpress.XtraGrid.GridLevelNode[] {
             gridLevelNode1});
-            this.gridControl1.Location = new System.Drawing.Point(23, 125);
+            this.gridControl1.Location = new System.Drawing.Point(23, 113);
             this.gridControl1.MainView = this.gridView1;
             this.gridControl1.Name = "gridControl1";
-            this.gridControl1.Size = new System.Drawing.Size(884, 429);
+            this.gridControl1.Size = new System.Drawing.Size(1262, 508);
             this.gridControl1.TabIndex = 13;
             this.gridControl1.ViewCollection.AddRange(new DevExpress.XtraGrid.Views.Base.BaseView[] {
             this.gridView1});
@@ -85,22 +84,6 @@
             this.gridView1.OptionsView.ShowGroupPanel = false;
             this.gridView1.DoubleClick += new System.EventHandler(this.gridView1_DoubleClick);
             // 
-            // btnGoster
-            // 
-            this.btnGoster.Appearance.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(108)))), ((int)(((byte)(117)))), ((int)(((byte)(125)))));
-            this.btnGoster.Appearance.Font = new System.Drawing.Font("Segoe UI", 9.5F, System.Drawing.FontStyle.Bold);
-            this.btnGoster.Appearance.ForeColor = System.Drawing.Color.White;
-            this.btnGoster.Appearance.Options.UseBackColor = true;
-            this.btnGoster.Appearance.Options.UseFont = true;
-            this.btnGoster.Appearance.Options.UseForeColor = true;
-            this.btnGoster.AppearancePressed.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(73)))), ((int)(((byte)(80)))), ((int)(((byte)(87)))));
-            this.btnGoster.AppearancePressed.Options.UseBackColor = true;
-            this.btnGoster.Location = new System.Drawing.Point(354, 580);
-            this.btnGoster.Name = "btnGoster";
-            this.btnGoster.Size = new System.Drawing.Size(126, 39);
-            this.btnGoster.TabIndex = 14;
-            this.btnGoster.Text = "Profil Göster";
-            // 
             // sqlDataSource1
             // 
             this.sqlDataSource1.Name = "sqlDataSource1";
@@ -117,9 +100,9 @@
             this.panelAI.Controls.Add(this.btnAIAnaliz);
             this.panelAI.Controls.Add(this.memoAIsonuc);
             this.panelAI.Controls.Add(this.lblAIbaslik);
-            this.panelAI.Location = new System.Drawing.Point(933, 0);
+            this.panelAI.Location = new System.Drawing.Point(1291, 0);
             this.panelAI.Name = "panelAI";
-            this.panelAI.Size = new System.Drawing.Size(635, 621);
+            this.panelAI.Size = new System.Drawing.Size(672, 621);
             this.panelAI.TabIndex = 17;
             // 
             // panelTahmin
@@ -131,7 +114,7 @@
             this.panelTahmin.Controls.Add(this.lblTahminBaslik);
             this.panelTahmin.Location = new System.Drawing.Point(15, 15);
             this.panelTahmin.Name = "panelTahmin";
-            this.panelTahmin.Size = new System.Drawing.Size(605, 135);
+            this.panelTahmin.Size = new System.Drawing.Size(600, 135);
             this.panelTahmin.TabIndex = 22;
             // 
             // btnTahmin
@@ -142,9 +125,9 @@
             this.btnTahmin.Appearance.Options.UseBackColor = true;
             this.btnTahmin.Appearance.Options.UseFont = true;
             this.btnTahmin.Appearance.Options.UseForeColor = true;
-            this.btnTahmin.Location = new System.Drawing.Point(15, 85);
+            this.btnTahmin.Location = new System.Drawing.Point(373, 39);
             this.btnTahmin.Name = "btnTahmin";
-            this.btnTahmin.Size = new System.Drawing.Size(110, 30);
+            this.btnTahmin.Size = new System.Drawing.Size(190, 43);
             this.btnTahmin.TabIndex = 3;
             this.btnTahmin.Text = "🔮 Tahmin Et";
             this.btnTahmin.Click += new System.EventHandler(this.btnTahmin_Click);
@@ -153,7 +136,7 @@
             // 
             this.lblTahminSonuc.Appearance.Font = new System.Drawing.Font("Segoe UI", 11F, System.Drawing.FontStyle.Bold);
             this.lblTahminSonuc.Appearance.Options.UseFont = true;
-            this.lblTahminSonuc.Location = new System.Drawing.Point(331, 35);
+            this.lblTahminSonuc.Location = new System.Drawing.Point(15, 98);
             this.lblTahminSonuc.Name = "lblTahminSonuc";
             this.lblTahminSonuc.Size = new System.Drawing.Size(152, 25);
             this.lblTahminSonuc.TabIndex = 2;
@@ -165,7 +148,7 @@
             this.progressBarTahmin.Name = "progressBarTahmin";
             this.progressBarTahmin.Properties.ShowTitle = true;
             this.progressBarTahmin.Properties.Step = 1;
-            this.progressBarTahmin.Size = new System.Drawing.Size(300, 20);
+            this.progressBarTahmin.Size = new System.Drawing.Size(313, 42);
             this.progressBarTahmin.TabIndex = 1;
             // 
             // lblTahminBaslik
@@ -190,7 +173,7 @@
             this.btnBursKabul.Appearance.Options.UseForeColor = true;
             this.btnBursKabul.AppearancePressed.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(34)))), ((int)(((byte)(153)))), ((int)(((byte)(84)))));
             this.btnBursKabul.AppearancePressed.Options.UseBackColor = true;
-            this.btnBursKabul.Location = new System.Drawing.Point(57, 561);
+            this.btnBursKabul.Location = new System.Drawing.Point(54, 561);
             this.btnBursKabul.Name = "btnBursKabul";
             this.btnBursKabul.Size = new System.Drawing.Size(175, 44);
             this.btnBursKabul.TabIndex = 19;
@@ -207,7 +190,7 @@
             this.btnYedek.Appearance.Options.UseForeColor = true;
             this.btnYedek.AppearancePressed.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(211)))), ((int)(((byte)(84)))), ((int)(((byte)(0)))));
             this.btnYedek.AppearancePressed.Options.UseBackColor = true;
-            this.btnYedek.Location = new System.Drawing.Point(420, 561);
+            this.btnYedek.Location = new System.Drawing.Point(417, 561);
             this.btnYedek.Name = "btnYedek";
             this.btnYedek.Size = new System.Drawing.Size(184, 44);
             this.btnYedek.TabIndex = 21;
@@ -223,7 +206,7 @@
             this.btnBursReddet.Appearance.Options.UseForeColor = true;
             this.btnBursReddet.AppearancePressed.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(57)))), ((int)(((byte)(43)))));
             this.btnBursReddet.AppearancePressed.Options.UseBackColor = true;
-            this.btnBursReddet.Location = new System.Drawing.Point(238, 561);
+            this.btnBursReddet.Location = new System.Drawing.Point(235, 561);
             this.btnBursReddet.Name = "btnBursReddet";
             this.btnBursReddet.Size = new System.Drawing.Size(176, 44);
             this.btnBursReddet.TabIndex = 20;
@@ -240,7 +223,7 @@
             this.btnAIAnaliz.Appearance.Options.UseForeColor = true;
             this.btnAIAnaliz.AppearancePressed.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(41)))), ((int)(((byte)(128)))), ((int)(((byte)(185)))));
             this.btnAIAnaliz.AppearancePressed.Options.UseBackColor = true;
-            this.btnAIAnaliz.Location = new System.Drawing.Point(238, 504);
+            this.btnAIAnaliz.Location = new System.Drawing.Point(235, 504);
             this.btnAIAnaliz.Name = "btnAIAnaliz";
             this.btnAIAnaliz.Size = new System.Drawing.Size(176, 38);
             this.btnAIAnaliz.TabIndex = 18;
@@ -258,7 +241,7 @@
             this.memoAIsonuc.Properties.Appearance.Options.UseFont = true;
             this.memoAIsonuc.Properties.Appearance.Options.UseForeColor = true;
             this.memoAIsonuc.Properties.ReadOnly = true;
-            this.memoAIsonuc.Size = new System.Drawing.Size(615, 342);
+            this.memoAIsonuc.Size = new System.Drawing.Size(600, 342);
             this.memoAIsonuc.TabIndex = 1;
             this.memoAIsonuc.EditValueChanged += new System.EventHandler(this.memoAIsonuc_EditValueChanged);
             // 
@@ -280,7 +263,7 @@
             this.lblFiltre.Appearance.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(44)))), ((int)(((byte)(62)))), ((int)(((byte)(80)))));
             this.lblFiltre.Appearance.Options.UseFont = true;
             this.lblFiltre.Appearance.Options.UseForeColor = true;
-            this.lblFiltre.Location = new System.Drawing.Point(116, 66);
+            this.lblFiltre.Location = new System.Drawing.Point(23, 54);
             this.lblFiltre.Name = "lblFiltre";
             this.lblFiltre.Size = new System.Drawing.Size(86, 23);
             this.lblFiltre.TabIndex = 16;
@@ -288,7 +271,7 @@
             // 
             // cmbFiltre
             // 
-            this.cmbFiltre.Location = new System.Drawing.Point(208, 64);
+            this.cmbFiltre.Location = new System.Drawing.Point(115, 52);
             this.cmbFiltre.Name = "cmbFiltre";
             this.cmbFiltre.Properties.Appearance.BackColor = System.Drawing.Color.Transparent;
             this.cmbFiltre.Properties.Appearance.Font = new System.Drawing.Font("Segoe UI", 9.5F);
@@ -309,12 +292,11 @@
             // OgrenciModule
             // 
             this.Controls.Add(this.cmbFiltre);
-            this.Controls.Add(this.btnGoster);
             this.Controls.Add(this.gridControl1);
             this.Controls.Add(this.panelAI);
             this.Controls.Add(this.lblFiltre);
             this.Name = "OgrenciModule";
-            this.Size = new System.Drawing.Size(1571, 741);
+            this.Size = new System.Drawing.Size(1992, 741);
             this.Load += new System.EventHandler(this.OgrenciModule_Load);
             ((System.ComponentModel.ISupportInitialize)(this.gridControl1)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridView1)).EndInit();
@@ -336,7 +318,6 @@
 
         public DevExpress.XtraGrid.GridControl gridControl1;
         public DevExpress.XtraGrid.Views.Grid.GridView gridView1;
-        private DevExpress.XtraEditors.SimpleButton btnGoster;
         private DevExpress.DataAccess.Sql.SqlDataSource sqlDataSource1;
         private DevExpress.XtraEditors.PanelControl panelAI;
         private DevExpress.XtraEditors.MemoEdit memoAIsonuc;

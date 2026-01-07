@@ -2,6 +2,7 @@
 using DevExpress.XtraBars;
 using DevExpress.XtraEditors;
 using DevExpress.XtraGrid.Views.Grid;
+using DevExpress.Utils;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -94,9 +95,6 @@ namespace bursoto1.Modules
             if (cmbFiltre != null)
                 cmbFiltre.SelectedIndexChanged += CmbFiltre_SelectedIndexChanged;
 
-            // Profil göster butonu
-            if (btnGoster != null)
-                btnGoster.Click += BtnGoster_Click;
 
             // AI Analiz butonları
             if (btnAIAnaliz != null)
@@ -107,6 +105,14 @@ namespace bursoto1.Modules
                 btnBursReddet.Click += BtnBursReddet_Click;
             if (btnYedek != null)
                 btnYedek.Click += BtnYedek_Click;
+
+            // GridView event'leri
+            if (gridView1 != null)
+            {
+                gridView1.CustomDrawCell += GridView1_CustomDrawCell;
+                // Satır değiştiğinde AI özetini ve tahmin bilgisini sağ panele yansıt
+                gridView1.FocusedRowChanged += GridView1_FocusedRowChanged;
+            }
         }
 
         private void CmbFiltre_SelectedIndexChanged(object sender, EventArgs e)
@@ -155,7 +161,7 @@ namespace bursoto1.Modules
             gridControl1.BackColor = Color.FromArgb(32, 32, 32);
         }
 
-        public void Listele(string filtreTipi = "Tüm Öğrenciler")
+        public void Listele(string filtreTipi = "Tüm Öğrenciler", int? selectedOgrenciID = null)
         {
             try
             {
@@ -218,6 +224,9 @@ namespace bursoto1.Modules
                         ? string.Empty 
                         : $", o.[{universiteKolon}] AS [Üniversite]";
 
+                    // AIPotansiyelNotu ve AIPotansiyelYuzde kolonları SELECT'e eklenecek
+                    string aiPotansiyelSelect = ", ISNULL(o.AIPotansiyelNotu, 0) AS [AIPotansiyelNotu], ISNULL(o.AIPotansiyelYuzde, '') AS [AIPotansiyelYuzde]";
+
                     string sorgu;
                     
                     switch (filtreTipi)
@@ -225,7 +234,7 @@ namespace bursoto1.Modules
                         case "Burs Alanlar":
                             sorgu = $@"SELECT DISTINCT o.[{ogrenciIDKolonu}] AS ID, o.AD, o.SOYAD, o.BÖLÜMÜ, o.SINIF, o.AGNO, 
                                      o.[TOPLAM HANE GELİRİ] AS [Hane Geliri], o.[KARDEŞ SAYISI] AS [Kardeş], 
-                                     ISNULL(o.AISkor, 0) AS [AI Puanı]{universiteSelect},
+                                     ISNULL(o.AISkor, 0) AS [AI Puanı]{universiteSelect}{aiPotansiyelSelect},
                                      ISNULL(ob.Durum, -1) AS [Durum],
                                      CASE 
                                          WHEN ob.Durum = 1 THEN 'Kabul Edildi'
@@ -241,7 +250,7 @@ namespace bursoto1.Modules
                         case "Beklemedeki Öğrenciler":
                             sorgu = $@"SELECT DISTINCT o.[{ogrenciIDKolonu}] AS ID, o.AD, o.SOYAD, o.BÖLÜMÜ, o.SINIF, o.AGNO, 
                                      o.[TOPLAM HANE GELİRİ] AS [Hane Geliri], o.[KARDEŞ SAYISI] AS [Kardeş], 
-                                     ISNULL(o.AISkor, 0) AS [AI Puanı]{universiteSelect},
+                                     ISNULL(o.AISkor, 0) AS [AI Puanı]{universiteSelect}{aiPotansiyelSelect},
                                      ISNULL(ob.Durum, -1) AS [Durum],
                                      CASE 
                                          WHEN ob.Durum = 1 THEN 'Kabul Edildi'
@@ -257,7 +266,7 @@ namespace bursoto1.Modules
                         case "Yedek Listesi":
                             sorgu = $@"SELECT DISTINCT o.[{ogrenciIDKolonu}] AS ID, o.AD, o.SOYAD, o.BÖLÜMÜ, o.SINIF, o.AGNO, 
                                      o.[TOPLAM HANE GELİRİ] AS [Hane Geliri], o.[KARDEŞ SAYISI] AS [Kardeş], 
-                                     ISNULL(o.AISkor, 0) AS [AI Puanı]{universiteSelect},
+                                     ISNULL(o.AISkor, 0) AS [AI Puanı]{universiteSelect}{aiPotansiyelSelect},
                                      ISNULL(ob.Durum, -1) AS [Durum],
                                      CASE 
                                          WHEN ob.Durum = 1 THEN 'Kabul Edildi'
@@ -273,7 +282,7 @@ namespace bursoto1.Modules
                         case "Reddedilen Öğrenciler":
                             sorgu = $@"SELECT o.[{ogrenciIDKolonu}] AS ID, o.AD, o.SOYAD, o.BÖLÜMÜ, o.SINIF, o.AGNO, 
                                      o.[TOPLAM HANE GELİRİ] AS [Hane Geliri], o.[KARDEŞ SAYISI] AS [Kardeş], 
-                                     ISNULL(o.AISkor, 0) AS [AI Puanı]{universiteSelect},
+                                     ISNULL(o.AISkor, 0) AS [AI Puanı]{universiteSelect}{aiPotansiyelSelect},
                                      -1 AS [Durum],
                                      'Reddedildi' AS [Durum Metni]
                                      FROM Ogrenciler o
@@ -284,7 +293,7 @@ namespace bursoto1.Modules
                             string orderByClause = ogrenciBurslariIDVar ? "BaslangicTarihi DESC, ID DESC" : "BaslangicTarihi DESC";
                             sorgu = $@"SELECT o.[{ogrenciIDKolonu}] AS ID, o.AD, o.SOYAD, o.BÖLÜMÜ, o.SINIF, o.AGNO, 
                                   o.[TOPLAM HANE GELİRİ] AS [Hane Geliri], o.[KARDEŞ SAYISI] AS [Kardeş], 
-                                  ISNULL(o.AISkor, 0) AS [AI Puanı]{universiteSelect},
+                                  ISNULL(o.AISkor, 0) AS [AI Puanı]{universiteSelect}{aiPotansiyelSelect},
                                   CASE 
                                       WHEN ob.Durum IS NULL THEN -1
                                       WHEN ob.Durum = 1 THEN 1
@@ -329,16 +338,53 @@ namespace bursoto1.Modules
                     gridView1.Columns["Durum"].Visible = false; // Sadece renklendirme için kullanılacak
                 }
 
+                // AIPotansiyelNotu sütununun formatını 2 haneli sayı olacak şekilde ayarla
+                var colAIPot = gridView1.Columns["AIPotansiyelNotu"];
+                if (colAIPot != null)
+                {
+                    colAIPot.DisplayFormat.FormatType = FormatType.Numeric;
+                    colAIPot.DisplayFormat.FormatString = "n2"; // 2 ondalık hane
+                }
+
                 gridView1.BestFitColumns();
                 ApplyDarkGrid(gridView1);
                 
                 // Satır renklendirmesi için event handler ekle (ApplyDarkGrid'den sonra)
                 gridView1.RowStyle -= GridView1_RowStyle;
                 gridView1.RowStyle += GridView1_RowStyle;
+                
+                // NOT: Seçili öğrenciyi geri yükleme işlemi Listele() içinden kaldırıldı
+                // Çünkü FocusedRowChanged içinden Listele() çağrılırsa sonsuz döngüye neden olabilir
+                // Odak geri yükleme sadece btnTahmin_Click ve BtnAIAnaliz_Click içinde yapılmalı
             }
             catch (Exception ex)
             {
                 MessageHelper.ShowException(ex, "Listeleme Hatası");
+            }
+        }
+
+        // Seçili öğrenciyi ID'ye göre bul ve tekrar seç
+        private void RestoreSelectedOgrenci(int ogrenciID)
+        {
+            try
+            {
+                if (gridView1 == null) return;
+                
+                // LocateByValue ile ID'ye göre satırı bul (field name string olarak)
+                int foundHandle = gridView1.LocateByValue("ID", ogrenciID);
+                
+                if (foundHandle >= 0)
+                {
+                    // Satırı seçili yap (bu otomatik olarak FocusedRowChanged event'ini tetikler)
+                    gridView1.FocusedRowHandle = foundHandle;
+                    
+                    // Grid'i görünür alana kaydır
+                    gridView1.MakeRowVisible(foundHandle);
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Seçili öğrenci geri yüklenirken hata: {ex.Message}");
             }
         }
 
@@ -584,22 +630,101 @@ namespace bursoto1.Modules
             string gelir = dr["Hane Geliri"]?.ToString() ?? "0";
             string kardes = dr["Kardeş"]?.ToString() ?? "0";
 
-            // Öğrencinin ek bilgilerini çek (motivasyon, ihtiyaç cevapları vb.)
+            // Öğrencinin ek bilgilerini çek - ÖNCE GRID'DEN, SONRA VERİTABANINDAN
             string motivasyon = "";
             string ihtiyac = "";
             string hedefler = "";
             string kullanim = "";
             string fark = "";
+            string aiPotansiyelNotu = "";
+            string aiPotansiyelYuzde = "";
             
+            // NOT: Veritabanında Ihtiyac, Hedefler, BursKullanim, FarkliOzellik kolonları yok
+            // Bu yüzden bu veriler AINotu içinde saklanmış olabilir veya hiç kaydedilmemiş olabilir
+            
+            // 1. ÖNCELİK: Grid'den veri okumaya çalış (ekranda görünen veriler)
+            try
+            {
+                // Grid'deki kolon isimlerini kontrol et (farklı varyasyonlar olabilir)
+                var gridColumns = dr.Table.Columns;
+                
+                // Hedefler için farklı kolon isimlerini dene
+                if (gridColumns.Contains("Hedefler"))
+                    hedefler = dr["Hedefler"]?.ToString() ?? "";
+                else if (gridColumns.Contains("HEDEFLER"))
+                    hedefler = dr["HEDEFLER"]?.ToString() ?? "";
+                
+                // Ihtiyac için
+                if (gridColumns.Contains("Ihtiyac"))
+                    ihtiyac = dr["Ihtiyac"]?.ToString() ?? "";
+                else if (gridColumns.Contains("İhtiyaç"))
+                    ihtiyac = dr["İhtiyaç"]?.ToString() ?? "";
+                
+                // BursKullanim için - tüm varyasyonları kontrol et
+                if (gridColumns.Contains("BursKullanim"))
+                    kullanim = dr["BursKullanim"]?.ToString() ?? "";
+                else if (gridColumns.Contains("Burs Kullanım"))
+                    kullanim = dr["Burs Kullanım"]?.ToString() ?? "";
+                else if (gridColumns.Contains("Kullanim"))
+                    kullanim = dr["Kullanim"]?.ToString() ?? "";
+                else if (gridColumns.Contains("Kullanım"))
+                    kullanim = dr["Kullanım"]?.ToString() ?? "";
+                
+                // FarkliOzellik için - tüm varyasyonları kontrol et
+                if (gridColumns.Contains("FarkliOzellik"))
+                    fark = dr["FarkliOzellik"]?.ToString() ?? "";
+                else if (gridColumns.Contains("Farklı Özellik"))
+                    fark = dr["Farklı Özellik"]?.ToString() ?? "";
+                else if (gridColumns.Contains("Fark"))
+                    fark = dr["Fark"]?.ToString() ?? "";
+                
+                // AIPotansiyelNotu ve AIPotansiyelYuzde grid'den
+                if (gridColumns.Contains("AIPotansiyelNotu") && dr["AIPotansiyelNotu"] != DBNull.Value)
+                    aiPotansiyelNotu = dr["AIPotansiyelNotu"]?.ToString() ?? "";
+                if (gridColumns.Contains("AIPotansiyelYuzde") && dr["AIPotansiyelYuzde"] != DBNull.Value)
+                    aiPotansiyelYuzde = dr["AIPotansiyelYuzde"]?.ToString() ?? "";
+            }
+            catch (Exception exGrid)
+            {
+                System.Diagnostics.Debug.WriteLine($"[GRID OKUMA] Grid'den veri okunurken hata: {exGrid.Message}");
+            }
+            
+            // 2. FALLBACK: Grid'de bulunamayan verileri veritabanından çek
             try
             {
                 using (SqlConnection conn = bgl.baglanti())
                 {
-                    // Önce kolonları kontrol et
+                    // Önce kolonları kontrol et - TÜM olası kolon isimlerini kontrol et
                     SqlCommand cmdCheck = new SqlCommand(@"SELECT COLUMN_NAME 
                         FROM INFORMATION_SCHEMA.COLUMNS 
                         WHERE TABLE_NAME = 'Ogrenciler' 
-                        AND COLUMN_NAME IN ('Motivasyon', 'Ihtiyac', 'Hedefler', 'BursKullanim', 'FarkliOzellik', 'AINotu')", conn);
+                        AND (COLUMN_NAME IN ('Motivasyon', 'Ihtiyac', 'Hedefler', 'BursKullanim', 'FarkliOzellik', 'AINotu', 'AIPotansiyelNotu', 'AIPotansiyelYuzde')
+                             OR COLUMN_NAME LIKE '%Kullanim%'
+                             OR COLUMN_NAME LIKE '%Kullanım%'
+                             OR COLUMN_NAME LIKE '%Fark%'
+                             OR COLUMN_NAME LIKE '%Ozellik%'
+                             OR COLUMN_NAME LIKE '%İhtiyaç%'
+                             OR COLUMN_NAME LIKE '%Hedef%')", conn);
+                    
+                    // Eksik kolonları otomatik oluştur
+                    try
+                    {
+                        SqlCommand cmdCreateCols = new SqlCommand(@"
+                            IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'Ogrenciler' AND COLUMN_NAME = 'Ihtiyac')
+                                ALTER TABLE Ogrenciler ADD Ihtiyac NVARCHAR(MAX) NULL;
+                            IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'Ogrenciler' AND COLUMN_NAME = 'Hedefler')
+                                ALTER TABLE Ogrenciler ADD Hedefler NVARCHAR(MAX) NULL;
+                            IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'Ogrenciler' AND COLUMN_NAME = 'BursKullanim')
+                                ALTER TABLE Ogrenciler ADD BursKullanim NVARCHAR(MAX) NULL;
+                            IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'Ogrenciler' AND COLUMN_NAME = 'FarkliOzellik')
+                                ALTER TABLE Ogrenciler ADD FarkliOzellik NVARCHAR(MAX) NULL;", conn);
+                        cmdCreateCols.ExecuteNonQuery();
+                        System.Diagnostics.Debug.WriteLine("[VERİTABANI] Eksik kolonlar oluşturuldu (varsa)");
+                    }
+                    catch (Exception exCreate)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"[VERİTABANI KOLON OLUŞTURMA] Hata: {exCreate.Message}");
+                    }
                     var kolonlar = new List<string>();
                     using (var reader = cmdCheck.ExecuteReader())
                     {
@@ -615,6 +740,9 @@ namespace bursoto1.Modules
                             }
                         }
                     }
+                    
+                    // Debug: Bulunan kolonları yazdır
+                    System.Diagnostics.Debug.WriteLine($"[VERİTABANI KOLONLAR] Bulunan kolonlar: {string.Join(", ", kolonlar)}");
 
                     // Ogrenciler tablosundaki ID kolonunu dinamik tespit et
                     string ogrenciIDKolonu = "ID";
@@ -638,14 +766,43 @@ namespace bursoto1.Modules
                     }
                     catch { }
 
+                    // Kullanım kolonunu bul (farklı isimlerle olabilir)
+                    string kullanimKolonu = null;
+                    foreach (string kolon in kolonlar)
+                    {
+                        if (kolon.Equals("BursKullanim", StringComparison.OrdinalIgnoreCase) ||
+                            kolon.Contains("Kullanim") || kolon.Contains("Kullanım"))
+                        {
+                            kullanimKolonu = kolon;
+                            break;
+                        }
+                    }
+                    
+                    // Fark kolonunu bul
+                    string farkKolonu = null;
+                    foreach (string kolon in kolonlar)
+                    {
+                        if (kolon.Equals("FarkliOzellik", StringComparison.OrdinalIgnoreCase) ||
+                            kolon.Contains("Fark") || kolon.Contains("Ozellik"))
+                        {
+                            farkKolonu = kolon;
+                            break;
+                        }
+                    }
+                    
                     // Mevcut kolonları kullanarak sorgu oluştur
                     string selectColumns = $"[{ogrenciIDKolonu}]";
                     if (kolonlar.Contains("Motivasyon")) selectColumns += ", ISNULL(Motivasyon, '') as Motivasyon";
                     if (kolonlar.Contains("Ihtiyac")) selectColumns += ", ISNULL(Ihtiyac, '') as Ihtiyac";
                     if (kolonlar.Contains("Hedefler")) selectColumns += ", ISNULL(Hedefler, '') as Hedefler";
-                    if (kolonlar.Contains("BursKullanim")) selectColumns += ", ISNULL(BursKullanim, '') as Kullanim";
-                    if (kolonlar.Contains("FarkliOzellik")) selectColumns += ", ISNULL(FarkliOzellik, '') as Fark";
+                    if (!string.IsNullOrEmpty(kullanimKolonu)) selectColumns += $", ISNULL([{kullanimKolonu}], '') as Kullanim";
+                    if (!string.IsNullOrEmpty(farkKolonu)) selectColumns += $", ISNULL([{farkKolonu}], '') as Fark";
                     if (kolonlar.Contains("AINotu")) selectColumns += ", ISNULL(AINotu, '') as AINotu";
+                    if (kolonlar.Contains("AIPotansiyelNotu")) selectColumns += ", ISNULL(AIPotansiyelNotu, 0) as AIPotansiyelNotu";
+                    if (kolonlar.Contains("AIPotansiyelYuzde")) selectColumns += ", ISNULL(AIPotansiyelYuzde, '') as AIPotansiyelYuzde";
+
+                    System.Diagnostics.Debug.WriteLine($"[VERİTABANI SORGUSU] Kullanim kolonu: '{kullanimKolonu}', Fark kolonu: '{farkKolonu}'");
+                    System.Diagnostics.Debug.WriteLine($"[VERİTABANI SORGUSU] SELECT: {selectColumns}");
 
                     SqlCommand cmd = new SqlCommand($"SELECT {selectColumns} FROM Ogrenciler WHERE [{ogrenciIDKolonu}] = @id", conn);
                     cmd.Parameters.AddWithValue("@id", ogrenciID);
@@ -654,25 +811,131 @@ namespace bursoto1.Modules
                     {
                         if (reader.Read())
                         {
+                            // ÖNCE veritabanından oku, SONRA grid'deki verilerle override et (eğer grid'de varsa)
                             if (kolonlar.Contains("Motivasyon"))
-                                motivasyon = reader["Motivasyon"]?.ToString() ?? "";
+                            {
+                                string dbMotivasyon = reader["Motivasyon"]?.ToString() ?? "";
+                                if (!string.IsNullOrWhiteSpace(dbMotivasyon))
+                                    motivasyon = dbMotivasyon;
+                            }
                             if (kolonlar.Contains("Ihtiyac"))
-                                ihtiyac = reader["Ihtiyac"]?.ToString() ?? "";
+                            {
+                                string dbIhtiyac = reader["Ihtiyac"]?.ToString() ?? "";
+                                if (!string.IsNullOrWhiteSpace(dbIhtiyac))
+                                    ihtiyac = dbIhtiyac;
+                            }
                             if (kolonlar.Contains("Hedefler"))
-                                hedefler = reader["Hedefler"]?.ToString() ?? "";
-                            if (kolonlar.Contains("BursKullanim"))
-                                kullanim = reader["Kullanim"]?.ToString() ?? "";
-                            if (kolonlar.Contains("FarkliOzellik"))
-                                fark = reader["Fark"]?.ToString() ?? "";
+                            {
+                                string dbHedefler = reader["Hedefler"]?.ToString() ?? "";
+                                if (!string.IsNullOrWhiteSpace(dbHedefler))
+                                    hedefler = dbHedefler;
+                            }
+                            if (!string.IsNullOrEmpty(kullanimKolonu))
+                            {
+                                try
+                                {
+                                    string dbKullanim = reader["Kullanim"]?.ToString() ?? "";
+                                    System.Diagnostics.Debug.WriteLine($"[VERİTABANI OKUMA] Kullanim veritabanından: '{dbKullanim}' (uzunluk: {dbKullanim?.Length ?? 0})");
+                                    if (!string.IsNullOrWhiteSpace(dbKullanim))
+                                        kullanim = dbKullanim;
+                                }
+                                catch (Exception exKullanim)
+                                {
+                                    System.Diagnostics.Debug.WriteLine($"[VERİTABANI OKUMA HATASI] Kullanim okunamadı: {exKullanim.Message}");
+                                }
+                            }
+                            if (!string.IsNullOrEmpty(farkKolonu))
+                            {
+                                try
+                                {
+                                    string dbFark = reader["Fark"]?.ToString() ?? "";
+                                    System.Diagnostics.Debug.WriteLine($"[VERİTABANI OKUMA] Fark veritabanından: '{dbFark}' (uzunluk: {dbFark?.Length ?? 0})");
+                                    if (!string.IsNullOrWhiteSpace(dbFark))
+                                        fark = dbFark;
+                                }
+                                catch (Exception exFark)
+                                {
+                                    System.Diagnostics.Debug.WriteLine($"[VERİTABANI OKUMA HATASI] Fark okunamadı: {exFark.Message}");
+                                }
+                            }
                             
-                            // AINotu varsa ve diğerleri boşsa onu kullan
+                            // AINotu varsa ve içinde başvuru cevapları varsa parse et
+                            // NOT: Veritabanında Ihtiyac, Hedefler, BursKullanim, FarkliOzellik kolonları yok
+                            // Bu yüzden bu veriler başka bir yerde saklanmış olabilir veya hiç kaydedilmemiş
                             if (kolonlar.Contains("AINotu"))
                             {
                                 string aiNotu = reader["AINotu"]?.ToString() ?? "";
-                                if (string.IsNullOrWhiteSpace(ihtiyac) && string.IsNullOrWhiteSpace(motivasyon) && !string.IsNullOrWhiteSpace(aiNotu))
+                                System.Diagnostics.Debug.WriteLine($"[AINOTU OKUMA] AINotu uzunluk: {aiNotu?.Length ?? 0}, içerik başlangıcı: {(aiNotu?.Length > 100 ? aiNotu.Substring(0, 100) : aiNotu)}");
+                                
+                                // Eğer AINotu içinde başvuru cevapları varsa (eski format), parse et
+                                // Ama sadece gerçek başvuru cevapları varsa, AI analiz sonucu değilse
+                                if (!string.IsNullOrWhiteSpace(aiNotu) && !aiNotu.Contains("SKOR:") && !aiNotu.Contains("ANALİZ:"))
                                 {
-                                    motivasyon = aiNotu; // Fallback olarak kullan
+                                    // Eski format: [İHTİYAÇ], [HEDEFLER], [KULLANIM], [FARK] içeren metin
+                                    try
+                                    {
+                                        // [İHTİYAÇ] ve [HEDEFLER] arasındaki metni al
+                                        int ihtiyacStart = aiNotu.IndexOf("[İHTİYAÇ]");
+                                        int hedeflerStart = aiNotu.IndexOf("[HEDEFLER]");
+                                        if (ihtiyacStart >= 0 && hedeflerStart > ihtiyacStart)
+                                        {
+                                            string ihtiyacMetni = aiNotu.Substring(ihtiyacStart + 10, hedeflerStart - ihtiyacStart - 10).Trim();
+                                            if (string.IsNullOrWhiteSpace(ihtiyac) && !string.IsNullOrWhiteSpace(ihtiyacMetni) && !ihtiyacMetni.Contains("SKOR:"))
+                                                ihtiyac = ihtiyacMetni;
+                                        }
+                                        
+                                        // [HEDEFLER] ve [KULLANIM] arasındaki metni al
+                                        int kullanimStart = aiNotu.IndexOf("[KULLANIM]");
+                                        if (hedeflerStart >= 0 && kullanimStart > hedeflerStart)
+                                        {
+                                            string hedeflerMetni = aiNotu.Substring(hedeflerStart + 11, kullanimStart - hedeflerStart - 11).Trim();
+                                            if (string.IsNullOrWhiteSpace(hedefler) && !string.IsNullOrWhiteSpace(hedeflerMetni) && !hedeflerMetni.Contains("SKOR:"))
+                                                hedefler = hedeflerMetni;
+                                        }
+                                        
+                                        // [KULLANIM] ve [FARK] arasındaki metni al
+                                        int farkStart = aiNotu.IndexOf("[FARK]");
+                                        if (kullanimStart >= 0 && farkStart > kullanimStart)
+                                        {
+                                            string kullanimMetni = aiNotu.Substring(kullanimStart + 11, farkStart - kullanimStart - 11).Trim();
+                                            if (string.IsNullOrWhiteSpace(kullanim) && !string.IsNullOrWhiteSpace(kullanimMetni) && !kullanimMetni.Contains("SKOR:"))
+                                                kullanim = kullanimMetni;
+                                        }
+                                        
+                                        // [FARK] sonrası metni al
+                                        if (farkStart >= 0)
+                                        {
+                                            string farkMetni = aiNotu.Substring(farkStart + 7).Trim();
+                                            // SKOR: veya ANALİZ: gibi kelimelerden önceki kısmı al
+                                            int skorIndex = farkMetni.IndexOf("SKOR:");
+                                            int analizIndex = farkMetni.IndexOf("ANALİZ:");
+                                            int minIndex = Math.Min(skorIndex >= 0 ? skorIndex : int.MaxValue, analizIndex >= 0 ? analizIndex : int.MaxValue);
+                                            if (minIndex < int.MaxValue && minIndex > 0)
+                                                farkMetni = farkMetni.Substring(0, minIndex).Trim();
+                                            
+                                            if (string.IsNullOrWhiteSpace(fark) && !string.IsNullOrWhiteSpace(farkMetni) && !farkMetni.Contains("SKOR:"))
+                                                fark = farkMetni;
+                                        }
+                                    }
+                                    catch (Exception exParse)
+                                    {
+                                        System.Diagnostics.Debug.WriteLine($"[AINOTU PARSE] Hata: {exParse.Message}");
+                                    }
                                 }
+                            }
+                            
+                            // ML.NET tahmin verilerini çek (grid'de yoksa)
+                            if (string.IsNullOrWhiteSpace(aiPotansiyelNotu) && kolonlar.Contains("AIPotansiyelNotu"))
+                            {
+                                object potansiyelNotuObj = reader["AIPotansiyelNotu"];
+                                if (potansiyelNotuObj != null && potansiyelNotuObj != DBNull.Value)
+                                {
+                                    aiPotansiyelNotu = potansiyelNotuObj.ToString();
+                                }
+                            }
+                            if (string.IsNullOrWhiteSpace(aiPotansiyelYuzde) && kolonlar.Contains("AIPotansiyelYuzde"))
+                            {
+                                aiPotansiyelYuzde = reader["AIPotansiyelYuzde"]?.ToString() ?? "";
                             }
                         }
                     }
@@ -680,15 +943,66 @@ namespace bursoto1.Modules
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Motivasyon sütunları okunamadı: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"[VERİTABANI OKUMA] Veritabanından veri okunurken hata: {ex.Message}");
             }
+            
+            // Debug: Tüm verileri konsola yazdır
+            System.Diagnostics.Debug.WriteLine($"[AI ANALİZ VERİ] ========================================");
+            System.Diagnostics.Debug.WriteLine($"[AI ANALİZ VERİ] OgrenciID: {ogrenciID}, Ad: {ad} {soyad}");
+            System.Diagnostics.Debug.WriteLine($"[AI ANALİZ VERİ] AGNO: {agno}, Gelir: {gelir} TL, Kardeş: {kardes}");
+            System.Diagnostics.Debug.WriteLine($"[AI ANALİZ VERİ] Ihtiyac: '{(string.IsNullOrWhiteSpace(ihtiyac) ? "BOŞ" : (ihtiyac.Length > 50 ? ihtiyac.Substring(0, 50) + "..." : ihtiyac))}' (uzunluk: {ihtiyac?.Length ?? 0})");
+            System.Diagnostics.Debug.WriteLine($"[AI ANALİZ VERİ] Hedefler: '{(string.IsNullOrWhiteSpace(hedefler) ? "BOŞ" : (hedefler.Length > 50 ? hedefler.Substring(0, 50) + "..." : hedefler))}' (uzunluk: {hedefler?.Length ?? 0})");
+            System.Diagnostics.Debug.WriteLine($"[AI ANALİZ VERİ] Kullanim: '{(string.IsNullOrWhiteSpace(kullanim) ? "BOŞ" : (kullanim.Length > 50 ? kullanim.Substring(0, 50) + "..." : kullanim))}' (uzunluk: {kullanim?.Length ?? 0})");
+            System.Diagnostics.Debug.WriteLine($"[AI ANALİZ VERİ] Fark: '{(string.IsNullOrWhiteSpace(fark) ? "BOŞ" : (fark.Length > 50 ? fark.Substring(0, 50) + "..." : fark))}' (uzunluk: {fark?.Length ?? 0})");
+            System.Diagnostics.Debug.WriteLine($"[AI ANALİZ VERİ] Motivasyon: '{(string.IsNullOrWhiteSpace(motivasyon) ? "BOŞ" : (motivasyon.Length > 50 ? motivasyon.Substring(0, 50) + "..." : motivasyon))}' (uzunluk: {motivasyon?.Length ?? 0})");
+            System.Diagnostics.Debug.WriteLine($"[AI ANALİZ VERİ] AIPotansiyelNotu: '{aiPotansiyelNotu}', AIPotansiyelYuzde: '{aiPotansiyelYuzde}'");
+            System.Diagnostics.Debug.WriteLine($"[AI ANALİZ VERİ] ========================================");
 
-            // AI için detaylı veri hazırla - boş değilse gönder
-            string ogrenciVerisi = $"Ad Soyad: {ad} {soyad}\n" +
-                                   $"Bölüm: {bolum}, Sınıf: {sinif}\n" +
-                                   $"AGNO: {agno}\n" +
-                                   $"Hane Geliri: {gelir} TL\n" +
-                                   $"Kardeş Sayısı: {kardes}\n\n";
+            // Kişi başı gelir hesapla (AI için önemli)
+            decimal haneGeliriDecimal = 0;
+            int kardesSayisiInt = 0;
+            decimal.TryParse(gelir, out haneGeliriDecimal);
+            int.TryParse(kardes, out kardesSayisiInt);
+            decimal kisiBasiGelir = (kardesSayisiInt + 2) > 0 ? haneGeliriDecimal / (kardesSayisiInt + 2) : 0;
+            
+            // AGNO'yu float'a çevir
+            float agnoFloat = 0;
+            float.TryParse(agno, out agnoFloat);
+            
+            // AI için detaylı ve benzersiz veri hazırla
+            string ogrenciVerisi = $"═══════════════════════════════════════\n";
+            ogrenciVerisi += $"ÖĞRENCİ BİLGİLERİ (ID: {ogrenciID})\n";
+            ogrenciVerisi += $"═══════════════════════════════════════\n";
+            ogrenciVerisi += $"Ad Soyad: {ad} {soyad}\n";
+            ogrenciVerisi += $"Bölüm: {bolum}\n";
+            ogrenciVerisi += $"Sınıf: {sinif}\n";
+            ogrenciVerisi += $"AGNO: {agnoFloat:F2} / 4.00\n";
+            ogrenciVerisi += $"Hane Geliri: {haneGeliriDecimal:N0} TL\n";
+            ogrenciVerisi += $"Kardeş Sayısı: {kardesSayisiInt}\n";
+            ogrenciVerisi += $"Kişi Başı Gelir: {kisiBasiGelir:N0} TL (Hane Geliri / (Kardeş + 2))\n";
+            ogrenciVerisi += $"═══════════════════════════════════════\n\n";
+            
+            // ML.NET tahmin verilerini ekle (varsa)
+            if (!string.IsNullOrWhiteSpace(aiPotansiyelNotu) && float.TryParse(aiPotansiyelNotu, out float potansiyelNotu))
+            {
+                ogrenciVerisi += $"🤖 ML.NET MEZUNİYET TAHMİNİ:\n";
+                ogrenciVerisi += $"   Tahmini Mezuniyet Puanı: {potansiyelNotu:F2} / 4.00\n";
+                if (agnoFloat > 0)
+                {
+                    float artis = potansiyelNotu - agnoFloat;
+                    float artisYuzde = (artis / agnoFloat) * 100;
+                    ogrenciVerisi += $"   Mevcut AGNO'dan Fark: {artis:+#0.00;-#0.00} ({artisYuzde:+#0.0;-#0.0}%)\n";
+                }
+                if (!string.IsNullOrWhiteSpace(aiPotansiyelYuzde))
+                {
+                    ogrenciVerisi += $"   Öngörülen Artış: {aiPotansiyelYuzde}\n";
+                }
+                ogrenciVerisi += $"\n";
+            }
+            
+            ogrenciVerisi += $"═══════════════════════════════════════\n";
+            ogrenciVerisi += $"BAŞVURU CEVAPLARI\n";
+            ogrenciVerisi += $"═══════════════════════════════════════\n\n";
 
             // Sadece dolu olan cevapları ekle
             if (!string.IsNullOrWhiteSpace(ihtiyac))
@@ -731,55 +1045,96 @@ namespace bursoto1.Modules
                 int aiSkor = ParseAISkor(sonuc);
                 string aiNotu = ParseAINotu(sonuc);
 
-                // AI Skorunu kaydet
+                // AI Skorunu ve AINotu'yu kaydet
                 using (SqlConnection conn = bgl.baglanti())
                 {
-                    SqlCommand cmd = new SqlCommand("UPDATE Ogrenciler SET AISkor = @skor WHERE ID = @id", conn);
-                    cmd.Parameters.AddWithValue("@skor", aiSkor);
-                    cmd.Parameters.AddWithValue("@id", ogrenciID);
-                    cmd.ExecuteNonQuery();
+                    // AISkor ve AINotu kolonlarının varlığını kontrol et
+                    bool hasAISkor = false;
+                    bool hasAINotu = false;
+                    try
+                    {
+                        SqlCommand checkCmd = new SqlCommand(@"SELECT COLUMN_NAME 
+                            FROM INFORMATION_SCHEMA.COLUMNS 
+                            WHERE TABLE_NAME = 'Ogrenciler' 
+                            AND COLUMN_NAME IN ('AISkor', 'AINotu')", conn);
+                        using (var reader = checkCmd.ExecuteReader())
+                        {
+                            while (reader.Read())
+                            {
+                                string kolonAdi = reader[0]?.ToString() ?? "";
+                                if (kolonAdi == "AISkor") hasAISkor = true;
+                                if (kolonAdi == "AINotu") hasAINotu = true;
+                            }
+                        }
+                    }
+                    catch { }
+                    
+                    // Kolonları otomatik oluştur (yoksa)
+                    if (!hasAISkor)
+                    {
+                        try
+                        {
+                            SqlCommand alterCmd = new SqlCommand("ALTER TABLE Ogrenciler ADD AISkor INT NULL", conn);
+                            alterCmd.ExecuteNonQuery();
+                            hasAISkor = true;
+                        }
+                        catch { }
+                    }
+                    if (!hasAINotu)
+                    {
+                        try
+                        {
+                            SqlCommand alterCmd = new SqlCommand("ALTER TABLE Ogrenciler ADD AINotu NVARCHAR(MAX) NULL", conn);
+                            alterCmd.ExecuteNonQuery();
+                            hasAINotu = true;
+                        }
+                        catch { }
+                    }
+                    
+                    // UPDATE sorgusu
+                    string updateQuery = "";
+                    if (hasAISkor && hasAINotu)
+                        updateQuery = "UPDATE Ogrenciler SET AISkor = @skor, AINotu = @notu WHERE ID = @id";
+                    else if (hasAISkor)
+                        updateQuery = "UPDATE Ogrenciler SET AISkor = @skor WHERE ID = @id";
+                    else if (hasAINotu)
+                        updateQuery = "UPDATE Ogrenciler SET AINotu = @notu WHERE ID = @id";
+                    
+                    if (!string.IsNullOrEmpty(updateQuery))
+                    {
+                        SqlCommand cmd = new SqlCommand(updateQuery, conn);
+                        if (hasAISkor)
+                            cmd.Parameters.AddWithValue("@skor", aiSkor);
+                        if (hasAINotu)
+                            cmd.Parameters.AddWithValue("@notu", aiNotu);
+                        cmd.Parameters.AddWithValue("@id", ogrenciID);
+                        cmd.ExecuteNonQuery();
+                    }
                 }
 
-                string uygunluk = aiSkor >= 70 ? "UYGUN" : aiSkor >= 40 ? "DEĞERLENDIR" : "UYGUN DEĞİL";
-                Color renk = aiSkor >= 70 ? Color.FromArgb(39, 174, 96) : aiSkor >= 40 ? Color.FromArgb(243, 156, 18) : Color.FromArgb(231, 76, 60);
+                Color renk = GetAISkorColor(aiSkor);
 
                 try
                 {
                     if (memoAIsonuc != null)
                     {
-                        // 1. Ayraç Çizgileri
-                        string thickLine = new string('━', 45); // Kalın ana ayraç
-                        string thinLine = new string('─', 45);  // İnce alt ayraç
-                        string n = Environment.NewLine;         // Yeni satır kısayolu
+                        // Formatlanmış raporu oluştur
+                        string formattedReport = FormatAIReport(aiNotu, aiSkor, ad, soyad);
 
-                        // 2. Ham metni temizle ve başlıkları boşluklu hale getir
-                        // Metinlerin çizgiye yapışmaması için her başlıktan sonra 2 satır atlıyoruz.
-                        string temizNot = aiNotu
-                            .Replace("ANALİZ:", $"{n}🔍  ANALİZ{n}{thinLine}{n}")
-                            .Replace("KİŞİLİK:", $"{n}{n}👤  KİŞİLİK ÖZETİ{n}{thinLine}{n}")
-                            .Replace("KARAR:", $"{n}{n}📌  SONUÇ VE KARAR{n}{thinLine}{n}");
-
-                        // 3. Raporu İnşa Et
-                        StringBuilder sb = new StringBuilder();
-                        sb.AppendLine($"         📋 AI DEĞERLENDİRME RAPORU");
-                        sb.AppendLine(thickLine);
-                        sb.AppendLine($"👤 Öğrenci  : {ad.ToUpper()} {soyad.ToUpper()}");
-                        sb.AppendLine($"🎯 Puanlama : {aiSkor} / 100");
-                        sb.AppendLine($"📢 Durum    : {(uygunluk.ToUpper().Contains("UYGUN") ? "✅ " : "❌ ")}{uygunluk.ToUpper()}");
-                        sb.AppendLine(thickLine);
-                        sb.AppendLine(temizNot);
-
-                        // 4. MemoEdit'e Bas
-                        memoAIsonuc.EditValue = sb.ToString();
+                        // MemoEdit'e Bas
+                        memoAIsonuc.EditValue = formattedReport;
                         memoAIsonuc.Properties.Appearance.ForeColor = renk;
-
-                        // FONT ÇOK ÖNEMLİ: Eğer fontun kötüyse ne yapsan kötü durur. 
-                        // "Segoe UI" veya "Consolas" (kod gibi dursun istersen) öneririm.
                         memoAIsonuc.Properties.Appearance.Font = new Font("Segoe UI Semibold", 10.5F);
                     }
 
-                    // Filtreleme ve bildirim işlemleri
-                    Listele(cmbFiltre?.SelectedIndex >= 0 ? cmbFiltre.Properties.Items[cmbFiltre.SelectedIndex].ToString() : "Tüm Öğrenciler");
+                    // Filtreleme ve bildirim işlemleri - Seçili öğrenciyi koru
+                    string filtreTipi = cmbFiltre?.SelectedIndex >= 0 
+                        ? cmbFiltre.Properties.Items[cmbFiltre.SelectedIndex].ToString() 
+                        : "Tüm Öğrenciler";
+                    
+                    // Listele() çağrısından sonra seçili öğrenciyi geri yükle
+                    Listele(filtreTipi);
+                    RestoreSelectedOgrenci(ogrenciID);
                     DataChangedNotifier.NotifyOgrenciChanged();
                 }
                 catch (Exception ex)
@@ -824,6 +1179,63 @@ namespace bursoto1.Modules
             return sonuc;
         }
 
+        // AI Analiz Raporunu Formatla - Ortak metod
+        private string FormatAIReport(string rawText, int skor, string ad, string soyad)
+        {
+            try
+            {
+                // 1. Ayraç Çizgileri
+                string thickLine = new string('━', 45); // Kalın ana ayraç
+                string thinLine = new string('─', 45);  // İnce alt ayraç
+                string n = Environment.NewLine;         // Yeni satır kısayolu
+
+                // 2. Ham metni temizle
+                // SKOR satırını kaldır (zaten başlıkta gösteriyoruz)
+                string temizMetin = System.Text.RegularExpressions.Regex.Replace(
+                    rawText, 
+                    @"SKOR:\s*\d+.*?(\r?\n|$)", 
+                    "", 
+                    System.Text.RegularExpressions.RegexOptions.IgnoreCase | System.Text.RegularExpressions.RegexOptions.Multiline);
+
+                // Başlıkları formatla - Metinlerin çizgiye yapışmaması için her başlıktan sonra 2 satır atlıyoruz.
+                temizMetin = temizMetin
+                    .Replace("ANALİZ:", $"{n}🔍  ANALİZ{n}{thinLine}{n}")
+                    .Replace("KİŞİLİK:", $"{n}{n}👤  KİŞİLİK ÖZETİ{n}{thinLine}{n}")
+                    .Replace("KARAR:", $"{n}{n}📌  SONUÇ VE KARAR{n}{thinLine}{n}");
+
+                // 3. Uygunluk durumu
+                string uygunluk = skor >= 70 ? "UYGUN" : skor >= 40 ? "DEĞERLENDIR" : "UYGUN DEĞİL";
+
+                // 4. Raporu İnşa Et
+                StringBuilder sb = new StringBuilder();
+                sb.AppendLine($"         📋 AI DEĞERLENDİRME RAPORU");
+                sb.AppendLine(thickLine);
+                sb.AppendLine($"👤 Öğrenci  : {ad.ToUpper()} {soyad.ToUpper()}");
+                sb.AppendLine($"🎯 Puanlama : {skor} / 100");
+                sb.AppendLine($"📢 Durum    : {(uygunluk.ToUpper().Contains("UYGUN") ? "✅ " : "❌ ")}{uygunluk.ToUpper()}");
+                sb.AppendLine(thickLine);
+                sb.AppendLine(temizMetin);
+
+                return sb.ToString();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"FormatAIReport hatası: {ex.Message}");
+                return rawText; // Hata durumunda ham metni döndür
+            }
+        }
+
+        // Skora göre renk döndür
+        private Color GetAISkorColor(int skor)
+        {
+            if (skor >= 70)
+                return Color.FromArgb(39, 174, 96); // Yeşil
+            else if (skor >= 40)
+                return Color.FromArgb(243, 156, 18); // Turuncu
+            else
+                return Color.FromArgb(231, 76, 60); // Kırmızı
+        }
+
         // Burs Kabul - Burs seçimi dialogu ile
         private void BtnBursKabul_Click(object sender, EventArgs e)
         {
@@ -850,7 +1262,7 @@ namespace bursoto1.Modules
             {
                 frm.Text = $"Burs Seç - {adSoyad}";
                 frm.Size = new System.Drawing.Size(450, 350);
-                frm.StartPosition = FormStartPosition.CenterParent;
+                frm.StartPosition = FormStartPosition.CenterScreen;
                 frm.FormBorderStyle = FormBorderStyle.FixedDialog;
                 frm.MaximizeBox = false;
                 frm.MinimizeBox = false;
@@ -1347,8 +1759,17 @@ namespace bursoto1.Modules
                 // Sonucu göster (mevcut AGNO ile karşılaştır)
                 ShowTahminSonucu(tahminEdilenPuan, mevcutAgno);
 
-                // Tahmini veritabanına kaydet
-                UpdateAIPotansiyelNotu(ogrenciID, tahminEdilenPuan);
+                // Tahmini veritabanına kaydet (not ve yüzde ile birlikte)
+                UpdateAIPotansiyelNotu(ogrenciID, tahminEdilenPuan, mevcutAgno);
+                
+                // Grid'i otomatik yenile ve seçili öğrenciyi koru
+                string filtreTipi = cmbFiltre?.SelectedIndex >= 0 
+                    ? cmbFiltre.Properties.Items[cmbFiltre.SelectedIndex].ToString() 
+                    : "Tüm Öğrenciler";
+                
+                // Listele() çağrısından sonra seçili öğrenciyi geri yükle
+                Listele(filtreTipi);
+                RestoreSelectedOgrenci(ogrenciID);
             }
             catch (Exception ex)
             {
@@ -1374,34 +1795,26 @@ namespace bursoto1.Modules
                 // Label'ı güncelle
                 if (lblTahminSonuc != null)
                 {
-                    // Temel metin
-                    string text = $"🤖 AI Başarı Projeksiyonu: {tahminEdilenPuan:F2}";
-
-                    // Eğer tahmini not mevcut AGNO'dan yüksekse, potansiyel artış mesajı ekle
+                    // Temel metin (3.52 ↑ formatını koru)
+                    string text = tahminEdilenPuan.ToString("F2");
                     bool potansiyelArtis = tahminEdilenPuan > mevcutAgno;
                     if (potansiyelArtis)
                     {
-                        text += " ↑ Potansiyel Artış Bekleniyor";
+                        text += " ↑";
                     }
 
-                    lblTahminSonuc.Text = text;
+                    lblTahminSonuc.Text = $"🤖 AI Başarı Projeksiyonu: {text}";
 
-                    // Renklendirme: Potansiyel artış varsa yeşil, yoksa turuncu
+                    // Renklendirme: Artış varsa modern yeşil, düşükse kırmızı
                     if (potansiyelArtis)
                     {
-                        lblTahminSonuc.Appearance.ForeColor = Color.FromArgb(39, 174, 96); // Yeşil
-                        if (progressBarTahmin != null)
-                        {
-                            progressBarTahmin.Properties.Appearance.ForeColor = Color.FromArgb(39, 174, 96);
-                        }
+                        // Modern yeşil tonu (güzel ve göze hoş)
+                        lblTahminSonuc.Appearance.ForeColor = Color.FromArgb(46, 204, 113); // Modern yeşil
                     }
                     else
                     {
-                        lblTahminSonuc.Appearance.ForeColor = Color.FromArgb(243, 156, 18); // Turuncu
-                        if (progressBarTahmin != null)
-                        {
-                            progressBarTahmin.Properties.Appearance.ForeColor = Color.FromArgb(243, 156, 18);
-                        }
+                        // Kırmızı tonu (düşük performans)
+                        lblTahminSonuc.Appearance.ForeColor = Color.FromArgb(231, 76, 60); // Kırmızı
                     }
                     lblTahminSonuc.Appearance.Options.UseForeColor = true;
                 }
@@ -1563,16 +1976,13 @@ namespace bursoto1.Modules
             string uni = universiteAdi.ToUpper(new CultureInfo("tr-TR"));
 
             // İstanbul ve üst seviye özel/vakıf üniversiteleri
-            if (uni.Contains("İSTANBUL") || uni.Contains("İTÜ") || uni.Contains("İSTANBUL TEKNİK") ||
-                uni.Contains("BOĞAZİÇİ") || uni.Contains("KOÇ") ||
-                uni.Contains("ITU") || uni.Contains("İTU"))
+            if (uni.Contains("İSTANBUL") || uni.Contains("İTÜ") || uni.Contains("İTU"))
             {
                 return 1.0f;
             }
 
             // Ankara ve benzeri yüksek maliyetli şehir üniversiteleri
-            if (uni.Contains("ANKARA") || uni.Contains("ODTÜ") || uni.Contains("ORTA DOĞU TEKNİK") ||
-                uni.Contains("HACETTEPE"))
+            if (uni.Contains("ANKARA") || uni.Contains("ODTÜ"))
             {
                 return 0.9f;
             }
@@ -1601,17 +2011,16 @@ namespace bursoto1.Modules
                 .Replace('ı', 'I')
                 .ToUpper(new CultureInfo("tr-TR"));
 
-            // En zor bölümler
-            // TIP ayrı ele alınır (maksimum zorluk)
-            if (bolum.Contains("TIP"))
-            {
-                return 5.0f;
-            }
-
-            // MÜHENDIS (noktasız I) - mühendislik türevleri
-            if (bolum.Contains("MÜHENDIS") || bolum.Contains("MUHENDIS"))
+            // En zor bölümler - MÜHENDİS, MUHENDIS, TIP -> 4.8f
+            if (bolum.Contains("MÜHENDIS") || bolum.Contains("MUHENDIS") || bolum.Contains("TIP"))
             {
                 return 4.8f;
+            }
+
+            // HEMŞİRE, HEMSIRE -> 4.5f
+            if (bolum.Contains("HEMŞİRE") || bolum.Contains("HEMSIRE"))
+            {
+                return 4.5f;
             }
 
             // Zor bölümler
@@ -1628,10 +2037,14 @@ namespace bursoto1.Modules
                 return 3.0f;
             }
 
-            // Daha düşük zorluk
-            // TARIH ve TARİH kontrolü - Replace("İ", "I") yapıldığı için TARIH kontrolü yeterli
-            if (bolum.Contains("EDEBİYAT") || bolum.Contains("TARIH") ||
-                bolum.Contains("ARKEOLOJİ") || bolum.Contains("SPOR"))
+            // Daha düşük zorluk - TARİH, TARIH -> 2.0f
+            if (bolum.Contains("TARIH") || bolum.Contains("TARİH"))
+            {
+                return 2.0f;
+            }
+
+            // Diğer düşük zorluk bölümler
+            if (bolum.Contains("EDEBİYAT") || bolum.Contains("ARKEOLOJİ") || bolum.Contains("SPOR"))
             {
                 return 2.0f;
             }
@@ -1640,8 +2053,8 @@ namespace bursoto1.Modules
             return 2.5f;
         }
 
-        // Tahmin edilen puanı Ogrenciler.AIPotansiyelNotu kolonuna kaydet
-        private void UpdateAIPotansiyelNotu(int ogrenciID, float tahminEdilenPuan)
+        // Tahmin edilen puanı Ogrenciler.AIPotansiyelNotu ve AIPotansiyelYuzde kolonlarına kaydet
+        private void UpdateAIPotansiyelNotu(int ogrenciID, float tahminEdilenPuan, float mevcutAgno)
         {
             try
             {
@@ -1698,11 +2111,67 @@ namespace bursoto1.Modules
                         }
                     }
 
-                    SqlCommand cmd = new SqlCommand(
-                        $"UPDATE Ogrenciler SET AIPotansiyelNotu = @puan WHERE [{ogrenciIDKolonu}] = @id", conn);
-                    cmd.Parameters.AddWithValue("@puan", tahminEdilenPuan);
+                    // AIPotansiyelYuzde kolonu var mı kontrol et
+                    bool hasAIPotansiyelYuzde = false;
+                    try
+                    {
+                        SqlCommand cmdCheckYuzde = new SqlCommand(@"SELECT COUNT(*) 
+                            FROM INFORMATION_SCHEMA.COLUMNS 
+                            WHERE TABLE_NAME = 'Ogrenciler' AND COLUMN_NAME = 'AIPotansiyelYuzde'", conn);
+                        hasAIPotansiyelYuzde = Convert.ToInt32(cmdCheckYuzde.ExecuteScalar()) > 0;
+                    }
+                    catch { }
+
+                    // Kolon yoksa otomatik oluştur
+                    if (!hasAIPotansiyelYuzde)
+                    {
+                        try
+                        {
+                            SqlCommand cmdAlterYuzde = new SqlCommand(@"ALTER TABLE Ogrenciler 
+                                ADD AIPotansiyelYuzde NVARCHAR(20) NULL", conn);
+                            cmdAlterYuzde.ExecuteNonQuery();
+                            System.Diagnostics.Debug.WriteLine("AIPotansiyelYuzde kolonu otomatik olarak oluşturuldu.");
+                            hasAIPotansiyelYuzde = true;
+                        }
+                        catch (Exception alterEx)
+                        {
+                            System.Diagnostics.Debug.WriteLine($"AIPotansiyelYuzde kolonu oluşturulamadı: {alterEx.Message}");
+                        }
+                    }
+
+                    // Puanı 2 ondalık basamağa yuvarla
+                    float yuvarlanmisPuan = (float)Math.Round(tahminEdilenPuan, 2);
+
+                    // Artış yüzdesini hesapla
+                    string artisYuzdeStr = string.Empty;
+                    if (mevcutAgno > 0)
+                    {
+                        float artisYuzde = ((tahminEdilenPuan - mevcutAgno) / mevcutAgno) * 100;
+                        artisYuzdeStr = $"+%{Math.Round(artisYuzde, 1):F1}";
+                    }
+
+                    // UPDATE sorgusu - hem notu hem de yüzdeyi kaydet
+                    string updateQuery = $"UPDATE Ogrenciler SET AIPotansiyelNotu = @puan";
+                    if (hasAIPotansiyelYuzde)
+                    {
+                        updateQuery += ", AIPotansiyelYuzde = @yuzde";
+                    }
+                    updateQuery += $" WHERE [{ogrenciIDKolonu}] = @id";
+
+                    SqlCommand cmd = new SqlCommand(updateQuery, conn);
+                    cmd.Parameters.AddWithValue("@puan", yuvarlanmisPuan);
+                    if (hasAIPotansiyelYuzde)
+                    {
+                        cmd.Parameters.AddWithValue("@yuzde", artisYuzdeStr);
+                    }
                     cmd.Parameters.AddWithValue("@id", ogrenciID);
                     cmd.ExecuteNonQuery();
+
+                    // Grid'i yenile
+                    if (gridControl1 != null)
+                    {
+                        gridControl1.Refresh();
+                    }
                 }
             }
             catch (Exception ex)
@@ -1716,6 +2185,155 @@ namespace bursoto1.Modules
 
         }
 
+        // Satır değiştiğinde, daha önce yapılmış AI analizini ve ML tahminini sağ panele yansıt
+        private void GridView1_FocusedRowChanged(object sender, DevExpress.XtraGrid.Views.Base.FocusedRowChangedEventArgs e)
+        {
+            try
+            {
+                if (gridView1 == null)
+                    return;
+
+                DataRow dr = gridView1.GetDataRow(e.FocusedRowHandle);
+                if (dr == null)
+                {
+                    if (memoAIsonuc != null)
+                    {
+                        memoAIsonuc.EditValue = "Bu öğrenci için henüz AI analizi yapılmamıştır.";
+                        memoAIsonuc.Properties.Appearance.ForeColor = Color.FromArgb(180, 180, 180);
+                    }
+                    return;
+                }
+
+                // Temel alanlar
+                int ogrenciID = Convert.ToInt32(dr["ID"]);
+                float mevcutAgno = 0;
+                float.TryParse(dr["AGNO"]?.ToString() ?? "0", out mevcutAgno);
+
+                // ML.NET tahmini (AIPotansiyelNotu) ve yüzde
+                float tahminEdilenPuan = 0;
+                bool hasTahmin = false;
+                string potansiyelYuzde = string.Empty;
+
+                if (dr.Table.Columns.Contains("AIPotansiyelNotu") && dr["AIPotansiyelNotu"] != DBNull.Value)
+                {
+                    hasTahmin = float.TryParse(dr["AIPotansiyelNotu"].ToString(), out tahminEdilenPuan);
+                }
+                if (dr.Table.Columns.Contains("AIPotansiyelYuzde") && dr["AIPotansiyelYuzde"] != DBNull.Value)
+                {
+                    potansiyelYuzde = dr["AIPotansiyelYuzde"]?.ToString() ?? string.Empty;
+                }
+
+                // AISkor (grid'deki "AI Puanı" kolonu)
+                int aiSkor = 0;
+                bool hasSkor = false;
+                if (dr.Table.Columns.Contains("AI Puanı") && dr["AI Puanı"] != DBNull.Value)
+                {
+                    hasSkor = int.TryParse(dr["AI Puanı"].ToString(), out aiSkor);
+                }
+
+                // AINotu veritabanından oku (detaylı analiz metni)
+                string aiNotuDetay = string.Empty;
+                try
+                {
+                    using (SqlConnection conn = bgl.baglanti())
+                    {
+                        // Ogrenciler tablosundaki ID kolonunu dinamik tespit et
+                        string ogrenciIDKolonu = "ID";
+                        try
+                        {
+                            SqlCommand cmdKolon = new SqlCommand(@"SELECT TOP 1 COLUMN_NAME 
+                                FROM INFORMATION_SCHEMA.COLUMNS 
+                                WHERE TABLE_NAME = 'Ogrenciler' 
+                                AND COLUMN_NAME IN ('ID', 'OgrenciID')
+                                ORDER BY CASE COLUMN_NAME 
+                                    WHEN 'ID' THEN 1 
+                                    WHEN 'OgrenciID' THEN 2 
+                                    ELSE 3 END", conn);
+                            var kolonResult = cmdKolon.ExecuteScalar();
+                            if (kolonResult != null && kolonResult != DBNull.Value)
+                            {
+                                string kolonStr = kolonResult.ToString();
+                                if (!string.IsNullOrEmpty(kolonStr))
+                                    ogrenciIDKolonu = kolonStr;
+                            }
+                        }
+                        catch { }
+
+                        SqlCommand cmd = new SqlCommand($@"SELECT ISNULL(AINotu, '') 
+                                                           FROM Ogrenciler 
+                                                           WHERE [{ogrenciIDKolonu}] = @id", conn);
+                        cmd.Parameters.AddWithValue("@id", ogrenciID);
+                        object notResult = cmd.ExecuteScalar();
+                        if (notResult != null && notResult != DBNull.Value)
+                            aiNotuDetay = notResult.ToString();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"AINotu okunamadı: {ex.Message}");
+                }
+
+                bool analizVar = (!string.IsNullOrWhiteSpace(aiNotuDetay)) || hasSkor || hasTahmin;
+
+                // Henüz analiz yoksa bilgilendir
+                if (!analizVar)
+                {
+                    if (memoAIsonuc != null)
+                    {
+                        memoAIsonuc.EditValue = "Bu öğrenci için henüz AI analizi yapılmamıştır.";
+                        memoAIsonuc.Properties.Appearance.ForeColor = Color.FromArgb(180, 180, 180);
+                    }
+
+                    // Tahmin label ve progress bar'ı temizle
+                    if (lblTahminSonuc != null)
+                    {
+                        lblTahminSonuc.Text = "🤖 AI Başarı Projeksiyonu: -";
+                        lblTahminSonuc.Appearance.ForeColor = Color.White;
+                    }
+                    if (progressBarTahmin != null)
+                    {
+                        progressBarTahmin.Position = 0;
+                    }
+                    return;
+                }
+
+                // ML tahmin sonucu varsa, tahmin panelini güncelle
+                if (hasTahmin)
+                {
+                    ShowTahminSonucu(tahminEdilenPuan, mevcutAgno);
+                }
+
+                // AI analiz notunu ve skoruna göre rengi göster
+                if (memoAIsonuc != null)
+                {
+                    if (!string.IsNullOrWhiteSpace(aiNotuDetay))
+                    {
+                        // Formatlanmış raporu göster
+                        string ad = dr["AD"]?.ToString() ?? "";
+                        string soyad = dr["SOYAD"]?.ToString() ?? "";
+                        string formattedReport = FormatAIReport(aiNotuDetay, aiSkor, ad, soyad);
+                        memoAIsonuc.EditValue = formattedReport;
+                    }
+                    else
+                    {
+                        // Sadece skor varsa basit bilgi göster
+                        memoAIsonuc.EditValue = hasSkor
+                            ? $"Bu öğrenci için AI skoru: {aiSkor} / 100\n\nDetaylı analiz notu bulunamadı."
+                            : "Bu öğrenci için henüz AI analizi yapılmamıştır.";
+                    }
+
+                    // Skora göre renk (70+ Yeşil, 40+ Turuncu, altı Kırmızı)
+                    Color renk = GetAISkorColor(hasSkor ? aiSkor : 0);
+                    memoAIsonuc.Properties.Appearance.ForeColor = renk;
+                    memoAIsonuc.Properties.Appearance.Font = new Font("Segoe UI Semibold", 10.5F);
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"FocusedRowChanged işlenirken hata: {ex.Message}");
+            }
+        }
+
         private void btnBursReddet_Click_1(object sender, EventArgs e)
         {
 
@@ -1724,6 +2342,60 @@ namespace bursoto1.Modules
         private void btnBursKabul_Click_1(object sender, EventArgs e)
         {
 
+        }
+
+        // GridView CustomDrawCell - AIPotansiyelNotu kolonu için özel görselleştirme
+        private void GridView1_CustomDrawCell(object sender, DevExpress.XtraGrid.Views.Base.RowCellCustomDrawEventArgs e)
+        {
+            try
+            {
+                GridView view = sender as GridView;
+                if (view == null) return;
+
+                // Sadece AIPotansiyelNotu kolonunda işlem yap
+                if (e.Column == null || (e.Column.FieldName != "AIPotansiyelNotu" && e.Column.Caption != "AIPotansiyelNotu"))
+                    return;
+
+                DataRow row = view.GetDataRow(e.RowHandle);
+                if (row == null) return;
+
+                // AIPotansiyelNotu ve AGNO değerlerini al
+                object aiPotansiyelNotuObj = null;
+                if (row.Table.Columns.Contains("AIPotansiyelNotu"))
+                    aiPotansiyelNotuObj = row["AIPotansiyelNotu"];
+
+                object agnoObj = row["AGNO"];
+
+                if (aiPotansiyelNotuObj == null || aiPotansiyelNotuObj == DBNull.Value)
+                    return;
+
+                if (!float.TryParse(aiPotansiyelNotuObj.ToString(), out float tahminEdilenPuan))
+                    return;
+
+                float mevcutAgno = 0;
+                if (agnoObj != null && agnoObj != DBNull.Value)
+                {
+                    float.TryParse(agnoObj.ToString(), out mevcutAgno);
+                }
+
+                // Hücre metnini oluştur (örnek: 3.40 ↑ %12)
+                string cellText = tahminEdilenPuan.ToString("F2");
+                bool hasIncrease = (tahminEdilenPuan > mevcutAgno && mevcutAgno > 0);
+
+                if (hasIncrease)
+                {
+                    float artisYuzde = ((tahminEdilenPuan - mevcutAgno) / mevcutAgno) * 100f;
+                    int artisInt = (int)Math.Round(artisYuzde, 0);
+                    cellText = $"{tahminEdilenPuan:F2} ↑ %{artisInt}";
+                }
+
+                // Sadece metni güncelle (renklendirme yok, default görünüm)
+                e.DisplayText = cellText;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"CustomDrawCell hatası: {ex.Message}");
+            }
         }
 
         // Satır renklendirmesi - Durum'a göre
